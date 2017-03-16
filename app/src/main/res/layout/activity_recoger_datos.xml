@@ -39,23 +39,22 @@
             android:id="@+id/timeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/activityText"
             android:ems="10"
             android:hint="Time"
-            android:inputType="textPersonName"
+            android:inputType="numberDecimal"
             android:singleLine="false" />
 
         <EditText
             android:id="@+id/filesText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/timeText"
             android:ems="10"
             android:hint="Files"
-            android:inputType="textPersonName"
-            android:layout_below="@+id/timeText"
-            android:layout_alignParentStart="true" />
+            android:inputType="numberDecimal" />
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -86,8 +85,19 @@
             android:layout_below="@+id/seekBar"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="53dp"
+            android:baselineAlignBottom="true"
             android:elevation="16dp"
             app:srcCompat="@android:drawable/ic_media_play" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/imageButton"
+            android:layout_marginStart="28dp"
+            android:layout_toEndOf="@+id/imageButton"
+            android:onClick="onClickButtonPlay"
+            android:text="Button" />
 
     </RelativeLayout>
 
