@@ -75,29 +75,18 @@
             android:layout_alignParentStart="true"
             android:layout_below="@+id/filesText"
             android:layout_marginTop="21dp"
-            android:max="10"
-            android:progress="3" />
-
-        <ImageButton
-            android:id="@+id/imageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/seekBar"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="53dp"
-            android:baselineAlignBottom="true"
-            android:elevation="16dp"
-            app:srcCompat="@android:drawable/ic_media_play" />
+            android:max="4"
+            android:progress="0" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/buttonRecord"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/imageButton"
-            android:layout_marginStart="28dp"
-            android:layout_toEndOf="@+id/imageButton"
+            android:layout_above="@+id/progressBar"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="41dp"
             android:onClick="onClickButtonPlay"
-            android:text="Button" />
+            android:text="Record" />
 
     </RelativeLayout>
 
