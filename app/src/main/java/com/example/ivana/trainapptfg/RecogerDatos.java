@@ -5,6 +5,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -67,11 +68,15 @@ public class RecogerDatos extends AppCompatActivity {
 
     private ArrayList<DataTAD> dataListAccel;
     private ArrayList<DataTAD> dataListGyro;
+    private ArrayList<DataTAD> dataListSensores;
 
     private static final String TAG = "RecogerDatos";
 
     private int timeAcumulated;
     private Timer timer;
+
+    static final int NUM_ATRIB_ACCEL = 3;
+    static final int NUM_ATRIB_GYRO = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +91,7 @@ public class RecogerDatos extends AppCompatActivity {
 
         this.dataListAccel = new ArrayList<DataTAD>();
         this.dataListGyro = new ArrayList<DataTAD>();
+        this.dataListSensores = new ArrayList<DataTAD>();
 
         /*this.mSensorListenerAccel = new SensorEventListener() {
             private long initialTime = 0;
@@ -210,6 +216,15 @@ public class RecogerDatos extends AppCompatActivity {
                 dataListAccel.add(miSensorAcelerometro.obtenerDatosSensor());
                 dataListGyro.add(miSensorGiroscopio.obtenerDatosSensor());
 
+                float[] aux = new float[NUM_ATRIB_ACCEL + NUM_ATRIB_GYRO];
+                System.arraycopy(miSensorAcelerometro.obtenerDatosSensor().getValues(), 0, aux, 0, NUM_ATRIB_ACCEL);
+                System.arraycopy(miSensorGiroscopio.obtenerDatosSensor().getValues(), 0, aux, NUM_ATRIB_ACCEL, NUM_ATRIB_GYRO);
+                long timeInMillis = (new Date()).getTime();
+
+                dataListSensores.add(new DataTAD(timeInMillis, aux));
+
+
+
                 if(timeAcumulated >= (timePerFile * 1000)) {
                     miSensorAcelerometro.desactivarSensor();
                     miSensorGiroscopio.desactivarSensor();
@@ -218,7 +233,9 @@ public class RecogerDatos extends AppCompatActivity {
 
                     timer.cancel();
 
-                    //formatDataToCsv();
+                    formatDataToCsv(Sensor.TYPE_ALL);
+                    formatDataToCsv(Sensor.TYPE_ACCELEROMETER);
+                    formatDataToCsv(Sensor.TYPE_GYROSCOPE);
                 }
             }
         };
@@ -252,8 +269,10 @@ public class RecogerDatos extends AppCompatActivity {
     private void incrementProgressBar(int increment){
         this.progressBar.incrementProgressBy(increment);
     }
-    private void formatDataToCsv(){
-        String fileName = this.nameUser + "_" + this.nameActivity;
+    private void formatDataToCsv(int type){
+        String fileName = this.nameUser + "_" + this.nameActivity + "_" + String.valueOf(type);
+        int size = 0;
+
 
         OutputStreamWriter out = null;
         try {
@@ -262,13 +281,20 @@ public class RecogerDatos extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        //TODO IR ESCRIBIENDO EN EL ARCHIVO EL ESTRING FORMATTED
-        int size = Math.min(this.dataListAccel.size(), this.dataListGyro.size());
-        for (int i = 0; i < size; i++){
-            DataTAD dataItem1 = dataListAccel.get(i);
-            DataTAD dataItem2 = dataListGyro.get(i);
+        if(type == Sensor.TYPE_ACCELEROMETER){
+            size = this.dataListAccel.size();
+        }
+        else if(type == Sensor.TYPE_GYROSCOPE){
+            size = this.dataListGyro.size();
+        }
+        else if(type == Sensor.TYPE_ALL){
+            size = Math.min(this.dataListAccel.size(), this.dataListGyro.size());
+        }
 
-            String formatted = dataItem1.formattedStringTimestamp() + "," + dataItem1.formattedStringValues() + "," + dataItem2.formattedStringValues() + "\n";
+        for (int i = 0; i < size; i++){
+            DataTAD dataItem = dataListAccel.get(i);
+
+            String formatted = dataItem.formattedString() + "\n";
 
             try {
                 out.write(formatted);
