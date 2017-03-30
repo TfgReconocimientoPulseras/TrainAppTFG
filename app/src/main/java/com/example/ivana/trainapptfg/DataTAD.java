@@ -1,12 +1,16 @@
 package com.example.ivana.trainapptfg;
 
+import android.text.TextUtils;
+
+import java.util.ArrayList;
+
 /**
  * Created by ivana on 21/03/2017.
  */
 
 public class DataTAD {
     private long timestamp; //In milliseconds
-    private float[] values; //Values of accelerometer
+    private float[] values; //Values of sensor
 
     public DataTAD(long timestamp, float[] values) {
         this.timestamp = timestamp;
@@ -33,11 +37,16 @@ public class DataTAD {
         this.values = values;
     }
 
-    public String formattedStringValues(){
-        return String.valueOf(this.values[0]) + "," + String.valueOf(this.values[1]) + "," + String.valueOf(this.values[2]);
-    }
+    public String formattedString(){
+        ArrayList<String> miArrayString = new ArrayList<>();
+        String ret;
 
-    public String formattedStringTimestamp(){
-        return String.valueOf(this.timestamp);
+        for (float f:this.values) {
+            miArrayString.add(String.valueOf(f));
+        }
+
+        ret = this.timestamp + TextUtils.join(",", miArrayString);
+
+        return ret;
     }
 }
