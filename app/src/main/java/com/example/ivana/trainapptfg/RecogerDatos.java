@@ -318,7 +318,7 @@ public class RecogerDatos extends AppCompatActivity {
 
     private void comprobacionTimestamp(){
         for(int i = 0; i < dataListAccel.size(); i++){
-            Log.d(TAG, "Diferencia entre TimeStamp: " + "Acel: " + dataListAccel.get(i).formattedStringTimestamp() + " Gyro: " + dataListGyro.get(i).formattedStringTimestamp() + " Diff: " + String.valueOf(this.dataListAccel.get(i).getTimestamp() - this.dataListGyro.get(i).getTimestamp()));
+            Log.d(TAG, "Diferencia entre TimeStamp: " + "Acel: " + dataListAccel.get(i).formattedString() + " Gyro: " + dataListGyro.get(i).formattedString() + " Diff: " + String.valueOf(this.dataListAccel.get(i).getTimestamp() - this.dataListGyro.get(i).getTimestamp()));
         }
     }
 }
