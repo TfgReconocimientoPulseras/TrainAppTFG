@@ -60,8 +60,8 @@ public class RecogerDatos extends AppCompatActivity {
     private int frequency;
 
     private SensorManager mSensorManager;
-    private SensorEventListener mSensorListenerAccel;
-    private SensorEventListener mSensorListenerGyro;
+    private miSensor miSensorAcelerometro;
+    private miSensor miSensorGiroscopio;
     private Sensor mAccelerometer;
     private Sensor mGyroscope;
 
@@ -87,7 +87,7 @@ public class RecogerDatos extends AppCompatActivity {
         this.dataListAccel = new ArrayList<DataTAD>();
         this.dataListGyro = new ArrayList<DataTAD>();
 
-        this.mSensorListenerAccel = new SensorEventListener() {
+        /*this.mSensorListenerAccel = new SensorEventListener() {
             private long initialTime = 0;
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
@@ -132,6 +132,12 @@ public class RecogerDatos extends AppCompatActivity {
 
             }
         };
+
+        */
+
+        this.miSensorAcelerometro = new miSensor(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+        this.miSensorGiroscopio = new miSensor(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+
 
         this.nameUserText = (EditText) findViewById(R.id.nameText);
         this.nameActivityText = (EditText) findViewById(R.id.activityText);
@@ -178,6 +184,7 @@ public class RecogerDatos extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+
         super.onResume();
     }
 
@@ -190,19 +197,28 @@ public class RecogerDatos extends AppCompatActivity {
         this.timer = new Timer();
         this.buttonRecord.setEnabled(false);
 
-        this.registerListener();
+        this.activarSensores();
 
-        this.progressBar.setMax(this.timePerFile);
+        this.progressBar.setMax(this.timePerFile * 1000);
 
-        TimerTask timerTask= new TimerTask() {
+        TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                incrementProgressBar(1);
-                timeAcumulated++;
+                incrementProgressBar(100);
+                timeAcumulated += 100;
 
-                if(timeAcumulated > timePerFile){
+                dataListAccel.add(miSensorAcelerometro.obtenerDatosSensor());
+                dataListGyro.add(miSensorGiroscopio.obtenerDatosSensor());
+
+                if(timeAcumulated >= (timePerFile * 1000)) {
+                    miSensorAcelerometro.desactivarSensor();
+                    miSensorGiroscopio.desactivarSensor();
+
+                    comprobacionTimestamp();
+
                     timer.cancel();
-                    formatDataToCsv();
+
+                    //formatDataToCsv();
                 }
             }
         };
@@ -210,7 +226,7 @@ public class RecogerDatos extends AppCompatActivity {
         /*
          * Cada segundo ejecutamos el TimerTask
          */
-        this.timer.schedule(timerTask, 0l, 1000);
+        this.timer.schedule(timerTask, 0l, 100);
     }
 
     @Override
@@ -219,15 +235,18 @@ public class RecogerDatos extends AppCompatActivity {
         //unregisterListener();
     }
 
-    private void unregisterListener(final SensorEventListener listener){
-        mSensorManager.unregisterListener(listener);
+    private void desactivarSensores(){
+        //mSensorManager.unregisterListener(listener);
+        this.miSensorAcelerometro.desactivarSensor();
+        this.miSensorGiroscopio.desactivarSensor();
     }
 
-    private void registerListener(){
+    private void activarSensores(){
         //TODO Posibilidad de implementar con un HANDLER
-        mSensorManager.registerListener(mSensorListenerAccel, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
-
-        mSensorManager.registerListener(mSensorListenerGyro, mGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
+        //mSensorManager.registerListener(mSensorListenerAccel, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+        this.miSensorAcelerometro.activarSensor();
+        //mSensorManager.registerListener(mSensorListenerGyro, mGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
+        this.miSensorGiroscopio.activarSensor();
     }
 
     private void incrementProgressBar(int increment){
@@ -269,5 +288,11 @@ public class RecogerDatos extends AppCompatActivity {
 
     private void showMessageToast(String message){
         Toast.makeText(this, message, Toast.LENGTH_LONG);
+    }
+
+    private void comprobacionTimestamp(){
+        for(int i = 0; i < dataListAccel.size(); i++){
+            Log.d(TAG, "Diferencia entre TimeStamp: " + "Acel: " + dataListAccel.get(i).formattedStringTimestamp() + " Gyro: " + dataListGyro.get(i).formattedStringTimestamp() + " Diff: " + String.valueOf(this.dataListAccel.get(i).getTimestamp() - this.dataListGyro.get(i).getTimestamp()));
+        }
     }
 }
