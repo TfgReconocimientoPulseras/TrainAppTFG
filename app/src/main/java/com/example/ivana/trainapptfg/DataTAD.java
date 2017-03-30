@@ -5,7 +5,7 @@ package com.example.ivana.trainapptfg;
  */
 
 public class DataTAD {
-    private long timestamp; //In milliseconds
+    private long timestamp; //In millisecondsggg
     private float[] values; //Values of accelerometer
 
     public DataTAD(long timestamp, float[] values) {
