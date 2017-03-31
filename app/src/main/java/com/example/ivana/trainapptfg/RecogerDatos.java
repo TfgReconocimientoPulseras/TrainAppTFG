@@ -233,6 +233,7 @@ public class RecogerDatos extends AppCompatActivity {
 
                     timer.cancel();
 
+                    //Escritura en ficheros
                     formatDataToCsv(Sensor.TYPE_ALL);
                     formatDataToCsv(Sensor.TYPE_ACCELEROMETER);
                     formatDataToCsv(Sensor.TYPE_GYROSCOPE);
