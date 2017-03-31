@@ -5,6 +5,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,7 +17,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -232,11 +235,6 @@ public class RecogerDatos extends AppCompatActivity {
                     comprobacionTimestamp();
 
                     timer.cancel();
-
-                    //Escritura en ficheros
-                    formatDataToCsv(Sensor.TYPE_ALL);
-                    formatDataToCsv(Sensor.TYPE_ACCELEROMETER);
-                    formatDataToCsv(Sensor.TYPE_GYROSCOPE);
                 }
             }
         };
@@ -270,10 +268,9 @@ public class RecogerDatos extends AppCompatActivity {
     private void incrementProgressBar(int increment){
         this.progressBar.incrementProgressBy(increment);
     }
-    private void formatDataToCsv(int type){
-        String fileName = this.nameUser + "_" + this.nameActivity + "_" + String.valueOf(type);
-        int size = 0;
 
+    private void formatDataToCsvInternalStorage(ArrayList<DataTAD> list, int type){
+        String fileName = this.nameUser + "_" + this.nameActivity + "_" + String.valueOf(type);
 
         OutputStreamWriter out = null;
         try {
@@ -282,19 +279,7 @@ public class RecogerDatos extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        if(type == Sensor.TYPE_ACCELEROMETER){
-            size = this.dataListAccel.size();
-        }
-        else if(type == Sensor.TYPE_GYROSCOPE){
-            size = this.dataListGyro.size();
-        }
-        else if(type == Sensor.TYPE_ALL){
-            size = Math.min(this.dataListAccel.size(), this.dataListGyro.size());
-        }
-
-        for (int i = 0; i < size; i++){
-            DataTAD dataItem = dataListAccel.get(i);
-
+        for (DataTAD dataItem : list) {
             String formatted = dataItem.formattedString() + "\n";
 
             try {
@@ -302,8 +287,8 @@ public class RecogerDatos extends AppCompatActivity {
             } catch (Throwable t) {
                 showMessageToast("Error writing data");
             }
-
         }
+
         try {
             out.flush();
             out.close();
@@ -312,6 +297,41 @@ public class RecogerDatos extends AppCompatActivity {
         }
     }
 
+    private void formatDataToCsvExternalStorage(ArrayList<DataTAD> list, int type){
+        String fileName = this.nameUser + "_" + this.nameActivity + "_" + String.valueOf(type);
+        File mySD = Environment.getExternalStorageDirectory();
+        File dataDirectory = new File(mySD.getAbsolutePath() + "/DataTrainAppTFG");
+
+        if(!dataDirectory.exists())
+            dataDirectory.mkdirs();
+
+        File file = new File(dataDirectory, fileName);
+
+        FileOutputStream fOs = null;
+        try {
+            fOs = new FileOutputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        OutputStreamWriter oSw = new OutputStreamWriter(fOs);
+
+        for (DataTAD dataItem : list) {
+            String formatted = dataItem.formattedString() + "\n";
+
+            try {
+                oSw.write(formatted);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            oSw.flush();
+            oSw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void showMessageToast(String message){
         Toast.makeText(this, message, Toast.LENGTH_LONG);
