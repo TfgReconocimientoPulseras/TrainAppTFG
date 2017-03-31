@@ -6,6 +6,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -81,11 +82,11 @@ public class RecogerDatos extends AppCompatActivity {
     static final int NUM_ATRIB_ACCEL = 3;
     static final int NUM_ATRIB_GYRO = 3;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recoger_datos);
-
         this.mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 
 
@@ -95,54 +96,6 @@ public class RecogerDatos extends AppCompatActivity {
         this.dataListAccel = new ArrayList<DataTAD>();
         this.dataListGyro = new ArrayList<DataTAD>();
         this.dataListSensores = new ArrayList<DataTAD>();
-
-        /*this.mSensorListenerAccel = new SensorEventListener() {
-            private long initialTime = 0;
-            @Override
-            public void onSensorChanged(SensorEvent sensorEvent) {
-                long timeInMillis = (new Date()).getTime()
-                        + (sensorEvent.timestamp - System.nanoTime()) / 1000000L;
-                dataListAccel.add(new DataTAD(timeInMillis, sensorEvent.values));
-                if(this.initialTime == 0){
-                    this.initialTime = timeInMillis;
-                }
-                if (timeInMillis - this.initialTime > timePerFile*1000){
-                    unregisterListener(this);
-                    Log.d(TAG, "Length: " + dataListAccel.size());
-                    Log.d(TAG, "Timestamp: " + timeInMillis + " Sensor:" + sensorEvent.sensor.getName() + " X:" + sensorEvent.values[0] + " Y:" + sensorEvent.values[1] + " Z:" + sensorEvent.values[2]);
-                }
-            }
-
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int i) {
-
-            }
-        };
-
-        this.mSensorListenerGyro = new SensorEventListener() {
-            private long initialTime = 0;
-            @Override
-            public void onSensorChanged(SensorEvent sensorEvent) {
-                long timeInMillis = (new Date()).getTime()
-                        + (sensorEvent.timestamp - System.nanoTime()) / 1000000L;
-                dataListGyro.add(new DataTAD(timeInMillis, sensorEvent.values));
-                if(initialTime == 0){
-                    initialTime = timeInMillis;
-                }
-                if (timeInMillis - initialTime > timePerFile*1000){
-                    unregisterListener(this);
-                    Log.d(TAG, "Length: " + dataListGyro.size());
-                    Log.d(TAG, "Timestamp: " + timeInMillis + " Sensor:" + sensorEvent.sensor.getName() + " X:" + sensorEvent.values[0] + " Y:" + sensorEvent.values[1] + " Z:" + sensorEvent.values[2]);
-                }
-            }
-
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int i) {
-
-            }
-        };
-
-        */
 
         this.miSensorAcelerometro = new miSensor(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
         this.miSensorGiroscopio = new miSensor(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
@@ -216,33 +169,22 @@ public class RecogerDatos extends AppCompatActivity {
                 incrementProgressBar(100);
                 timeAcumulated += 100;
 
-                dataListAccel.add(miSensorAcelerometro.obtenerDatosSensor());
-                dataListGyro.add(miSensorGiroscopio.obtenerDatosSensor());
-
-                float[] aux = new float[NUM_ATRIB_ACCEL + NUM_ATRIB_GYRO];
-                System.arraycopy(miSensorAcelerometro.obtenerDatosSensor().getValues(), 0, aux, 0, NUM_ATRIB_ACCEL);
-                System.arraycopy(miSensorGiroscopio.obtenerDatosSensor().getValues(), 0, aux, NUM_ATRIB_ACCEL, NUM_ATRIB_GYRO);
-                long timeInMillis = (new Date()).getTime();
-
-                dataListSensores.add(new DataTAD(timeInMillis, aux));
-
+                rellenaListasDeDatos();
 
 
                 if(timeAcumulated >= (timePerFile * 1000)) {
                     miSensorAcelerometro.desactivarSensor();
                     miSensorGiroscopio.desactivarSensor();
-
                     comprobacionTimestamp();
-
                     timer.cancel();
                 }
             }
         };
 
         /*
-         * Cada segundo ejecutamos el TimerTask
+         * Pasado 1s comienza a ejecutarse la tarea "timerTask" cada 100 ms
          */
-        this.timer.schedule(timerTask, 0l, 100);
+        this.timer.scheduleAtFixedRate(timerTask, 1000, 100);
     }
 
     @Override
@@ -252,16 +194,12 @@ public class RecogerDatos extends AppCompatActivity {
     }
 
     private void desactivarSensores(){
-        //mSensorManager.unregisterListener(listener);
         this.miSensorAcelerometro.desactivarSensor();
         this.miSensorGiroscopio.desactivarSensor();
     }
 
     private void activarSensores(){
-        //TODO Posibilidad de implementar con un HANDLER
-        //mSensorManager.registerListener(mSensorListenerAccel, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
         this.miSensorAcelerometro.activarSensor();
-        //mSensorManager.registerListener(mSensorListenerGyro, mGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
         this.miSensorGiroscopio.activarSensor();
     }
 
@@ -341,5 +279,27 @@ public class RecogerDatos extends AppCompatActivity {
         for(int i = 0; i < dataListAccel.size(); i++){
             Log.d(TAG, "Diferencia entre TimeStamp: " + "Acel: " + dataListAccel.get(i).formattedString() + " Gyro: " + dataListGyro.get(i).formattedString() + " Diff: " + String.valueOf(this.dataListAccel.get(i).getTimestamp() - this.dataListGyro.get(i).getTimestamp()));
         }
+    }
+
+    private void rellenaListasDeDatos(){
+        DataTAD dAccel = miSensorAcelerometro.obtenerDatosSensor();
+        DataTAD dGyro = miSensorGiroscopio.obtenerDatosSensor();
+
+        if(dAccel.getValues() != null && dGyro.getValues() != null){
+            dataListAccel.add(dAccel);
+            dataListGyro.add(dGyro);
+
+            float[] aux = new float[NUM_ATRIB_ACCEL + NUM_ATRIB_GYRO];
+            System.arraycopy(dAccel.getValues(), 0, aux, 0, NUM_ATRIB_ACCEL);
+            System.arraycopy(dGyro.getValues(), 0, aux, NUM_ATRIB_ACCEL, NUM_ATRIB_GYRO);
+            long timeInMillis = (new Date()).getTime();
+
+            dataListSensores.add(new DataTAD(timeInMillis, aux));
+            /*
+            float[] aux = DataTAD.concatenateValues(dAccel.getValues(), dGyro.getValues());
+            long timeInMillis = (new Date()).getTime();
+            */
+        }
+
     }
 }

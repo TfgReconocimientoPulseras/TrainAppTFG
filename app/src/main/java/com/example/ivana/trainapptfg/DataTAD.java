@@ -1,8 +1,10 @@
 package com.example.ivana.trainapptfg;
 
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ivana on 21/03/2017.
@@ -45,8 +47,25 @@ public class DataTAD {
             miArrayString.add(String.valueOf(f));
         }
 
-        ret = this.timestamp + TextUtils.join(",", miArrayString);
+        ret = this.timestamp + "," + TextUtils.join(",", miArrayString);
 
         return ret;
+    }
+
+    @NonNull
+    public static float[] concatenateValues(float[] val1, float[] val2){
+        float[] retList = new float[val1.length + val2.length];
+        int i = 0;
+
+        for (float f:val1) {
+            retList[i] = f;
+            i++;
+        }
+        for (float f:val2) {
+            retList[i] = f;
+            i++;
+        }
+
+        return retList;
     }
 }
