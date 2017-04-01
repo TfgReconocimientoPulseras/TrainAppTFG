@@ -1,12 +1,21 @@
 package com.example.ivana.trainapptfg;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -28,7 +37,8 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/** AQUI ESTÁN LOS FICHEROS QUE SE CREAN
+/**
+ * AQUI ESTÁN LOS FICHEROS QUE SE CREAN
  * C:\Users\ivana\AppData\Local\Android\sdk\platform-tools
  * adb shell
  * cd data/data/com.example.ivana.trainapptfg
@@ -38,7 +48,7 @@ import java.util.TimerTask;
 
 /**
  * Esta actividad se encarga de recoger datos y crear un fichero con los datos
- *
+ * <p>
  * Los ficheros se encuentran en la siguiente ubicación (Windows)
  * C:\Users\ivana\AppData\Local\Android\sdk\platform-tools
  * adb shell
@@ -79,15 +89,19 @@ public class RecogerDatos extends AppCompatActivity {
     private int timeAcumulated;
     private Timer timer;
 
-    static final int NUM_ATRIB_ACCEL = 3;
-    static final int NUM_ATRIB_GYRO = 3;
-
+    private static final int NUM_ATRIB_ACCEL = 3;
+    private static final int NUM_ATRIB_GYRO = 3;
+    private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 123;
+    private static final String PATH_DATA_DIR =  Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recoger_datos);
-        this.mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
+        this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
 
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -113,19 +127,15 @@ public class RecogerDatos extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 //TODO SE PODRÍA METER EN UN HASHMAP LOS VALORES DEL PROGRESS Y SU FREQ CORRESPONDIENDTE
-                if(progress == 0){
+                if (progress == 0) {
                     frequency = 50;
-                }
-                else if(progress == 1){
+                } else if (progress == 1) {
                     frequency = 100;
-                }
-                else if(progress == 2){
+                } else if (progress == 2) {
                     frequency = 200;
-                }
-                else if(progress == 3){
+                } else if (progress == 3) {
                     frequency = 300;
-                }
-                else if(progress == 4){
+                } else if (progress == 4) {
                     frequency = 400;
                 }
             }
@@ -150,8 +160,8 @@ public class RecogerDatos extends AppCompatActivity {
         super.onResume();
     }
 
-    public void onClickButtonPlay(View view){
-        this.nameUser =  this.nameUserText.getText().toString();
+    public void onClickButtonPlay(View view) {
+        this.nameUser = this.nameUserText.getText().toString();
         this.nameActivity = this.nameActivityText.getText().toString();
         this.timePerFile = Integer.parseInt(this.timePerFileText.getText().toString());
         this.numberFiles = Integer.parseInt(this.numberFilesText.getText().toString());
@@ -172,11 +182,16 @@ public class RecogerDatos extends AppCompatActivity {
                 rellenaListasDeDatos();
 
 
-                if(timeAcumulated >= (timePerFile * 1000)) {
+                if (timeAcumulated >= (timePerFile * 1000)) {
                     miSensorAcelerometro.desactivarSensor();
                     miSensorGiroscopio.desactivarSensor();
                     comprobacionTimestamp();
                     timer.cancel();
+
+                    formatDataToCsvExternalStorage(dataListAccel, 1);
+                    formatDataToCsvExternalStorage(dataListGyro, 2);
+                    formatDataToCsvExternalStorage(dataListSensores, 3);
+                    //actualizaMemoria();
                 }
             }
         };
@@ -193,22 +208,22 @@ public class RecogerDatos extends AppCompatActivity {
         //unregisterListener();
     }
 
-    private void desactivarSensores(){
+    private void desactivarSensores() {
         this.miSensorAcelerometro.desactivarSensor();
         this.miSensorGiroscopio.desactivarSensor();
     }
 
-    private void activarSensores(){
+    private void activarSensores() {
         this.miSensorAcelerometro.activarSensor();
         this.miSensorGiroscopio.activarSensor();
     }
 
-    private void incrementProgressBar(int increment){
+    private void incrementProgressBar(int increment) {
         this.progressBar.incrementProgressBy(increment);
     }
 
-    private void formatDataToCsvInternalStorage(ArrayList<DataTAD> list, int type){
-        String fileName = this.nameUser + "_" + this.nameActivity + "_" + String.valueOf(type);
+    private void formatDataToCsvInternalStorage(ArrayList<DataTAD> list, int type) {
+        String fileName = this.nameUser + "_" + this.nameActivity + "_" + String.valueOf(type) + ".csv";
 
         OutputStreamWriter out = null;
         try {
@@ -235,35 +250,27 @@ public class RecogerDatos extends AppCompatActivity {
         }
     }
 
-    private void formatDataToCsvExternalStorage(ArrayList<DataTAD> list, int type){
-        String fileName = this.nameUser + "_" + this.nameActivity + "_" + String.valueOf(type);
-        File mySD = Environment.getExternalStorageDirectory();
-        File dataDirectory = new File(mySD.getAbsolutePath() + "/DataTrainAppTFG");
+    private void formatDataToCsvExternalStorage(ArrayList<DataTAD> list, int type) {
+        String fileName = new Date().getTime() + "_" + this.nameUser + "_" + this.nameActivity + "_" + String.valueOf(type) + ".csv";
+        //File mySD = Environment.getExternalStorageDirectory();
+        //File mySD = getExternalFilesDir(null);
+        //File mySD2 = Environment.getDataDirectory();
+        //File mySD = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+        File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles");
+        directory.mkdirs();
+        File file = new File(directory, fileName);
 
-        if(!dataDirectory.exists())
-            dataDirectory.mkdirs();
 
-        File file = new File(dataDirectory, fileName);
-
-        FileOutputStream fOs = null;
         try {
-            fOs = new FileOutputStream(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        OutputStreamWriter oSw = new OutputStreamWriter(fOs);
+            FileOutputStream fOs = new FileOutputStream(file);
+            OutputStreamWriter oSw = new OutputStreamWriter(fOs);
 
-        for (DataTAD dataItem : list) {
-            String formatted = dataItem.formattedString() + "\n";
-
-            try {
+            for (DataTAD dataItem : list) {
+                String formatted = dataItem.formattedString() + "\n";
                 oSw.write(formatted);
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-        }
 
-        try {
+
             oSw.flush();
             oSw.close();
         } catch (IOException e) {
@@ -271,21 +278,21 @@ public class RecogerDatos extends AppCompatActivity {
         }
     }
 
-    private void showMessageToast(String message){
+    private void showMessageToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG);
     }
 
-    private void comprobacionTimestamp(){
-        for(int i = 0; i < dataListAccel.size(); i++){
+    private void comprobacionTimestamp() {
+        for (int i = 0; i < dataListAccel.size(); i++) {
             Log.d(TAG, "Diferencia entre TimeStamp: " + "Acel: " + dataListAccel.get(i).formattedString() + " Gyro: " + dataListGyro.get(i).formattedString() + " Diff: " + String.valueOf(this.dataListAccel.get(i).getTimestamp() - this.dataListGyro.get(i).getTimestamp()));
         }
     }
 
-    private void rellenaListasDeDatos(){
+    private void rellenaListasDeDatos() {
         DataTAD dAccel = miSensorAcelerometro.obtenerDatosSensor();
         DataTAD dGyro = miSensorGiroscopio.obtenerDatosSensor();
 
-        if(dAccel.getValues() != null && dGyro.getValues() != null){
+        if (dAccel.getValues() != null && dGyro.getValues() != null) {
             dataListAccel.add(dAccel);
             dataListGyro.add(dGyro);
 
@@ -301,5 +308,31 @@ public class RecogerDatos extends AppCompatActivity {
             */
         }
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
+        switch (requestCode){
+            case REQUEST_WRITE_EXTERNAL_STORAGE:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    //MIRAR QUE SE ESTÉ REALIZANDO BIEN
+    private void actualizaMemoria(){
+        MediaScannerConnection.scanFile(this, new String[]{PATH_DATA_DIR}, null, new MediaScannerConnection.OnScanCompletedListener() {
+            @Override
+            public void onScanCompleted(String path, Uri uri) {
+                //showMessageToast("hola");
+            }
+        });
     }
 }
