@@ -58,6 +58,7 @@ import java.util.TimerTask;
  */
 public class RecogerDatos extends AppCompatActivity {
 
+    //ELEMENTOS GRÁFICOS/////////////////////////////////////////////////////////////////////////////////////////////
     private TextView mTextMessage;
     private EditText nameUserText;
     private EditText nameActivityText;
@@ -67,32 +68,37 @@ public class RecogerDatos extends AppCompatActivity {
     private Button buttonRecord;
     private SeekBar seekBar;
 
-
+    //PARAMETROS DE CONFIGURACION ACTIVIDADES////////////////////////////////////////////////////////////////////////
     private String nameUser;
     private String nameActivity;
     private int timePerFile;
     private int numberFiles;
     private int frequency;
 
+    //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
     private SensorManager mSensorManager;
     private miSensor miSensorAcelerometro;
     private miSensor miSensorGiroscopio;
     private Sensor mAccelerometer;
     private Sensor mGyroscope;
 
+    //ALMACENAMIENTO DATOS DE SENSORES///////////////////////////////////////////////////////////////////////////////
     private ArrayList<DataTAD> dataListAccel;
     private ArrayList<DataTAD> dataListGyro;
     private ArrayList<DataTAD> dataListSensores;
 
-    private static final String TAG = "RecogerDatos";
-
+    //GESTION DEL TIEMPO PARA RECOGIDA DE DATOS POR SENSORES/////////////////////////////////////////////////////////
     private int timeAcumulated;
+    private int numFileCreated;
     private Timer timer;
 
+    //CONSTANTES/////////////////////////////////////////////////////////////////////////////////////////////////////
     private static final int NUM_ATRIB_ACCEL = 3;
     private static final int NUM_ATRIB_GYRO = 3;
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 123;
     private static final String PATH_DATA_DIR =  Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles";
+    private static final int FREQUENCY_DEF = 100;
+    private static final String TAG = "RecogerDatos";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,6 +129,7 @@ public class RecogerDatos extends AppCompatActivity {
         this.buttonRecord = (Button) findViewById(R.id.buttonRecord);
         this.seekBar = (SeekBar) findViewById(R.id.seekBar);
 
+        this.frequency = FREQUENCY_DEF;
         this.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -166,32 +173,44 @@ public class RecogerDatos extends AppCompatActivity {
         this.timePerFile = Integer.parseInt(this.timePerFileText.getText().toString());
         this.numberFiles = Integer.parseInt(this.numberFilesText.getText().toString());
         this.timeAcumulated = 0;
+        this.numFileCreated = 0;
         this.timer = new Timer();
         this.buttonRecord.setEnabled(false);
+        this.progressBar.setProgress(0);
 
         this.activarSensores();
 
-        this.progressBar.setMax(this.timePerFile * 1000);
+        this.progressBar.setMax((this.timePerFile * 1000) * numberFiles);
 
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                incrementProgressBar(100);
-                timeAcumulated += 100;
+                incrementProgressBar(frequency);
+                timeAcumulated += frequency;
 
                 rellenaListasDeDatos();
 
 
                 if (timeAcumulated >= (timePerFile * 1000)) {
-                    miSensorAcelerometro.desactivarSensor();
-                    miSensorGiroscopio.desactivarSensor();
                     comprobacionTimestamp();
-                    timer.cancel();
 
-                    formatDataToCsvExternalStorage(dataListAccel, 1);
-                    formatDataToCsvExternalStorage(dataListGyro, 2);
-                    formatDataToCsvExternalStorage(dataListSensores, 3);
-                    //actualizaMemoria();
+                    if(numFileCreated >= numberFiles){
+                        miSensorAcelerometro.desactivarSensor();
+                        miSensorGiroscopio.desactivarSensor();
+                        limpiarFormulario();
+                        timer.cancel();
+
+                        //actualizaMemoria();
+                    }
+                    else{
+                        timeAcumulated = 0;
+                        numFileCreated++;
+
+                        //Archivos con datos del sensor tipo:
+                        formatDataToCsvExternalStorage(dataListAccel, 1);    //Sensor.TYPE_ACCELEROMETER
+                        formatDataToCsvExternalStorage(dataListGyro, 2);     //Sensor.TYPE_GYROSCOPE
+                        formatDataToCsvExternalStorage(dataListSensores, 3); //Sensor.TYPE_ALL
+                    }
                 }
             }
         };
@@ -199,7 +218,7 @@ public class RecogerDatos extends AppCompatActivity {
         /*
          * Pasado 1s comienza a ejecutarse la tarea "timerTask" cada 100 ms
          */
-        this.timer.scheduleAtFixedRate(timerTask, 1000, 100);
+        this.timer.scheduleAtFixedRate(timerTask, 1000, this.frequency);
     }
 
     @Override
@@ -334,5 +353,11 @@ public class RecogerDatos extends AppCompatActivity {
                 //showMessageToast("hola");
             }
         });
+    }
+
+    private void limpiarFormulario(){
+        timePerFileText.setText("");
+        numberFilesText.setText("");
+        buttonRecord.setEnabled(true);
     }
 }
