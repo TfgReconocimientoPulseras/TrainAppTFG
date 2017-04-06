@@ -26,8 +26,9 @@ public class miSensor implements SensorEventListener{
     public void onSensorChanged(SensorEvent event) {
         this.values = event.values;
 
-        long timeInMillis = (new Date()).getTime()
-                + (event.timestamp - System.nanoTime()) / 1000000L;
+        //long timeInMillis = (new Date()).getTime()
+                //+ (event.timestamp - System.nanoTime()) / 1000000L;
+        long timeInMillis = System.currentTimeMillis();
 
         this.timestamp = timeInMillis;
     }

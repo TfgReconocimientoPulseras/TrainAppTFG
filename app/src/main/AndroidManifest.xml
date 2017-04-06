@@ -22,9 +22,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".ReconocerActividad">
-            <!-- DESCOMENTAR PARA INICIAR LA OTRA ACTIVIDAD PRIMERO -->
-            <!--intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            <!--DESCOMENTAR PARA INICIAR LA OTRA ACTIVIDAD PRIMERO>
+            <intent-filter>
+                <-action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter-->

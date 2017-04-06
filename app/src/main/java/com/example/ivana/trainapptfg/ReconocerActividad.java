@@ -21,17 +21,13 @@ public class ReconocerActividad extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reconocer_actividad);
         EditText code = (EditText)findViewById(R.id.edit_text);
+
         code.setText("#qpy:console\n" +
-                "try:\n" +
-                "    import androidhelper\n" +
-                "\n" +
-                "    droid = androidhelper.Android()\n" +
-                "    line = droid.dialogGetInput()\n" +
-                "    s = 'Hello %s' % line.result\n" +
-                "    droid.makeToast(s)\n" +
-                "except:\n" +
-                "    print(\"Hello, Please update to newest QPython version from (http://play.qpython.com/qrcode-python.html) to use this feature\")\n");
+                    "import miscript as ms\n" +
+                    "\n" +
+                    "ms.mifuncion()\n");
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -1,22 +1,16 @@
 package com.example.ivana.trainapptfg;
 
 import android.Manifest;
-import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -197,7 +191,7 @@ public class RecogerDatos extends AppCompatActivity {
                     if(numFileCreated >= numberFiles){
                         miSensorAcelerometro.desactivarSensor();
                         miSensorGiroscopio.desactivarSensor();
-                        limpiarFormulario();
+                        //limpiarFormulario();
                         timer.cancel();
 
                         //actualizaMemoria();
@@ -303,7 +297,7 @@ public class RecogerDatos extends AppCompatActivity {
 
     private void comprobacionTimestamp() {
         for (int i = 0; i < dataListAccel.size(); i++) {
-            Log.d(TAG, "Diferencia entre TimeStamp: " + "Acel: " + dataListAccel.get(i).formattedString() + " Gyro: " + dataListGyro.get(i).formattedString() + " Diff: " + String.valueOf(this.dataListAccel.get(i).getTimestamp() - this.dataListGyro.get(i).getTimestamp()));
+            Log.d(TAG, "Diferencia entre TimeStamp: " + "Acel: " + dataListAccel.get(i).formattedString() + "\n" + " Gyro: " + dataListGyro.get(i).formattedString() + "\n" + " List: "  + dataListSensores.get(i).formattedString() + "\n" + " Diff: " + String.valueOf(this.dataListAccel.get(i).getTimestamp() - this.dataListGyro.get(i).getTimestamp()) + " Diff2: " + String.valueOf(this.dataListSensores.get(i).getTimestamp() - this.dataListGyro.get(i).getTimestamp()));
         }
     }
 
@@ -312,19 +306,18 @@ public class RecogerDatos extends AppCompatActivity {
         DataTAD dGyro = miSensorGiroscopio.obtenerDatosSensor();
 
         if (dAccel.getValues() != null && dGyro.getValues() != null) {
+            //long timeInMillis = System.currentTimeMillis();
+            long timeInMillis = System.currentTimeMillis();
             dataListAccel.add(dAccel);
             dataListGyro.add(dGyro);
 
             float[] aux = new float[NUM_ATRIB_ACCEL + NUM_ATRIB_GYRO];
             System.arraycopy(dAccel.getValues(), 0, aux, 0, NUM_ATRIB_ACCEL);
             System.arraycopy(dGyro.getValues(), 0, aux, NUM_ATRIB_ACCEL, NUM_ATRIB_GYRO);
-            long timeInMillis = (new Date()).getTime();
-
+            //TODO VIGILAR ESTE PARÁMETRO (VA 10 MIN ADELANTADO A LOS OTROS)
+            //long timeInMillis = (new Date()).getTime()
+             //       + (event.timestamp - System.nanoTime()) / 1000000L;
             dataListSensores.add(new DataTAD(timeInMillis, aux));
-            /*
-            float[] aux = DataTAD.concatenateValues(dAccel.getValues(), dGyro.getValues());
-            long timeInMillis = (new Date()).getTime();
-            */
         }
 
     }
