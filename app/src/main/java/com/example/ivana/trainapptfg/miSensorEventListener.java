@@ -5,9 +5,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import java.util.Date;
-
-public class miSensor implements SensorEventListener{
+public class miSensorEventListener implements SensorEventListener{
 
     private float[] values;
     private long timestamp;
@@ -15,7 +13,7 @@ public class miSensor implements SensorEventListener{
     private SensorManager mSensorManager;
     private int frecuencia;
 
-    public miSensor(Sensor sensor, SensorManager sm, int freq) {
+    public miSensorEventListener(Sensor sensor, SensorManager sm, int freq) {
         this.sensor = sensor;
         this.mSensorManager = sm;
         this.frecuencia = freq;

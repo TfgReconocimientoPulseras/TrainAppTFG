@@ -8,7 +8,6 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -71,8 +70,8 @@ public class RecogerDatos extends AppCompatActivity {
 
     //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
     private SensorManager mSensorManager;
-    private miSensor miSensorAcelerometro;
-    private miSensor miSensorGiroscopio;
+    private miSensorEventListener miSensorEventListenerAcelerometro;
+    private miSensorEventListener miSensorEventListenerGiroscopio;
     private Sensor mAccelerometer;
     private Sensor mGyroscope;
 
@@ -111,8 +110,8 @@ public class RecogerDatos extends AppCompatActivity {
         this.dataListGyro = new ArrayList<DataTAD>();
         this.dataListSensores = new ArrayList<DataTAD>();
 
-        this.miSensorAcelerometro = new miSensor(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
-        this.miSensorGiroscopio = new miSensor(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+        this.miSensorEventListenerAcelerometro = new miSensorEventListener(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+        this.miSensorEventListenerGiroscopio = new miSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
 
 
         this.nameUserText = (EditText) findViewById(R.id.nameText);
@@ -189,8 +188,8 @@ public class RecogerDatos extends AppCompatActivity {
                     comprobacionTimestamp();
 
                     if(numFileCreated >= numberFiles){
-                        miSensorAcelerometro.desactivarSensor();
-                        miSensorGiroscopio.desactivarSensor();
+                        miSensorEventListenerAcelerometro.desactivarSensor();
+                        miSensorEventListenerGiroscopio.desactivarSensor();
                         //limpiarFormulario();
                         timer.cancel();
 
@@ -222,13 +221,13 @@ public class RecogerDatos extends AppCompatActivity {
     }
 
     private void desactivarSensores() {
-        this.miSensorAcelerometro.desactivarSensor();
-        this.miSensorGiroscopio.desactivarSensor();
+        this.miSensorEventListenerAcelerometro.desactivarSensor();
+        this.miSensorEventListenerGiroscopio.desactivarSensor();
     }
 
     private void activarSensores() {
-        this.miSensorAcelerometro.activarSensor();
-        this.miSensorGiroscopio.activarSensor();
+        this.miSensorEventListenerAcelerometro.activarSensor();
+        this.miSensorEventListenerGiroscopio.activarSensor();
     }
 
     private void incrementProgressBar(int increment) {
@@ -302,8 +301,8 @@ public class RecogerDatos extends AppCompatActivity {
     }
 
     private void rellenaListasDeDatos() {
-        DataTAD dAccel = miSensorAcelerometro.obtenerDatosSensor();
-        DataTAD dGyro = miSensorGiroscopio.obtenerDatosSensor();
+        DataTAD dAccel = miSensorEventListenerAcelerometro.obtenerDatosSensor();
+        DataTAD dGyro = miSensorEventListenerGiroscopio.obtenerDatosSensor();
 
         if (dAccel.getValues() != null && dGyro.getValues() != null) {
             //long timeInMillis = System.currentTimeMillis();

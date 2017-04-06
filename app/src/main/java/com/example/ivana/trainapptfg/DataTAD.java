@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by ivana on 21/03/2017.
