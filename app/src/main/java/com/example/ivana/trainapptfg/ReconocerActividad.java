@@ -14,12 +14,16 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import joinery.DataFrame;
+
 public class ReconocerActividad extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reconocer_actividad);
+        //DataFrame df = DataFrame.readCsv();
+
         EditText code = (EditText)findViewById(R.id.edit_text);
 
         code.setText("#qpy:console\n" +
