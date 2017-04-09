@@ -4,6 +4,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.SystemClock;
+import android.provider.Settings;
+
+import java.util.Date;
 
 public class miSensorEventListener implements SensorEventListener{
 
@@ -23,12 +27,7 @@ public class miSensorEventListener implements SensorEventListener{
     @Override
     public void onSensorChanged(SensorEvent event) {
         this.values = event.values;
-
-        //long timeInMillis = (new Date()).getTime()
-                //+ (event.timestamp - System.nanoTime()) / 1000000L;
-        long timeInMillis = System.currentTimeMillis();
-
-        this.timestamp = timeInMillis;
+        this.timestamp = (System.currentTimeMillis() - SystemClock.elapsedRealtime()) + (event.timestamp/1000000L);
     }
 
     @Override
