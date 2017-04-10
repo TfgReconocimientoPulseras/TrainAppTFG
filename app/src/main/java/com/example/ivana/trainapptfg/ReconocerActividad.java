@@ -1,121 +1,167 @@
 package com.example.ivana.trainapptfg;
 
-import android.net.Uri;
-import android.os.Bundle;
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.util.Log;
-import android.view.Menu;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.os.Bundle;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.Button;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import joinery.DataFrame;
 
 public class ReconocerActividad extends Activity {
 
+    private DataFrame df;
+
+    private Collection colsNames = new ArrayList<String>(){{
+        add("timestamp");
+        add("ax");
+        add("ay");
+        add("az");
+        //add("ga");
+        //add("gb");
+        //add("gg");
+    }};
+
+    private Collection feautresMinNames = new ArrayList<String>(){{
+        add("min-ax");
+        add("min-ay");
+        add("min-az");
+        //add("min-ga");
+        //add("min-gb");
+        //add("min-gg");
+    }};
+
+    private Collection feautresMaxNames = new ArrayList<String>(){{
+        add("max-ax");
+        add("max-ay");
+        add("max-az");
+        //add("max-ga");
+        //add("max-gb");
+        //add("max-gg");
+    }};
+
+    private Collection coll;
+    //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
+    private SensorManager mSensorManager;
+    private miSensorEventListener miSensorEventListenerAcelerometro;
+    private miSensorEventListener miSensorEventListenerGiroscopio;
+    private Sensor mAccelerometer;
+    private Sensor mGyroscope;
+
+    private static final int FREQUENCY_DEF = 100;
+    private static final int DELAY_TIMER_TASK = 1000;
+    private static final int WINDOW_SZ = 1000; //In miliseconds --> 1000 = 1s
+
+
+
+    private Timer timer;
+    private TimerTask timerTask;
+    private int timeAcumulated;
+
+    private Button button;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reconocer_actividad);
-        //DataFrame df = DataFrame.readCsv();
+        this.button = (Button) findViewById(R.id.button1);
 
-        EditText code = (EditText)findViewById(R.id.edit_text);
+        this.df = new DataFrame(colsNames);
 
-        code.setText("#qpy:console\n" +
-                    "import miscript as ms\n" +
-                    "\n" +
-                    "ms.mifuncion()\n");
+        this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        this.mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+
+        this.miSensorEventListenerAcelerometro = new miSensorEventListener(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+        this.miSensorEventListenerGiroscopio = new miSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+        this.timeAcumulated = 0;
+
+        //TODO PASADOS X SEGUNDOS PARAR EL TIMERTASK Y EJECUTAR TAREAS DE EXTRACCIÓN DE CARACTERÍSTICAS Y CLASIFICAR DATOS
+        //TODO INCLUIR DATOS DEL GIROSOPIO
+        this.timer = new Timer();
+
+        this.timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                timeAcumulated += FREQUENCY_DEF;
+
+
+                DataTAD dataAccel = miSensorEventListenerAcelerometro.obtenerDatosSensor();
+                //DataTAD dataGyro = miSensorEventListenerGiroscopio.obtenerDatosSensor();
+
+                df.append(dataAccel.getDataTADasArrayList());
+
+                if (timeAcumulated >= (5 * 1000)) { // tras 5 segundos de momento para pruebas
+                    desactivarSensores();
+                    timer.cancel();
+
+                    //SEGMENTAR DATOS DEL DATAFRAME (VENTANAS DE 1S Y SIN SOLAPAMIENTO)
+                    DataFrame features = segmentameDatos(df);
+                    int k = 0; //DEPURACION
+                    //Ejecutar clasificador con los datos de features
+
+                }
+            }
+        };
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.navigation, menu);
-        return true;
-    }
-    /*
-     *
-     *
-     */
-    private final int SCRIPT_EXEC_PY = 40001;
-    private final String extPlgPlusName = "org.qpython.qpy";
-    public static boolean checkAppInstalledByName(Context context, String packageName) {
-        if (packageName == null || "".equals(packageName))
-            return false;
-        try {
-            ApplicationInfo info = context.getPackageManager().getApplicationInfo(
-                    packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
-
-            Log.d("QPYMAIN",  "checkAppInstalledByName:"+packageName+" found");
-            return true;
-        } catch (NameNotFoundException e) {
-            Log.d("QPYMAIN",  "checkAppInstalledByName:"+packageName+" not found");
-
-            return false;
-        }
+    public void onClickButtonRun(View view) {
+        button.setEnabled(false);
+        this.activarSensores();
+        this.timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
     }
 
-    public void onQPyExec(View v) {
+    private void activarSensores() {
+        this.miSensorEventListenerAcelerometro.activarSensor();
+        this.miSensorEventListenerGiroscopio.activarSensor();
+    }
 
-        if (checkAppInstalledByName(getApplicationContext(), extPlgPlusName)) {
-            Toast.makeText(this, "Sample of calling QPython API", Toast.LENGTH_SHORT).show();
+    private void desactivarSensores() {
+        this.miSensorEventListenerAcelerometro.desactivarSensor();
+        this.miSensorEventListenerGiroscopio.desactivarSensor();
+    }
 
-            Intent intent = new Intent();
-            intent.setClassName(extPlgPlusName, "org.qpython.qpylib.MPyApi");
-            intent.setAction(extPlgPlusName + ".action.MPyApi");
+    //VENTANA DESLIZANTE 1 SEGUNDO SIN SOLAPAMIENTO
+    //TODO IMPLEMENTAR OTRA FUNCION CON SOLAPAMIENTO DE 50%
+    //TODO REVISAR NUMERO DE VENTANAS -> PARA 5 SEGUNDOS SE CREAN 4 VENTANAS Y DEBERÍAN SER 5 VENTANAS
+    private DataFrame segmentameDatos(DataFrame df){
+        DataFrame retDf = new DataFrame();
 
-            Bundle mBundle = new Bundle();
-            mBundle.putString("app", "myappid");
-            mBundle.putString("act", "onPyApi");
-            mBundle.putString("flag", "onQPyExec");            // any String flag you may use in your context
-            mBundle.putString("param", "");          // param String param you may use in your context
+        DataFrame dataFrameMin = new DataFrame(this.feautresMinNames);
+        DataFrame dataFrameMax = new DataFrame(this.feautresMaxNames);
 
-	        /*
-	         * The String Python code, you can put your py file in res or raw or intenet, so that you can get it the same way, which can make it scalable
-	         */
-            EditText codeTxt = (EditText)findViewById(R.id.edit_text);
-            String code = codeTxt.getText().toString();
-            mBundle.putString("pycode", code);
+        long timeStart = 0;
+        int startSlice = 0;
 
-            intent.putExtras(mBundle);
-
-            startActivityForResult(intent, SCRIPT_EXEC_PY);
-        } else {
-            Toast.makeText(getApplicationContext(), "Please install QPython first", Toast.LENGTH_LONG).show();
-
-            try {
-                Uri uLink = Uri.parse("market://details?id=com.hipipal.qpyplus");
-                Intent intent = new Intent( Intent.ACTION_VIEW, uLink );
-                startActivity(intent);
-            } catch (Exception e) {
-                Uri uLink = Uri.parse("http://qpython.com");
-                Intent intent = new Intent( Intent.ACTION_VIEW, uLink );
-                startActivity(intent);
+        for (int row = 0; row < df.length(); row++){
+            if(timeStart == 0){
+                timeStart = (long) df.get(row, 0);
+                startSlice = row;
             }
 
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == SCRIPT_EXEC_PY) {
-            if (data!=null) {
-                Bundle bundle = data.getExtras();
-                String flag = bundle.getString("flag"); // flag you set
-                String param = bundle.getString("param"); // param you set
-                String result = bundle.getString("result"); // Result your Pycode generate
-                Toast.makeText(this, "onQPyExec: return ("+result+")", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "onQPyExec: data is null", Toast.LENGTH_SHORT).show();
-
+            if((long) df.get(row, 0) >= timeStart + WINDOW_SZ ){
+                //hacer slice
+                dataFrameMin.append(df.slice(startSlice,  row, 1, df.size()).min().row(0));
+                dataFrameMax.append(df.slice(startSlice,  row, 1, df.size()).max().row(0));
+                timeStart = 0;
             }
         }
+
+        //si el timestart es distinto de 0 significa que hay valores que se han quedado en la ventana sin procesar,
+        //ocurre cuando el número de datos que quedan es menor que el ancho de la ventana.
+        if(timeStart != 0 && !df.isEmpty()){
+            dataFrameMin.append(df.slice(startSlice,  df.length(), 1, df.size()).min().row(0));
+            dataFrameMax.append(df.slice(startSlice,  df.length(), 1, df.size()).max().row(0));
+        }
+
+        //join de los dataframes
+        return  dataFrameMin.join(dataFrameMax);
     }
 
 }

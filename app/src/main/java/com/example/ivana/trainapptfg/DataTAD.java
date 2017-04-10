@@ -67,4 +67,16 @@ public class DataTAD {
 
         return retList;
     }
+
+    public ArrayList getDataTADasArrayList(){
+        ArrayList aux = new ArrayList();
+
+        aux.add(this.getTimestamp());
+
+        for (float f : this.getValues()){
+            aux.add(f);
+        }
+
+        return aux;
+    }
 }

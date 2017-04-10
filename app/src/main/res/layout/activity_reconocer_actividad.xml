@@ -13,24 +13,8 @@ tools:context="com.example.ivana.trainapptfg.ReconocerActividad">
     android:orientation="vertical"
     android:weightSum="1">
 
-    <TextView
-        android:padding="20dip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:textColor="#999999"
-        android:text="hello_world" />
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textMultiLine"
-        android:ems="10"
-        android:id="@+id/edit_text"
-        android:textColor="#313131"
-        android:layout_weight="0.32"
-        android:text="sample_code" />
+
 
     <Button
         android:id="@+id/button1"
@@ -38,7 +22,7 @@ tools:context="com.example.ivana.trainapptfg.ReconocerActividad">
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:onClick="onQPyExec"
+        android:onClick="onClickButtonRun"
         android:text="Run"
         android:layout_gravity="center_horizontal" />
 </LinearLayout>

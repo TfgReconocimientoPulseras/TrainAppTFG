@@ -5,9 +5,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.SystemClock;
-import android.provider.Settings;
-
-import java.util.Date;
 
 public class miSensorEventListener implements SensorEventListener{
 
