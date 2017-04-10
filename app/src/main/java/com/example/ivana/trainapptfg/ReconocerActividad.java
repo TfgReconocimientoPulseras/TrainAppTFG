@@ -102,9 +102,17 @@ public class ReconocerActividad extends Activity {
                     timer.cancel();
 
                     //SEGMENTAR DATOS DEL DATAFRAME (VENTANAS DE 1S Y SIN SOLAPAMIENTO)
-                    DataFrame features = segmentameDatos(df);
-                    int k = 0; //DEPURACION
+                    DataFrame features = segmentameDatosSinSolapamiento(df);
+
+                    //2 -> SOLAPAMIENTO DEL 50%, 4-> SOLAPAMIENTO DEL 25%...
+                    //SEGMENTACION CON SOLAPAMIENTO (VENTANAS DE 1S Y CON SOLAPAMIENTO)
+                    DataFrame featuresSegmentado = segmentameDatosConSolapamiento(df, 2);
+
+                    int kk = 0;
                     //Ejecutar clasificador con los datos de features
+                    //TODO INVOCAR AL CÓDIGO DEL ÁRBOL
+
+
 
                 }
             }
@@ -129,8 +137,7 @@ public class ReconocerActividad extends Activity {
 
     //VENTANA DESLIZANTE 1 SEGUNDO SIN SOLAPAMIENTO
     //TODO IMPLEMENTAR OTRA FUNCION CON SOLAPAMIENTO DE 50%
-    //TODO REVISAR NUMERO DE VENTANAS -> PARA 5 SEGUNDOS SE CREAN 4 VENTANAS Y DEBERÍAN SER 5 VENTANAS
-    private DataFrame segmentameDatos(DataFrame df){
+    private DataFrame segmentameDatosSinSolapamiento(DataFrame df){
         DataFrame retDf = new DataFrame();
 
         DataFrame dataFrameMin = new DataFrame(this.feautresMinNames);
@@ -146,7 +153,6 @@ public class ReconocerActividad extends Activity {
             }
 
             if((long) df.get(row, 0) >= timeStart + WINDOW_SZ ){
-                //hacer slice
                 dataFrameMin.append(df.slice(startSlice,  row, 1, df.size()).min().row(0));
                 dataFrameMax.append(df.slice(startSlice,  row, 1, df.size()).max().row(0));
                 timeStart = 0;
@@ -164,4 +170,44 @@ public class ReconocerActividad extends Activity {
         return  dataFrameMin.join(dataFrameMax);
     }
 
+    //TODO COMPROBAR QUE HAGA CORRECTAMENTE LA SEGMENTACIÓN CON EL SOLAPAMIENTO
+    private DataFrame segmentameDatosConSolapamiento(DataFrame df, int porcentajeSolapamiento){
+        DataFrame retDf = new DataFrame();
+        int timeOverlap = WINDOW_SZ/porcentajeSolapamiento;
+        DataFrame dataFrameMin = new DataFrame(this.feautresMinNames);
+        DataFrame dataFrameMax = new DataFrame(this.feautresMaxNames);
+
+        long timeStart = 0;
+        int startSlice = 0;
+
+        for (int row = 0; row < df.length(); row++){
+            if(timeStart == 0){
+                timeStart = (long) df.get(row, 0);
+                startSlice = row;
+            }
+
+            if((long) df.get(row, 0) >= timeStart + WINDOW_SZ ){
+                dataFrameMin.append(df.slice(startSlice,  row, 1, df.size()).min().row(0));
+                dataFrameMax.append(df.slice(startSlice,  row, 1, df.size()).max().row(0));
+
+                //volver atrás para realizar el solapamiento
+                while ((long) df.get(row, 0) >= timeStart + timeOverlap)
+                    row--;
+
+                //un row-- extra por el row++ del bucle
+                row--;
+                timeStart = 0;
+            }
+        }
+
+        //si el timestart es distinto de 0 significa que hay valores que se han quedado en la ventana sin procesar,
+        //ocurre cuando el número de datos que quedan es menor que el ancho de la ventana.
+        if(timeStart != 0 && !df.isEmpty()){
+            dataFrameMin.append(df.slice(startSlice,  df.length(), 1, df.size()).min().row(0));
+            dataFrameMax.append(df.slice(startSlice,  df.length(), 1, df.size()).max().row(0));
+        }
+
+        //join de los dataframes
+        return  dataFrameMin.join(dataFrameMax);
+    }
 }
