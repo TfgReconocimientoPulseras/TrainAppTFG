@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -23,30 +24,29 @@ public class ReconocerActividad extends Activity {
         add("ax");
         add("ay");
         add("az");
-        //add("ga");
-        //add("gb");
-        //add("gg");
+        add("ga");
+        add("gb");
+        add("gg");
     }};
 
     private Collection feautresMinNames = new ArrayList<String>(){{
         add("min-ax");
         add("min-ay");
         add("min-az");
-        //add("min-ga");
-        //add("min-gb");
-        //add("min-gg");
+        add("min-ga");
+        add("min-gb");
+        add("min-gg");
     }};
 
     private Collection feautresMaxNames = new ArrayList<String>(){{
         add("max-ax");
         add("max-ay");
         add("max-az");
-        //add("max-ga");
-        //add("max-gb");
-        //add("max-gg");
+        add("max-ga");
+        add("max-gb");
+        add("max-gg");
     }};
 
-    private Collection coll;
     //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
     private SensorManager mSensorManager;
     private miSensorEventListener miSensorEventListenerAcelerometro;
@@ -83,7 +83,6 @@ public class ReconocerActividad extends Activity {
         this.timeAcumulated = 0;
 
         //TODO PASADOS X SEGUNDOS PARAR EL TIMERTASK Y EJECUTAR TAREAS DE EXTRACCIÓN DE CARACTERÍSTICAS Y CLASIFICAR DATOS
-        //TODO INCLUIR DATOS DEL GIROSOPIO
         this.timer = new Timer();
 
         this.timerTask = new TimerTask() {
@@ -93,11 +92,16 @@ public class ReconocerActividad extends Activity {
 
 
                 DataTAD dataAccel = miSensorEventListenerAcelerometro.obtenerDatosSensor();
-                //DataTAD dataGyro = miSensorEventListenerGiroscopio.obtenerDatosSensor();
+                DataTAD dataGyro = miSensorEventListenerGiroscopio.obtenerDatosSensor();
 
-                df.append(dataAccel.getDataTADasArrayList());
+                //unificamos los valores del acelerómetro y del giroscopio...
+                float[] floatUnificada = DataTAD.concatenateValues(dataAccel.getValues(), dataGyro.getValues());
+                DataTAD dataUnificada = new DataTAD(System.currentTimeMillis(), floatUnificada);
 
-                if (timeAcumulated >= (5 * 1000)) { // tras 5 segundos de momento para pruebas
+                //lo añadimos al dataframe
+                df.append(dataUnificada.getDataTADasArrayList());
+
+                if (timeAcumulated >= (15* 1000)) { // tras 5 segundos de momento para pruebas
                     desactivarSensores();
                     timer.cancel();
 
@@ -106,9 +110,13 @@ public class ReconocerActividad extends Activity {
 
                     //2 -> SOLAPAMIENTO DEL 50%, 4-> SOLAPAMIENTO DEL 25%...
                     //SEGMENTACION CON SOLAPAMIENTO (VENTANAS DE 1S Y CON SOLAPAMIENTO)
-                    DataFrame featuresSegmentado = segmentameDatosConSolapamiento(df, 2);
 
-                    int kk = 0;
+                    //long startTime = System.currentTimeMillis();
+                    DataFrame featuresSegmentado = segmentameDatosConSolapamiento(df, 2);
+                    //long stopTime = System.currentTimeMillis();
+                    //long elapsedTime = stopTime - startTime;
+                    //System.out.println(elapsedTime);
+                    //int kk = 0;
                     //Ejecutar clasificador con los datos de features
                     //TODO INVOCAR AL CÓDIGO DEL ÁRBOL
 
@@ -136,7 +144,6 @@ public class ReconocerActividad extends Activity {
     }
 
     //VENTANA DESLIZANTE 1 SEGUNDO SIN SOLAPAMIENTO
-    //TODO IMPLEMENTAR OTRA FUNCION CON SOLAPAMIENTO DE 50%
     private DataFrame segmentameDatosSinSolapamiento(DataFrame df){
         DataFrame retDf = new DataFrame();
 
@@ -170,7 +177,6 @@ public class ReconocerActividad extends Activity {
         return  dataFrameMin.join(dataFrameMax);
     }
 
-    //TODO COMPROBAR QUE HAGA CORRECTAMENTE LA SEGMENTACIÓN CON EL SOLAPAMIENTO
     private DataFrame segmentameDatosConSolapamiento(DataFrame df, int porcentajeSolapamiento){
         DataFrame retDf = new DataFrame();
         int timeOverlap = WINDOW_SZ/porcentajeSolapamiento;

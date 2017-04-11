@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by ivana on 21/03/2017.
@@ -68,6 +69,7 @@ public class DataTAD {
         return retList;
     }
 
+
     public ArrayList getDataTADasArrayList(){
         ArrayList aux = new ArrayList();
 
@@ -79,4 +81,5 @@ public class DataTAD {
 
         return aux;
     }
+
 }
