@@ -1,22 +1,26 @@
-package com.example.ivana.trainapptfg;
+package com.example.ivana.trainapptfg.fragments;
 
-import android.app.Activity;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.example.ivana.trainapptfg.DataTAD;
+import com.example.ivana.trainapptfg.R;
+import com.example.ivana.trainapptfg.miSensorEventListener;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import joinery.DataFrame;
 
-public class ReconocerActividad extends Activity {
-
+public class ReconocerActividadFragment extends Fragment {
     private DataFrame df;
 
     private Collection colsNames = new ArrayList<String>(){{
@@ -66,15 +70,17 @@ public class ReconocerActividad extends Activity {
 
     private Button button;
 
+    public ReconocerActividadFragment() {
+        // Required empty public constructor
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reconocer_actividad);
-        this.button = (Button) findViewById(R.id.button1);
 
         this.df = new DataFrame(colsNames);
 
-        this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        this.mSensorManager = (SensorManager) getActivity().getSystemService(getActivity().SENSOR_SERVICE);
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
@@ -101,7 +107,7 @@ public class ReconocerActividad extends Activity {
                 //lo añadimos al dataframe
                 df.append(dataUnificada.getDataTADasArrayList());
 
-                if (timeAcumulated >= (15* 1000)) { // tras 5 segundos de momento para pruebas
+                if (timeAcumulated >= (15 * 1000)) { // tras 5 segundos de momento para pruebas
                     desactivarSensores();
                     timer.cancel();
 
@@ -121,17 +127,29 @@ public class ReconocerActividad extends Activity {
                     //TODO INVOCAR AL CÓDIGO DEL ÁRBOL
 
 
-
                 }
             }
         };
     }
 
-    public void onClickButtonRun(View view) {
-        button.setEnabled(false);
-        this.activarSensores();
-        this.timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_reconocer_actividad, container, false);
+        button = (Button) view.findViewById(R.id.button1);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                button.setEnabled(false);
+                activarSensores();
+                timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
+            }
+        });
+
+        return view;
     }
+
 
     private void activarSensores() {
         this.miSensorEventListenerAcelerometro.activarSensor();
@@ -216,4 +234,5 @@ public class ReconocerActividad extends Activity {
         //join de los dataframes
         return  dataFrameMin.join(dataFrameMax);
     }
+
 }
