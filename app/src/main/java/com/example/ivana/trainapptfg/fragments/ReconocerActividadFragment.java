@@ -33,7 +33,7 @@ public class ReconocerActividadFragment extends Fragment {
         add("gg");
     }};
 
-    private Collection feautresMinNames = new ArrayList<String>(){{
+    private Collection featuresMinNames = new ArrayList<String>(){{
         add("min-ax");
         add("min-ay");
         add("min-az");
@@ -42,13 +42,40 @@ public class ReconocerActividadFragment extends Fragment {
         add("min-gg");
     }};
 
-    private Collection feautresMaxNames = new ArrayList<String>(){{
+    private Collection featuresMaxNames = new ArrayList<String>(){{
         add("max-ax");
         add("max-ay");
         add("max-az");
         add("max-ga");
         add("max-gb");
         add("max-gg");
+    }};
+
+    private Collection featuresMeanNames = new ArrayList<String>(){{
+        add("mean-ax");
+        add("mean-ay");
+        add("mean-az");
+        add("mean-ga");
+        add("mean-gb");
+        add("mean-gg");
+    }};
+
+    private Collection featuresMedianNames = new ArrayList<String>(){{
+        add("median-ax");
+        add("median-ay");
+        add("median-az");
+        add("median-ga");
+        add("median-gb");
+        add("median-gg");
+    }};
+
+    private Collection featuresStdNames = new ArrayList<String>(){{
+        add("std-ax");
+        add("std-ay");
+        add("std-az");
+        add("std-ga");
+        add("std-gb");
+        add("std-gg");
     }};
 
     //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +106,6 @@ public class ReconocerActividadFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         this.df = new DataFrame(colsNames);
-
         this.mSensorManager = (SensorManager) getActivity().getSystemService(getActivity().SENSOR_SERVICE);
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -112,7 +138,7 @@ public class ReconocerActividadFragment extends Fragment {
                     timer.cancel();
 
                     //SEGMENTAR DATOS DEL DATAFRAME (VENTANAS DE 1S Y SIN SOLAPAMIENTO)
-                    DataFrame features = segmentameDatosSinSolapamiento(df);
+                    //DataFrame features = segmentameDatosSinSolapamiento(df);
 
                     //2 -> SOLAPAMIENTO DEL 50%, 4-> SOLAPAMIENTO DEL 25%...
                     //SEGMENTACION CON SOLAPAMIENTO (VENTANAS DE 1S Y CON SOLAPAMIENTO)
@@ -122,7 +148,7 @@ public class ReconocerActividadFragment extends Fragment {
                     //long stopTime = System.currentTimeMillis();
                     //long elapsedTime = stopTime - startTime;
                     //System.out.println(elapsedTime);
-                    //int kk = 0;
+                    int kk = 0;
                     //Ejecutar clasificador con los datos de features
                     //TODO INVOCAR AL CÓDIGO DEL ÁRBOL
 
@@ -161,6 +187,7 @@ public class ReconocerActividadFragment extends Fragment {
         this.miSensorEventListenerGiroscopio.desactivarSensor();
     }
 
+    /*
     //VENTANA DESLIZANTE 1 SEGUNDO SIN SOLAPAMIENTO
     private DataFrame segmentameDatosSinSolapamiento(DataFrame df){
         DataFrame retDf = new DataFrame();
@@ -194,13 +221,16 @@ public class ReconocerActividadFragment extends Fragment {
         //join de los dataframes
         return  dataFrameMin.join(dataFrameMax);
     }
-
+*/
     private DataFrame segmentameDatosConSolapamiento(DataFrame df, int porcentajeSolapamiento){
         DataFrame retDf = new DataFrame();
-        int timeOverlap = WINDOW_SZ/porcentajeSolapamiento;
-        DataFrame dataFrameMin = new DataFrame(this.feautresMinNames);
-        DataFrame dataFrameMax = new DataFrame(this.feautresMaxNames);
 
+        int timeOverlap = WINDOW_SZ/porcentajeSolapamiento;
+        DataFrame dataFrameMin = new DataFrame(this.featuresMinNames);
+        DataFrame dataFrameMax = new DataFrame(this.featuresMaxNames);
+        DataFrame dataFrameMean = new DataFrame(this.featuresMeanNames);
+        DataFrame dataFrameMedian = new DataFrame(this.featuresMedianNames);
+        DataFrame dataFrameStd = new DataFrame(this.featuresStdNames);
         long timeStart = 0;
         int startSlice = 0;
 
@@ -213,6 +243,9 @@ public class ReconocerActividadFragment extends Fragment {
             if((long) df.get(row, 0) >= timeStart + WINDOW_SZ ){
                 dataFrameMin.append(df.slice(startSlice,  row, 1, df.size()).min().row(0));
                 dataFrameMax.append(df.slice(startSlice,  row, 1, df.size()).max().row(0));
+                dataFrameMean.append(df.slice(startSlice,  row, 1, df.size()).mean().row(0));
+                dataFrameMedian.append(df.slice(startSlice,  row, 1, df.size()).median().row(0));
+                dataFrameStd.append(df.slice(startSlice,  row, 1, df.size()).stddev().row(0));
 
                 //volver atrás para realizar el solapamiento
                 while ((long) df.get(row, 0) >= timeStart + timeOverlap)
@@ -229,10 +262,14 @@ public class ReconocerActividadFragment extends Fragment {
         if(timeStart != 0 && !df.isEmpty()){
             dataFrameMin.append(df.slice(startSlice,  df.length(), 1, df.size()).min().row(0));
             dataFrameMax.append(df.slice(startSlice,  df.length(), 1, df.size()).max().row(0));
+            dataFrameMean.append(df.slice(startSlice,  df.length(), 1, df.size()).mean().row(0));
+            dataFrameMedian.append(df.slice(startSlice,  df.length(), 1, df.size()).median().row(0));
+            dataFrameStd.append(df.slice(startSlice,  df.length(), 1, df.size()).stddev().row(0));
+
         }
 
         //join de los dataframes
-        return  dataFrameMin.join(dataFrameMax);
+        return  dataFrameMin.join(dataFrameMax).join(dataFrameMean).join(dataFrameMedian).join(dataFrameStd);
     }
 
 }
