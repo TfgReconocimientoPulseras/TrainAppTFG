@@ -1,22 +1,32 @@
 package com.example.ivana.trainapptfg;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.media.MediaScannerConnection;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,43 +40,17 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * AQUI ESTÁN LOS FICHEROS QUE SE CREAN
- * C:\Users\ivana\AppData\Local\Android\sdk\platform-tools
- * adb shell
- * cd data/data/com.example.ivana.trainapptfg
- * cd files
- * ls -l
- **/
-
-/**
- * Esta actividad se encarga de recoger datos y crear un fichero con los datos
- * <p>
- * Los ficheros se encuentran en la siguiente ubicación (Windows)
- * C:\Users\ivana\AppData\Local\Android\sdk\platform-tools
- * adb shell
- * cd data/data/com.example.ivana.trainapptfg
- * cd files
- * ls -l
- */
-public class RecogerDatos extends AppCompatActivity {
+public class RecogerDatosRecogida extends Activity {
 
     //ELEMENTOS GRÁFICOS/////////////////////////////////////////////////////////////////////////////////////////////
-    private TextView mTextMessage;
-    private EditText nameUserText;
-    private EditText nameActivityText;
-    private EditText timePerFileText;
-    private EditText numberFilesText;
     private ProgressBar progressBar;
     private Button buttonRecord;
-    private SeekBar seekBar;
+    private TextView temporizador;
+    private TextView numArchivosCreados;
 
     //PARAMETROS DE CONFIGURACION ACTIVIDADES////////////////////////////////////////////////////////////////////////
     private String nameUser;
     private String nameActivity;
-    private int timePerFile;
-    private int numberFiles;
-    private int frequency;
 
     //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
     private SensorManager mSensorManager;
@@ -92,122 +76,154 @@ public class RecogerDatos extends AppCompatActivity {
     private static final String PATH_DATA_DIR =  Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles";
     private static final int FREQUENCY_DEF = 100;
     private static final String TAG = "RecogerDatos";
+    private static final int NUM_ARCHIVOS_CREAR = 3;
+    private static final int TIEMPO_POR_ARCHIVO = 30000;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    private Handler modificadorFinalizador = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            buttonRecord.setEnabled(true);
+
+
+            if((Integer)msg.obj == (NUM_ARCHIVOS_CREAR - 1))
+                createSimpleDialog("¡Explendido! Ya casi estamos acabando. Vamos a repetir la prueba por última vez.");
+            else if((Integer)msg.obj == NUM_ARCHIVOS_CREAR) {
+                createSimpleDialog("¡Genial! Hemos acabado.");
+                numFileCreated = 0;
+                Intent recogida = new Intent (RecogerDatosRecogida.this, RecogerDatosBienvenida.class);
+                startActivity(recogida);
+            }
+            else
+                createSimpleDialog("¡Muy bien! Vamos a volver a repetir la prueba. Vuelve a pulsar el botón de play.");
+
+            numArchivosCreados.setText(Integer.toString((Integer)msg.obj) + "/" + Integer.toString(NUM_ARCHIVOS_CREAR));
+
+
+        }
+    };
+
+    private Handler modificadorTemporizador = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            int t = Integer.parseInt(String.valueOf(temporizador.getText()));
+
+            if(t != 0){
+                t--;
+                if(t < 10){
+                    temporizador.setText("0" + Integer.toString(t));
+                }
+                else {
+                    temporizador.setText(Integer.toString(t));
+                }
+            }
+        }
+    };
+
+    public void notificationAviso() {
+        Intent i = new Intent(this, this.getClass());
+        i.putExtra("notificationID", 1);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, 0);
+        NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+
+        CharSequence contentTitle = "Grabando actividad";
+        CharSequence contentText = "Hemos terminado una parte. Podemos continuar.";
+        Notification noti = new NotificationCompat.Builder(this)
+                .setContentIntent(pendingIntent)
+                .setContentTitle(contentTitle)
+                .setContentText(contentText)
+                .setSmallIcon(R.drawable.ico_activ)
+                .setVibrate(new long[] {100, 250, 100, 500})
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .build();
+        nm.notify(1, noti);
+    }
+
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recoger_datos);
+        setContentView(R.layout.activity_recoger_datos_recogida);
+
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE);
         }
+
         this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
-
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        this.miSensorEventListenerAcelerometro = new miSensorEventListener(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+        this.miSensorEventListenerGiroscopio = new miSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
 
         this.dataListAccel = new ArrayList<DataTAD>();
         this.dataListGyro = new ArrayList<DataTAD>();
         this.dataListSensores = new ArrayList<DataTAD>();
 
-        this.miSensorEventListenerAcelerometro = new miSensorEventListener(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
-        this.miSensorEventListenerGiroscopio = new miSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+        Bundle bundle = getIntent().getExtras();
+        this.nameUser = bundle.getString("nombreUsu");
+        this.nameActivity = bundle.getString("nombreAct");
 
+        this.numArchivosCreados = (TextView) findViewById(R.id.numArchivosCreadosRecogida);
+        this.temporizador = (TextView) findViewById(R.id.temporizadorRecogida);
+        this.buttonRecord = (Button) findViewById(R.id.buttonPlayRecogida);
+        this.progressBar = (ProgressBar) findViewById(R.id.progressBarRecogida);
 
-        this.nameUserText = (EditText) findViewById(R.id.nameText);
-        this.nameActivityText = (EditText) findViewById(R.id.activityText);
-        this.timePerFileText = (EditText) findViewById(R.id.timeText);
-        this.numberFilesText = (EditText) findViewById(R.id.filesText);
-        this.progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        this.buttonRecord = (Button) findViewById(R.id.buttonRecord);
-        this.seekBar = (SeekBar) findViewById(R.id.seekBar);
+        this.numFileCreated = 0;
 
-        this.frequency = FREQUENCY_DEF;
-        this.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                //TODO SE PODRÍA METER EN UN HASHMAP LOS VALORES DEL PROGRESS Y SU FREQ CORRESPONDIENDTE
-                if (progress == 0) {
-                    frequency = 50;
-                } else if (progress == 1) {
-                    frequency = 100;
-                } else if (progress == 2) {
-                    frequency = 200;
-                } else if (progress == 3) {
-                    frequency = 300;
-                } else if (progress == 4) {
-                    frequency = 400;
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-        this.timeAcumulated = 0;
+        temporizador.setText(Integer.toString(TIEMPO_POR_ARCHIVO/1000));
     }
 
-    @Override
     protected void onResume() {
 
         super.onResume();
     }
 
     public void onClickButtonPlay(View view) {
-        this.nameUser = this.nameUserText.getText().toString();
-        this.nameActivity = this.nameActivityText.getText().toString();
-        this.timePerFile = Integer.parseInt(this.timePerFileText.getText().toString());
-        this.numberFiles = Integer.parseInt(this.numberFilesText.getText().toString());
         this.timeAcumulated = 0;
-        this.numFileCreated = 0;
+
         this.timer = new Timer();
+
         this.buttonRecord.setEnabled(false);
+
         this.progressBar.setProgress(0);
 
         this.activarSensores();
 
-        this.progressBar.setMax((this.timePerFile * 1000) * numberFiles);
+        this.progressBar.setMax((this.TIEMPO_POR_ARCHIVO));
+
+        temporizador.setText(Integer.toString(TIEMPO_POR_ARCHIVO/1000));
 
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                incrementProgressBar(frequency);
-                timeAcumulated += frequency;
+                incrementProgressBar(FREQUENCY_DEF);
+                timeAcumulated += FREQUENCY_DEF;
 
                 rellenaListasDeDatos();
 
+                if((timeAcumulated % 1000) == 0){
+                    modificadorTemporizador.sendEmptyMessage(0);
+                }
 
-                if (timeAcumulated >= (timePerFile * 1000)) {
+                if (timeAcumulated >= (TIEMPO_POR_ARCHIVO)) {
                     comprobacionTimestamp();
 
-                    //if(numFileCreated >= numberFiles){
-                        miSensorEventListenerAcelerometro.desactivarSensor();
-                        miSensorEventListenerGiroscopio.desactivarSensor();
-                        //limpiarFormulario();
-                        timer.cancel();
-                        formatDataToCsvExternalStorage(dataListAccel, 1);    //Sensor.TYPE_ACCELEROMETER
-                        formatDataToCsvExternalStorage(dataListGyro, 2);     //Sensor.TYPE_GYROSCOPE
-                        formatDataToCsvExternalStorage(dataListSensores, 3); //Sensor.TYPE_ALL
-                        //actualizaMemoria();
-                    //}
-                    /*
-                    //TODO NO SE PUEDE GUARDAR EN FICHERO dataList y ESTAR RECOGIENDO DATOS DEL SENSOR A LA VEZ
-                    else{
-                        timeAcumulated = 0;
-                        numFileCreated++;
+                    miSensorEventListenerAcelerometro.desactivarSensor();
+                    miSensorEventListenerGiroscopio.desactivarSensor();
 
-                        //Archivos con datos del sensor tipo:
-                        formatDataToCsvExternalStorage(dataListAccel, 1);    //Sensor.TYPE_ACCELEROMETER
-                        formatDataToCsvExternalStorage(dataListGyro, 2);     //Sensor.TYPE_GYROSCOPE
-                        formatDataToCsvExternalStorage(dataListSensores, 3); //Sensor.TYPE_ALL
-                    }*/
+                    timer.cancel();
+                    formatDataToCsvExternalStorage(dataListAccel, 1);    //Sensor.TYPE_ACCELEROMETER
+                    formatDataToCsvExternalStorage(dataListGyro, 2);     //Sensor.TYPE_GYROSCOPE
+                    formatDataToCsvExternalStorage(dataListSensores, 3); //Sensor.TYPE_ALL
+
+                    numFileCreated++;
+
+                    Message msg = new Message();
+                    msg.obj = numFileCreated;
+                    modificadorFinalizador.sendMessage(msg);
+
+                   /* Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+                    v.vibrate(3000);
+                  */
+                    notificationAviso();
                 }
             }
         };
@@ -215,13 +231,17 @@ public class RecogerDatos extends AppCompatActivity {
         /*
          * Pasado 1s comienza a ejecutarse la tarea "timerTask" cada 100 ms
          */
-        this.timer.scheduleAtFixedRate(timerTask, 1000, this.frequency);
+        this.timer.scheduleAtFixedRate(timerTask, 1000, this.FREQUENCY_DEF);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        //unregisterListener();
+    public void createSimpleDialog(String texto) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Importante");
+        builder.setMessage(texto);
+        builder.setPositiveButton("OK",null);
+        builder.create();
+        builder.show();
     }
 
     private void desactivarSensores() {
@@ -345,11 +365,5 @@ public class RecogerDatos extends AppCompatActivity {
                 //showMessageToast("hola");
             }
         });
-    }
-
-    private void limpiarFormulario(){
-        timePerFileText.setText("");
-        numberFilesText.setText("");
-        buttonRecord.setEnabled(true);
     }
 }

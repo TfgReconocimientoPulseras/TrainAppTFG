@@ -1,8 +1,10 @@
 package com.example.ivana.trainapptfg.fragments;
 
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.widget.Button;
 
 import com.example.ivana.trainapptfg.DataTAD;
 import com.example.ivana.trainapptfg.R;
+import com.example.ivana.trainapptfg.RecogerDatosBienvenida;
 import com.example.ivana.trainapptfg.miSensorEventListener;
 
 import java.util.ArrayList;
@@ -96,6 +99,7 @@ public class ReconocerActividadFragment extends Fragment {
     private int timeAcumulated;
 
     private Button button;
+    private FloatingActionButton anadirActividad;
 
     public ReconocerActividadFragment() {
         // Required empty public constructor
@@ -170,6 +174,16 @@ public class ReconocerActividadFragment extends Fragment {
                 button.setEnabled(false);
                 activarSensores();
                 timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
+            }
+        });
+
+
+        this.anadirActividad = (FloatingActionButton) view.findViewById(R.id.anadirAct);
+        this.anadirActividad.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent recogida = new Intent(getActivity(), RecogerDatosBienvenida.class);
+                startActivity(recogida);
             }
         });
 

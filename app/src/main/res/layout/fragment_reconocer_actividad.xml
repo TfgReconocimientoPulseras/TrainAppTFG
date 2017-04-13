@@ -18,7 +18,7 @@
         android:text="Run" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/anadirAct"
         android:layout_width="61dp"
         android:layout_height="62dp"
         android:layout_gravity="bottom|end"
