@@ -16,8 +16,12 @@ import com.example.ivana.trainapptfg.R;
 import com.example.ivana.trainapptfg.RecogerDatosBienvenida;
 import com.example.ivana.trainapptfg.miSensorEventListener;
 
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -81,6 +85,12 @@ public class ReconocerActividadFragment extends Fragment {
         add("std-gg");
     }};
 
+    private Collection featuresCorrNames = new ArrayList<String>(){{
+        add("xy");
+        add("xz");
+        add("yz");
+    }};
+
     //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
     private SensorManager mSensorManager;
     private miSensorEventListener miSensorEventListenerAcelerometro;
@@ -137,7 +147,7 @@ public class ReconocerActividadFragment extends Fragment {
                 //lo añadimos al dataframe
                 df.append(dataUnificada.getDataTADasArrayList());
 
-                if (timeAcumulated >= (15 * 1000)) { // tras 5 segundos de momento para pruebas
+                if (timeAcumulated >= (2 * 1000)) { // tras 5 segundos de momento para pruebas
                     desactivarSensores();
                     timer.cancel();
 
@@ -245,6 +255,8 @@ public class ReconocerActividadFragment extends Fragment {
         DataFrame dataFrameMean = new DataFrame(this.featuresMeanNames);
         DataFrame dataFrameMedian = new DataFrame(this.featuresMedianNames);
         DataFrame dataFrameStd = new DataFrame(this.featuresStdNames);
+        DataFrame dataFrameCorr = new DataFrame(this.featuresCorrNames);
+
         long timeStart = 0;
         int startSlice = 0;
 
@@ -260,6 +272,7 @@ public class ReconocerActividadFragment extends Fragment {
                 dataFrameMean.append(df.slice(startSlice,  row, 1, df.size()).mean().row(0));
                 dataFrameMedian.append(df.slice(startSlice,  row, 1, df.size()).median().row(0));
                 dataFrameStd.append(df.slice(startSlice,  row, 1, df.size()).stddev().row(0));
+                dataFrameCorr.append(giveMeCorrelation(df.slice(startSlice,  row, 1, df.size())));
 
                 //volver atrás para realizar el solapamiento
                 while ((long) df.get(row, 0) >= timeStart + timeOverlap)
@@ -279,11 +292,47 @@ public class ReconocerActividadFragment extends Fragment {
             dataFrameMean.append(df.slice(startSlice,  df.length(), 1, df.size()).mean().row(0));
             dataFrameMedian.append(df.slice(startSlice,  df.length(), 1, df.size()).median().row(0));
             dataFrameStd.append(df.slice(startSlice,  df.length(), 1, df.size()).stddev().row(0));
-
+            dataFrameCorr.append(giveMeCorrelation(df.slice(startSlice,  df.length(), 1, df.size())));
         }
 
         //join de los dataframes
-        return  dataFrameMin.join(dataFrameMax).join(dataFrameMean).join(dataFrameMedian).join(dataFrameStd);
+        return  dataFrameMin.join(dataFrameMax).join(dataFrameMean).join(dataFrameMedian).join(dataFrameStd).join(dataFrameCorr);
     }
+
+
+
+
+    /**
+     * Por ahora esta funcion devuelve en una lista de valores, la correlación entre las variables accel-x accel - y | accel - x accel - z | accel - y accel - z
+     * Es importante que en el dataframe este ordenado, ya que el acceso se realiza de manera manual
+     * 1ºAccels (x, y, z)
+     * 2ºGyros (a , b , g)
+     *
+     * @param df
+     * @return
+     */
+    //TODO COMO SOLO CALCULAMOS CORRELACION DE LOS ACELERÓMETROS PASAR SOLO EL DATAFRAME CON LOS ACELEROMETROS
+    private List giveMeCorrelation(DataFrame df){
+        List retList = new ArrayList();
+
+        double[][] miMatrix = (double[][]) df.toArray(double[][].class);
+        RealMatrix rm = new PearsonsCorrelation(miMatrix).getCorrelationMatrix();
+        double [][] matrixDebug = rm.getData();
+
+        retList.add(matrixDebug[3][4]);
+        retList.add(matrixDebug[3][5]);
+        retList.add(matrixDebug[4][5]);
+
+        return retList;
+    }
+
+    //TODO COMPLETAR ESTE METODO
+    private List giveMeFFT(DataFrame df){
+        //http://commons.apache.org/proper/commons-math/javadocs/api-3.6/org/apache/commons/math3/transform/FastFourierTransformer.html
+        //http://commons.apache.org/proper/commons-math/javadocs/api-3.6/org/apache/commons/math3/transform/DftNormalization.html
+        return null;
+    }
+
+
 
 }
