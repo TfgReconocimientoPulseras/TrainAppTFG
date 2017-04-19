@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,18 +15,35 @@ import android.widget.Button;
 import com.example.ivana.trainapptfg.DataTAD;
 import com.example.ivana.trainapptfg.R;
 import com.example.ivana.trainapptfg.RecogerDatosBienvenida;
+import com.example.ivana.trainapptfg.Utils;
 import com.example.ivana.trainapptfg.miSensorEventListener;
 
+import org.apache.commons.math3.complex.Complex;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+import org.apache.commons.math3.transform.DftNormalization;
+import org.apache.commons.math3.transform.FastFourierTransformer;
+import org.apache.commons.math3.transform.TransformType;
+import org.apache.commons.math3.util.MathUtils;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.jar.JarOutputStream;
 
 import joinery.DataFrame;
+
+import static android.R.id.list;
 
 public class ReconocerActividadFragment extends Fragment {
     private DataFrame df;
@@ -91,6 +109,12 @@ public class ReconocerActividadFragment extends Fragment {
         add("yz");
     }};
 
+    private Collection featuresFftNames = new ArrayList<String>(){{
+        add("x_fft");
+        add("y_fft");
+        add("z_fft");
+    }};
+
     //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
     private SensorManager mSensorManager;
     private miSensorEventListener miSensorEventListenerAcelerometro;
@@ -147,7 +171,7 @@ public class ReconocerActividadFragment extends Fragment {
                 //lo añadimos al dataframe
                 df.append(dataUnificada.getDataTADasArrayList());
 
-                if (timeAcumulated >= (2 * 1000)) { // tras 5 segundos de momento para pruebas
+                if (timeAcumulated >= (30 * 1000)) { // tras 30 segundos para pruebas
                     desactivarSensores();
                     timer.cancel();
 
@@ -159,9 +183,12 @@ public class ReconocerActividadFragment extends Fragment {
 
                     //long startTime = System.currentTimeMillis();
                     DataFrame featuresSegmentado = segmentameDatosConSolapamiento(df, 2);
+
                     //long stopTime = System.currentTimeMillis();
                     //long elapsedTime = stopTime - startTime;
                     //System.out.println(elapsedTime);
+                    formatDataToCsvExternalStorage("sensorDataset", df);
+                    formatDataToCsvExternalStorage("feautresDataset", featuresSegmentado);
                     int kk = 0;
                     //Ejecutar clasificador con los datos de features
                     //TODO INVOCAR AL CÓDIGO DEL ÁRBOL
@@ -256,6 +283,7 @@ public class ReconocerActividadFragment extends Fragment {
         DataFrame dataFrameMedian = new DataFrame(this.featuresMedianNames);
         DataFrame dataFrameStd = new DataFrame(this.featuresStdNames);
         DataFrame dataFrameCorr = new DataFrame(this.featuresCorrNames);
+        DataFrame dataFrameFft = new DataFrame(this.featuresFftNames);
 
         long timeStart = 0;
         int startSlice = 0;
@@ -273,6 +301,7 @@ public class ReconocerActividadFragment extends Fragment {
                 dataFrameMedian.append(df.slice(startSlice,  row, 1, df.size()).median().row(0));
                 dataFrameStd.append(df.slice(startSlice,  row, 1, df.size()).stddev().row(0));
                 dataFrameCorr.append(giveMeCorrelation(df.slice(startSlice,  row, 1, df.size())));
+                dataFrameFft.append(giveMeFFT(df.slice(startSlice,  row, 1, df.size())));
 
                 //volver atrás para realizar el solapamiento
                 while ((long) df.get(row, 0) >= timeStart + timeOverlap)
@@ -293,10 +322,11 @@ public class ReconocerActividadFragment extends Fragment {
             dataFrameMedian.append(df.slice(startSlice,  df.length(), 1, df.size()).median().row(0));
             dataFrameStd.append(df.slice(startSlice,  df.length(), 1, df.size()).stddev().row(0));
             dataFrameCorr.append(giveMeCorrelation(df.slice(startSlice,  df.length(), 1, df.size())));
+            dataFrameFft.append(giveMeFFT(df.slice(startSlice,  df.length(), 1, df.size())));
         }
 
         //join de los dataframes
-        return  dataFrameMin.join(dataFrameMax).join(dataFrameMean).join(dataFrameMedian).join(dataFrameStd).join(dataFrameCorr);
+        return  dataFrameMin.join(dataFrameMax).join(dataFrameMean).join(dataFrameMedian).join(dataFrameStd).join(dataFrameCorr).join(dataFrameFft);
     }
 
 
@@ -326,13 +356,70 @@ public class ReconocerActividadFragment extends Fragment {
         return retList;
     }
 
-    //TODO COMPLETAR ESTE METODO
     private List giveMeFFT(DataFrame df){
+        List retList = new ArrayList();
         //http://commons.apache.org/proper/commons-math/javadocs/api-3.6/org/apache/commons/math3/transform/FastFourierTransformer.html
         //http://commons.apache.org/proper/commons-math/javadocs/api-3.6/org/apache/commons/math3/transform/DftNormalization.html
-        return null;
+        //http://jakevdp.github.io/blog/2013/08/28/understanding-the-fft/
+
+        double[][] miMatrix = (double[][]) df.toArray(double[][].class);
+        RealMatrix rm = new Array2DRowRealMatrix(miMatrix);
+
+        double[] x = rm.getColumn(0);
+        double[] y = rm.getColumn(1);
+        double[] z = rm.getColumn(2);
+        double logaritmo = Math.log(x.length)/Math.log(2);
+
+        if(!Utils.isInteger(logaritmo)){
+            x = Arrays.copyOf(x, (int) Math.pow(2, Math.ceil(logaritmo)));
+            y = Arrays.copyOf(y, (int) Math.pow(2, Math.ceil(logaritmo)));
+            z = Arrays.copyOf(z, (int) Math.pow(2, Math.ceil(logaritmo)));
+        }
+
+
+        FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
+
+        Complex[] X = fft.transform(x, TransformType.FORWARD);
+        Complex[] Y = fft.transform(y, TransformType.FORWARD);
+        Complex[] Z = fft.transform(z, TransformType.FORWARD);
+
+        double sumX = 0;
+        double sumY = 0;
+        double sumZ = 0;
+
+        //TODO PENDIENTE DE COMPROBACIÓN (MARLON)
+        for (int i = 0; i < X.length; i++) {
+            sumX += Math.pow(X[i].abs(), 2);
+            sumY += Math.pow(Y[i].abs(), 2);
+            sumZ += Math.pow(Z[i].abs(), 2);
+        }
+
+        //TODO PENDIENTE DE COMPROBACIÓN (MARLON)
+        retList.add(sumX/df.length());
+        retList.add(sumY/df.length());
+        retList.add(sumZ/df.length());
+
+
+
+        return retList;
     }
 
+    private void formatDataToCsvExternalStorage(String fName, DataFrame df) {
+        String fileName = new Date().getTime() + fName + ".csv";
+        File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles");
+        directory.mkdirs();
+        File file = new File(directory, fileName);
+
+        try {
+            OutputStream oS = new FileOutputStream(file);
+            df.writeCsv(oS);
+            oS.flush();
+            oS.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 }

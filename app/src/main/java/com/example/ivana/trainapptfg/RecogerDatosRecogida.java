@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+//TODO SE PUEDE MODIFICAR LAS LISTAS A DATAFRAMES (JOINERY)
 public class RecogerDatosRecogida extends Activity {
 
     //ELEMENTOS GRÁFICOS/////////////////////////////////////////////////////////////////////////////////////////////
