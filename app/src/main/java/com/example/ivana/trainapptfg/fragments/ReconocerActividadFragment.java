@@ -298,10 +298,10 @@ public class ReconocerActividadFragment extends Fragment {
                 dataFrameMin.append(df.slice(startSlice,  row, 1, df.size()).min().row(0));
                 dataFrameMax.append(df.slice(startSlice,  row, 1, df.size()).max().row(0));
                 dataFrameMean.append(df.slice(startSlice,  row, 1, df.size()).mean().row(0));
-                dataFrameMedian.append(df.slice(startSlice,  row, 1, df.size()).median().row(0));
-                dataFrameStd.append(df.slice(startSlice,  row, 1, df.size()).stddev().row(0));
-                dataFrameCorr.append(giveMeCorrelation(df.slice(startSlice,  row, 1, df.size())));
-                dataFrameFft.append(giveMeFFT(df.slice(startSlice,  row, 1, df.size())));
+                //dataFrameMedian.append(df.slice(startSlice,  row, 1, df.size()).median().row(0));
+                //dataFrameStd.append(df.slice(startSlice,  row, 1, df.size()).stddev().row(0));
+                //dataFrameCorr.append(giveMeCorrelation(df.slice(startSlice,  row, 1, df.size())));
+                //dataFrameFft.append(giveMeFFT(df.slice(startSlice,  row, 1, df.size())));
 
                 //volver atrás para realizar el solapamiento
                 while ((long) df.get(row, 0) >= timeStart + timeOverlap)
@@ -319,14 +319,15 @@ public class ReconocerActividadFragment extends Fragment {
             dataFrameMin.append(df.slice(startSlice,  df.length(), 1, df.size()).min().row(0));
             dataFrameMax.append(df.slice(startSlice,  df.length(), 1, df.size()).max().row(0));
             dataFrameMean.append(df.slice(startSlice,  df.length(), 1, df.size()).mean().row(0));
-            dataFrameMedian.append(df.slice(startSlice,  df.length(), 1, df.size()).median().row(0));
-            dataFrameStd.append(df.slice(startSlice,  df.length(), 1, df.size()).stddev().row(0));
-            dataFrameCorr.append(giveMeCorrelation(df.slice(startSlice,  df.length(), 1, df.size())));
-            dataFrameFft.append(giveMeFFT(df.slice(startSlice,  df.length(), 1, df.size())));
+            //dataFrameMedian.append(df.slice(startSlice,  df.length(), 1, df.size()).median().row(0));
+            //dataFrameStd.append(df.slice(startSlice,  df.length(), 1, df.size()).stddev().row(0));
+            //dataFrameCorr.append(giveMeCorrelation(df.slice(startSlice,  df.length(), 1, df.size())));
+            //dataFrameFft.append(giveMeFFT(df.slice(startSlice,  df.length(), 1, df.size())));
         }
 
         //join de los dataframes
-        return  dataFrameMin.join(dataFrameMax).join(dataFrameMean).join(dataFrameMedian).join(dataFrameStd).join(dataFrameCorr).join(dataFrameFft);
+        return dataFrameMin.join(dataFrameMax).join(dataFrameMean);
+        //return  dataFrameMin.join(dataFrameMax).join(dataFrameMean).join(dataFrameMedian).join(dataFrameStd).join(dataFrameCorr).join(dataFrameFft);
     }
 
 
@@ -419,6 +420,60 @@ public class ReconocerActividadFragment extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private int clasificarActividad(DataFrame df){
+
+        double min_gyro_alpha, min_gyro_beta, min_gyro_gamma, min_ax, min_ay, min_az;
+        double max_gyro_alpha, max_gyro_beta, max_gyro_gamma, max_ax, max_ay, max_az;
+        double avg_gyro_alpha, avg_gyro_beta, avg_gyro_gamma, avg_ax, avg_ay, avg_az;
+
+
+        //EN CONSTRUCCION
+        for(int i = 0; i < 4; i++){
+
+            //TODO mirar si hay algun metodo que a partir del nombre de la columna me devuelva el valor
+            min_ax = (double)df.get(i, 0); min_ay = (double)df.get(i, 1);  min_az = (double)df.get(i, 2);
+            min_gyro_alpha = (double)df.get(i, 3); min_gyro_beta = (double)df.get(i, 4);  min_gyro_gamma = (double)df.get(i, 5);
+
+            max_ax = (double)df.get(i, 6); max_ay = (double)df.get(i, 7);  max_az = (double)df.get(i, 8);
+            max_gyro_alpha = (double)df.get(i, 9); max_gyro_beta = (double)df.get(i, 10);  max_gyro_gamma = (double)df.get(i, 11);
+
+            avg_ax = (double)df.get(i, 12); avg_ay = (double)df.get(i, 13);  avg_az = (double)df.get(i, 14);
+            avg_gyro_alpha = (double)df.get(i, 15); avg_gyro_beta = (double)df.get(i, 16);  avg_gyro_gamma = (double)df.get(i, 17);
+
+
+
+
+            if(max_gyro_beta <= -225.09375)
+                return 1;
+            else //if(max_gyro-beta > -225.09375)
+                if(avg_gyro_gamma <= -83.54296875)
+                    return 1;
+                else //if(avg_gyro-gamma > -83.54296875)
+                    if(min_gyro_alpha <= -142.0546875)
+                        if(avg_gyro_alpha <= -192.259765625)
+                            return 1;
+                        else //if(avg_gyro-alpha > -192.259765625)
+                            if(max_ay <= -0.0712890625)
+                                return 1;
+                            else //if(max_ay > -0.0712890625)
+                                return 1;
+                    else //if(min_gyro-alpha > -142.0546875)
+                        if(avg_ax <= -0.53955078125)
+                            return 1;
+                        else //if(avg_ax > -0.53955078125)
+                            if(avg_az <= -1.07824707031)
+                                return 1;
+                            else //if(avg_az > -1.07824707031)
+                                if(avg_gyro_alpha <= -23.97265625)
+                                    return 1;
+                                else //if(avg_gyro-alpha > -23.97265625)
+                                    return 1;
+        }
+
+        return 0;
+
     }
 
 
