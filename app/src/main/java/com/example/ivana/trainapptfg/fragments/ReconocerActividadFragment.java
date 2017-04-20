@@ -50,63 +50,63 @@ public class ReconocerActividadFragment extends Fragment {
 
     private Collection colsNames = new ArrayList<String>(){{
         add("timestamp");
-        add("ax");
-        add("ay");
-        add("az");
-        add("ga");
-        add("gb");
-        add("gg");
+        add("gyro-alpha");
+        add("gyro-beta");
+        add("gyro-gamma");
+        add("accel-x");
+        add("accel-y");
+        add("accel-z");
     }};
 
     private Collection featuresMinNames = new ArrayList<String>(){{
-        add("min-ax");
-        add("min-ay");
-        add("min-az");
-        add("min-ga");
-        add("min-gb");
-        add("min-gg");
+        add("gyro_alpha_min");
+        add("gyro_beta_min");
+        add("gyro_gamma_min");
+        add("accel_x_min");
+        add("accel_y_min");
+        add("accel_z_min");
     }};
 
     private Collection featuresMaxNames = new ArrayList<String>(){{
-        add("max-ax");
-        add("max-ay");
-        add("max-az");
-        add("max-ga");
-        add("max-gb");
-        add("max-gg");
+        add("gyro_alpha_max");
+        add("gyro_beta_max");
+        add("gyro_gamma_max");
+        add("accel_x_max");
+        add("accel_y_max");
+        add("accel_z_max");
     }};
 
     private Collection featuresMeanNames = new ArrayList<String>(){{
-        add("mean-ax");
-        add("mean-ay");
-        add("mean-az");
-        add("mean-ga");
-        add("mean-gb");
-        add("mean-gg");
+        add("gyro_alpha_avg");
+        add("gyro_beta_avg");
+        add("gyro_gamma_avg");
+        add("accel_x_avg");
+        add("accel_y_avg");
+        add("accel_z_avg");
     }};
 
     private Collection featuresMedianNames = new ArrayList<String>(){{
-        add("median-ax");
-        add("median-ay");
-        add("median-az");
-        add("median-ga");
-        add("median-gb");
-        add("median-gg");
+        add("accel_x_med");
+        add("accel_y_med");
+        add("accel_z_med");
+        add("gyro_alpha_med");
+        add("gyro_beta_med");
+        add("gyro_gamma_med");
     }};
 
     private Collection featuresStdNames = new ArrayList<String>(){{
-        add("std-ax");
-        add("std-ay");
-        add("std-az");
-        add("std-ga");
-        add("std-gb");
-        add("std-gg");
+        add("gyro_alpha_std");
+        add("gyro_beta_std");
+        add("gyro_gamma_std");
+        add("accel_x_std");
+        add("accel_y_std");
+        add("accel_z_std");
     }};
 
     private Collection featuresCorrNames = new ArrayList<String>(){{
-        add("xy");
-        add("xz");
-        add("yz");
+        add("xy_cor");
+        add("xz_cor");
+        add("yz_cor");
     }};
 
     private Collection featuresFftNames = new ArrayList<String>(){{
@@ -165,7 +165,7 @@ public class ReconocerActividadFragment extends Fragment {
                 DataTAD dataGyro = miSensorEventListenerGiroscopio.obtenerDatosSensor();
 
                 //unificamos los valores del acelerómetro y del giroscopio...
-                float[] floatUnificada = DataTAD.concatenateValues(dataAccel.getValues(), dataGyro.getValues());
+                float[] floatUnificada = DataTAD.concatenateValues(dataGyro.getValues(), dataAccel.getValues());
                 DataTAD dataUnificada = new DataTAD(System.currentTimeMillis(), floatUnificada);
 
                 //lo añadimos al dataframe
@@ -187,9 +187,9 @@ public class ReconocerActividadFragment extends Fragment {
                     //long stopTime = System.currentTimeMillis();
                     //long elapsedTime = stopTime - startTime;
                     //System.out.println(elapsedTime);
-                    formatDataToCsvExternalStorage("sensorDataset", df);
-                    formatDataToCsvExternalStorage("feautresDataset", featuresSegmentado);
-                    int kk = 0;
+                    formatDataToCsvExternalStorage("DataSetSensores", df);
+                    formatDataToCsvExternalStorage("DataSetFeatures", featuresSegmentado);
+
                     //Ejecutar clasificador con los datos de features
                     //TODO INVOCAR AL CÓDIGO DEL ÁRBOL
 
@@ -298,10 +298,10 @@ public class ReconocerActividadFragment extends Fragment {
                 dataFrameMin.append(df.slice(startSlice,  row, 1, df.size()).min().row(0));
                 dataFrameMax.append(df.slice(startSlice,  row, 1, df.size()).max().row(0));
                 dataFrameMean.append(df.slice(startSlice,  row, 1, df.size()).mean().row(0));
-                //dataFrameMedian.append(df.slice(startSlice,  row, 1, df.size()).median().row(0));
-                //dataFrameStd.append(df.slice(startSlice,  row, 1, df.size()).stddev().row(0));
-                //dataFrameCorr.append(giveMeCorrelation(df.slice(startSlice,  row, 1, df.size())));
-                //dataFrameFft.append(giveMeFFT(df.slice(startSlice,  row, 1, df.size())));
+                dataFrameMedian.append(df.slice(startSlice,  row, 1, df.size()).median().row(0));
+                dataFrameStd.append(df.slice(startSlice,  row, 1, df.size()).stddev().row(0));
+                dataFrameCorr.append(giveMeCorrelation(df.slice(startSlice,  row, 1, df.size())));
+                dataFrameFft.append(giveMeFFT(df.slice(startSlice,  row, 1, df.size())));
 
                 //volver atrás para realizar el solapamiento
                 while ((long) df.get(row, 0) >= timeStart + timeOverlap)
@@ -319,15 +319,14 @@ public class ReconocerActividadFragment extends Fragment {
             dataFrameMin.append(df.slice(startSlice,  df.length(), 1, df.size()).min().row(0));
             dataFrameMax.append(df.slice(startSlice,  df.length(), 1, df.size()).max().row(0));
             dataFrameMean.append(df.slice(startSlice,  df.length(), 1, df.size()).mean().row(0));
-            //dataFrameMedian.append(df.slice(startSlice,  df.length(), 1, df.size()).median().row(0));
-            //dataFrameStd.append(df.slice(startSlice,  df.length(), 1, df.size()).stddev().row(0));
-            //dataFrameCorr.append(giveMeCorrelation(df.slice(startSlice,  df.length(), 1, df.size())));
-            //dataFrameFft.append(giveMeFFT(df.slice(startSlice,  df.length(), 1, df.size())));
+            dataFrameMedian.append(df.slice(startSlice,  df.length(), 1, df.size()).median().row(0));
+            dataFrameStd.append(df.slice(startSlice,  df.length(), 1, df.size()).stddev().row(0));
+            dataFrameCorr.append(giveMeCorrelation(df.slice(startSlice,  df.length(), 1, df.size())));
+            dataFrameFft.append(giveMeFFT(df.slice(startSlice,  df.length(), 1, df.size())));
         }
 
         //join de los dataframes
-        return dataFrameMin.join(dataFrameMax).join(dataFrameMean);
-        //return  dataFrameMin.join(dataFrameMax).join(dataFrameMean).join(dataFrameMedian).join(dataFrameStd).join(dataFrameCorr).join(dataFrameFft);
+        return dataFrameMean.join(dataFrameMin).join(dataFrameMax).join(dataFrameStd).join(dataFrameCorr).join(dataFrameFft).join(dataFrameMedian);
     }
 
 
@@ -342,7 +341,6 @@ public class ReconocerActividadFragment extends Fragment {
      * @param df
      * @return
      */
-    //TODO COMO SOLO CALCULAMOS CORRELACION DE LOS ACELERÓMETROS PASAR SOLO EL DATAFRAME CON LOS ACELEROMETROS
     private List giveMeCorrelation(DataFrame df){
         List retList = new ArrayList();
 
@@ -406,7 +404,7 @@ public class ReconocerActividadFragment extends Fragment {
     }
 
     private void formatDataToCsvExternalStorage(String fName, DataFrame df) {
-        String fileName = new Date().getTime() + fName + ".csv";
+        String fileName = new Date().getTime() + "_" + fName + ".csv";
         File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles");
         directory.mkdirs();
         File file = new File(directory, fileName);
