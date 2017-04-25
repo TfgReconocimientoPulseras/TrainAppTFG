@@ -32,11 +32,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -123,8 +125,6 @@ public class ReconocerActividadFragment extends Fragment {
     private static final int DELAY_TIMER_TASK = 1000;
     private static final int WINDOW_SZ = 1000; //In miliseconds --> 1000 = 1s
 
-
-
     private Timer timer;
     private TimerTask timerTask;
     private int timeAcumulated;
@@ -168,7 +168,7 @@ public class ReconocerActividadFragment extends Fragment {
                 //lo añadimos al dataframe
                 df.append(dataUnificada.getDataTADasArrayList());
 
-                if (timeAcumulated >= (15 * 1000)) { // tras 30 segundos para pruebas
+                if (timeAcumulated >= (10 * 1000)) { // tras 30 segundos para pruebas
                     desactivarSensores();
                     timer.cancel();
 
@@ -184,11 +184,15 @@ public class ReconocerActividadFragment extends Fragment {
                     //long stopTime = System.currentTimeMillis();
                     //long elapsedTime = stopTime - startTime;
                     //System.out.println(elapsedTime);
-                    formatDataToCsvExternalStorage("DataSetSensores", df);
-                    formatDataToCsvExternalStorage("DataSetFeatures", featuresSegmentado);
+
+                    //DESCOMENTAR PARA GUARDAR DATOS DE DF Y FEATURES EN FICHERO -> PARA DEPURACIÓN DE DATOS
+                    //formatDataToCsvExternalStorage("DataSetSensores", df);
+                    //formatDataToCsvExternalStorage("DataSetFeatures", featuresSegmentado);
 
                     //Ejecutar clasificador con los datos de features
-                    //TODO INVOCAR AL CÓDIGO DEL ÁRBOL
+                    clasificarActividad(featuresSegmentado);
+                    //BORRAR DF
+                    //
 
 
                 }
@@ -450,56 +454,151 @@ public class ReconocerActividadFragment extends Fragment {
     }
 
     private int clasificarActividad(DataFrame df){
+        Integer ix = 2;
 
-        double min_gyro_alpha, min_gyro_beta, min_gyro_gamma, min_ax, min_ay, min_az;
-        double max_gyro_alpha, max_gyro_beta, max_gyro_gamma, max_ax, max_ay, max_az;
-        double avg_gyro_alpha, avg_gyro_beta, avg_gyro_gamma, avg_ax, avg_ay, avg_az;
+
+        List<Integer> list = new ArrayList<>();
+        ListIterator li = df.iterrows();
+        double d = (double) df.get(0, "gyro_alpha_min");
 
 
         //EN CONSTRUCCION
-        for(int i = 0; i < 4; i++){
-
-            //TODO mirar si hay algun metodo que a partir del nombre de la columna me devuelva el valor
-            min_ax = (double)df.get(i, 0); min_ay = (double)df.get(i, 1);  min_az = (double)df.get(i, 2);
-            min_gyro_alpha = (double)df.get(i, 3); min_gyro_beta = (double)df.get(i, 4);  min_gyro_gamma = (double)df.get(i, 5);
-
-            max_ax = (double)df.get(i, 6); max_ay = (double)df.get(i, 7);  max_az = (double)df.get(i, 8);
-            max_gyro_alpha = (double)df.get(i, 9); max_gyro_beta = (double)df.get(i, 10);  max_gyro_gamma = (double)df.get(i, 11);
-
-            avg_ax = (double)df.get(i, 12); avg_ay = (double)df.get(i, 13);  avg_az = (double)df.get(i, 14);
-            avg_gyro_alpha = (double)df.get(i, 15); avg_gyro_beta = (double)df.get(i, 16);  avg_gyro_gamma = (double)df.get(i, 17);
-
-
-
-
-            if(max_gyro_beta <= -225.09375)
-                return 1;
-            else //if(max_gyro-beta > -225.09375)
-                if(avg_gyro_gamma <= -83.54296875)
-                    return 1;
-                else //if(avg_gyro-gamma > -83.54296875)
-                    if(min_gyro_alpha <= -142.0546875)
-                        if(avg_gyro_alpha <= -192.259765625)
-                            return 1;
-                        else //if(avg_gyro-alpha > -192.259765625)
-                            if(max_ay <= -0.0712890625)
-                                return 1;
-                            else //if(max_ay > -0.0712890625)
-                                return 1;
-                    else //if(min_gyro-alpha > -142.0546875)
-                        if(avg_ax <= -0.53955078125)
-                            return 1;
-                        else //if(avg_ax > -0.53955078125)
-                            if(avg_az <= -1.07824707031)
-                                return 1;
-                            else //if(avg_az > -1.07824707031)
-                                if(avg_gyro_alpha <= -23.97265625)
-                                    return 1;
-                                else //if(avg_gyro-alpha > -23.97265625)
-                                    return 1;
+        for (int i = 0; i < df.length();i++){
+            list.add(getPredictClass(i, df));
         }
 
         return 0;
+
+    }
+
+    private int getPredictClass(int i,DataFrame df){
+        if((double)df.get(i, "accel_z_max") <= 0.270629882812)
+            if((double)df.get(i, "accel_z_max") <= -0.0557861328125)
+                if((double)df.get(i, "gyro_alpha_min") <= -10.234375)
+                    if((double)df.get(i, "yz_cor") <= -0.265517234802)
+                        if((double)df.get(i, "yz_cor") <= -0.722222208977)
+                            if((double)df.get(i, "accel_x_med") <= 0.861938476562)
+                                return 5;
+                            else //if(accel_x_med > 0.861938476562)
+                                return 1;
+                        else //if(yz_cor > -0.722222208977)
+                            return 1;
+                    else //if(yz_cor > -0.265517234802)
+                        if((double)df.get(i, "xz_cor") <= 0.00561797758564)
+                            if((double)df.get(i, "xy_cor") <= -0.352941185236)
+                                return 5;
+                            else //if(xy_cor > -0.352941185236)
+                                return 4;
+                        else //if(xz_cor > 0.00561797758564)
+                            if((double)df.get(i, "xz_cor") <= 0.122235879302)
+                                return 5;
+                            else //if(xz_cor > 0.122235879302)
+                                return 4;
+                else //if(gyro_alpha_min > -10.234375)
+                    if((double)df.get(i, "gyro_alpha_avg") <= 7.396484375)
+                        if((double)df.get(i, "gyro_gamma_max") <= 20.04296875)
+                            if((double)df.get(i, "gyro_gamma_avg") <= -7.64794921875)
+                                return 4;
+                            else //if(gyro_gamma_avg > -7.64794921875)
+                                return 3;
+                        else //if(gyro_gamma_max > 20.04296875)
+                            if((double)df.get(i, "yz_cor") <= -0.0770308151841)
+                                return 1;
+                            else //if(yz_cor > -0.0770308151841)
+                                return 4;
+                    else //if(gyro_alpha_avg > 7.396484375)
+                        if((double)df.get(i, "yz_cor") <= -0.265517234802)
+                            if((double)df.get(i, "yz_cor") <= -0.722222208977)
+                                return 1;
+                            else //if(yz_cor > -0.722222208977)
+                                return 1;
+                        else //if(yz_cor > -0.265517234802)
+                            if((double)df.get(i, "accel_y_avg") <= 0.00970458984375)
+                                return 3;
+                            else //if(accel_y_avg > 0.00970458984375)
+                                return 4;
+            else //if(accel_z_max > -0.0557861328125)
+                if((double)df.get(i, "accel_y_min") <= -0.216796875)
+                    if((double)df.get(i, "accel_y_max") <= -0.186157226562)
+                        if((double)df.get(i, "x_fft") <= 0.584477305412)
+                            if((double)df.get(i, "gyro_beta_std") <= 17.2740154266)
+                                return 1;
+                            else //if(gyro_beta_std > 17.2740154266)
+                                return 2;
+                        else //if(x_fft > 0.584477305412)
+                            return 1;
+                    else //if(accel_y_max > -0.186157226562)
+                        if((double)df.get(i, "yz_cor") <= -0.200900912285)
+                            if((double)df.get(i, "accel_x_min") <= 0.76513671875)
+                                return 1;
+                            else //if(accel_x_min > 0.76513671875)
+                                return 1;
+                        else //if(yz_cor > -0.200900912285)
+                            if((double)df.get(i, "accel_x_min") <= 0.76513671875)
+                                return 5;
+                            else //if(accel_x_min > 0.76513671875)
+                                return 1;
+                else //if(accel_y_min > -0.216796875)
+                    if((double)df.get(i, "yz_cor") <= -0.265517234802)
+                        if((double)df.get(i, "yz_cor") <= -0.722222208977)
+                            if((double)df.get(i, "x_fft") <= 2.30511021614)
+                                return 5;
+                            else //if(x_fft > 2.30511021614)
+                                return 4;
+                        else //if(yz_cor > -0.722222208977)
+                            return 1;
+                    else //if(yz_cor > -0.265517234802)
+                        if((double)df.get(i, "xz_cor") <= -0.0926301553845)
+                            if((double)df.get(i, "xz_cor") <= -0.588235318661)
+                                return 4;
+                            else //if(xz_cor > -0.588235318661)
+                                return 4;
+                        else //if(xz_cor > -0.0926301553845)
+                            if((double)df.get(i, "yz_cor") <= 0.063502676785)
+                                return 5;
+                            else //if(yz_cor > 0.063502676785)
+                                return 4;
+        else //if(accel_z_max > 0.270629882812)
+            if((double)df.get(i, "accel_x_max") <= 1.220703125)
+                if((double)df.get(i, "accel_z_min") <= 0.146728515625)
+                    if((double)df.get(i, "y_fft") <= 0.333095878363)
+                        if((double)df.get(i, "accel_y_std") <= 0.0845201537013)
+                            return 5;
+                        else //if(accel_y_std > 0.0845201537013)
+                            return 2;
+                    else //if(y_fft > 0.333095878363)
+                        if((double)df.get(i, "gyro_beta_max") <= 158.6484375)
+                            if((double)df.get(i, "gyro_beta_std") <= 0.832784533501)
+                                return 1;
+                            else //if(gyro_beta_std > 0.832784533501)
+                                return 2;
+                        else //if(gyro_beta_max > 158.6484375)
+                            if((double)df.get(i, "accel_z_max") <= 0.718383789062)
+                                return 1;
+                            else //if(accel_z_max > 0.718383789062)
+                                return 2;
+                else //if(accel_z_min > 0.146728515625)
+                    if((double)df.get(i, "gyro_alpha_std") <= 3.76972877802e-07)
+                        if((double)df.get(i, "xz_cor") <= 0.142105266452)
+                            return 1;
+                        else //if(xz_cor > 0.142105266452)
+                            return 2;
+                    else //if(gyro_alpha_std > 3.76972877802e-07)
+                        return 2;
+            else //if(accel_x_max > 1.220703125)
+                if((double)df.get(i, "accel_y_min") <= -0.153930664062)
+                    return 1;
+                else //if(accel_y_min > -0.153930664062)
+                    if((double)df.get(i, "accel_z_avg") <= 0.469650268555)
+                        if((double)df.get(i, "accel_x_max") <= 1.55456542969)
+                            if((double)df.get(i, "gyro_gamma_max") <= 20.52734375)
+                                return 5;
+                            else //if(gyro_gamma_max > 20.52734375)
+                                return 4;
+                        else //if(accel_x_max > 1.55456542969)
+                            return 5;
+                    else //if(accel_z_avg > 0.469650268555)
+                        return 2;
 
     }
 
