@@ -16,7 +16,6 @@ import android.widget.Button;
 import com.example.ivana.trainapptfg.DataTAD;
 import com.example.ivana.trainapptfg.R;
 import com.example.ivana.trainapptfg.RecogerDatosBienvenida;
-import com.example.ivana.trainapptfg.Utils;
 import com.example.ivana.trainapptfg.miSensorEventListener;
 
 import org.apache.commons.math3.complex.Complex;
@@ -26,33 +25,22 @@ import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
-import org.apache.commons.math3.transform.TransformUtils;
 import org.apache.commons.math3.util.ArithmeticUtils;
-import org.apache.commons.math3.util.DoubleArray;
-import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.MathUtils;
 import org.apache.commons.math3.util.Pair;
-import org.bytedeco.javacpp.fftw3;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.jar.JarOutputStream;
 
 import joinery.DataFrame;
-
-import static android.R.id.list;
 
 public class ReconocerActividadFragment extends Fragment {
     private DataFrame df;
@@ -95,12 +83,12 @@ public class ReconocerActividadFragment extends Fragment {
     }};
 
     private Collection featuresMedianNames = new ArrayList<String>(){{
-        add("accel_x_med");
-        add("accel_y_med");
-        add("accel_z_med");
         add("gyro_alpha_med");
         add("gyro_beta_med");
         add("gyro_gamma_med");
+        add("accel_x_med");
+        add("accel_y_med");
+        add("accel_z_med");
     }};
 
     private Collection featuresStdNames = new ArrayList<String>(){{
