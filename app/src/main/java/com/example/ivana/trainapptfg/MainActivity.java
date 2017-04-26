@@ -16,10 +16,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.ivana.trainapptfg.fragments.FourFragment;
+import com.example.ivana.trainapptfg.fragments.HistorialFragment;
 import com.example.ivana.trainapptfg.fragments.ReconocerActividadFragment;
-import com.example.ivana.trainapptfg.fragments.ThreeFragment;
-import com.example.ivana.trainapptfg.fragments.TwoFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,12 +55,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                tab.getIcon().setColorFilter(getResources().getColor(R.color.colorWhite), PorterDuff.Mode.SRC_IN);
+                tab.getIcon().setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.SRC_IN);
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                tab.getIcon().setColorFilter(getResources().getColor(R.color.colorBlack), PorterDuff.Mode.SRC_IN);
+                tab.getIcon().setColorFilter(getResources().getColor(R.color.colorWhite), PorterDuff.Mode.SRC_IN);
             }
 
             @Override
@@ -150,9 +148,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void initViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new ReconocerActividadFragment(), "ACTIVIDADES");
-        adapter.addFragment(new TwoFragment(), "CALENDARIO");
-        adapter.addFragment(new ThreeFragment(), "HISTORIAL");
-        adapter.addFragment(new FourFragment(), "TWITAPP");
+        adapter.addFragment(new HistorialFragment(), "HISTORIAL");
 
         viewPager.setAdapter(adapter);
     }
@@ -161,9 +157,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tabLayout.getTabAt(0).setIcon(icons[1]);
         tabLayout.getTabAt(0).getIcon().setColorFilter(getResources().getColor(R.color.colorWhite), PorterDuff.Mode.SRC_IN);
 
-        tabLayout.getTabAt(1).setIcon(icons[2]);
-        tabLayout.getTabAt(2).setIcon(icons[3]);
-        tabLayout.getTabAt(3).setIcon(icons[4]);
+        //tabLayout.getTabAt(1).setIcon(icons[2]);
+        tabLayout.getTabAt(1).setIcon(icons[3]);
+        //tabLayout.getTabAt(3).setIcon(icons[4]);
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {
