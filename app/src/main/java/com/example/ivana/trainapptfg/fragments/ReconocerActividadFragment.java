@@ -1,6 +1,5 @@
 package com.example.ivana.trainapptfg.fragments;
 
-import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -14,14 +13,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.ivana.trainapptfg.DataTAD;
 import com.example.ivana.trainapptfg.R;
-import com.example.ivana.trainapptfg.RecogerDatosBienvenida;
-import com.example.ivana.trainapptfg.RecogerDatosRecogida;
 import com.example.ivana.trainapptfg.miSensorEventListener;
 
 import org.apache.commons.math3.complex.Complex;
@@ -48,10 +43,10 @@ import java.util.TimerTask;
 
 import joinery.DataFrame;
 
+import static java.lang.Thread.sleep;
+
 public class ReconocerActividadFragment extends Fragment {
-    private DataFrame df;
-    private DataFrame featuresSegmentado1;
-    private DataFrame featuresSegmentado2;
+
 
     private Handler modificadorActividad = new Handler() {
         @Override
@@ -87,6 +82,12 @@ public class ReconocerActividadFragment extends Fragment {
         }
     };
 
+    //GESTIÓN DE DATAFRAMES//////////////////////////////////////////////////////////////////////////////////////////////////
+    private DataFrame df;
+    private DataFrame featuresSegmentado1;
+    private DataFrame featuresSegmentado2;
+
+    //NOMBRES PARA LOS DATAFRAMES////////////////////////////////////////////////////////////////////////////////////////////
     private Collection colsNames = new ArrayList<String>(){{
         add("timestamp");
         add("gyro-alpha");
@@ -154,13 +155,14 @@ public class ReconocerActividadFragment extends Fragment {
         add("z_fft");
     }};
 
-    //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
+    //GESTIÓN DE SENSORES///////////////////////////////////////////////////////////////////////////////////////////////////
     private SensorManager mSensorManager;
     private miSensorEventListener miSensorEventListenerAcelerometro;
     private miSensorEventListener miSensorEventListenerGiroscopio;
     private Sensor mAccelerometer;
     private Sensor mGyroscope;
 
+    //CONSTANTES/////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private static final int FREQUENCY_DEF = 100;
     private static final int DELAY_TIMER_TASK = 1000;
     private static final int WINDOW_SZ = 1000; //In miliseconds --> 1000 = 1s
@@ -176,7 +178,7 @@ public class ReconocerActividadFragment extends Fragment {
     private TimerTask timerTask;
     private int timeAcumulated;
 
-    //GESTION GRAFICA
+    //GESTIÓN ELEMENTOS GRÁFICOS
     private Button button;
     private FloatingActionButton anadirActividad;
     private TextView nombreActividad;
@@ -190,7 +192,7 @@ public class ReconocerActividadFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        this.df = new DataFrame(colsNames);
+        //this.df = new DataFrame(colsNames);
         this.mSensorManager = (SensorManager) getActivity().getSystemService(getActivity().SENSOR_SERVICE);
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -199,8 +201,6 @@ public class ReconocerActividadFragment extends Fragment {
         this.miSensorEventListenerGiroscopio = new miSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
         this.timeAcumulated = 0;
 
-
-        //TODO PASADOS X SEGUNDOS PARAR EL TIMERTASK Y EJECUTAR TAREAS DE EXTRACCIÓN DE CARACTERÍSTICAS Y CLASIFICAR DATOS
         this.timer = new Timer();
 
         this.timerTask = new TimerTask() {
@@ -221,16 +221,6 @@ public class ReconocerActividadFragment extends Fragment {
                 df.append(dataUnificada.getDataTADasArrayList());
 
                 if (timeAcumulated >= (5 * 1000)) { // tras 30 segundos para pruebas
-                    //desactivarSensores();
-                    //timer.cancel();
-
-                    //SEGMENTAR DATOS DEL DATAFRAME (VENTANAS DE 1S Y SIN SOLAPAMIENTO)
-                    // DataFrame features = segmentameDatosSinSolapamiento(df);
-
-                    //2 -> SOLAPAMIENTO DEL 50%, 4-> SOLAPAMIENTO DEL 25%...
-                    //SEGMENTACION CON SOLAPAMIENTO (VENTANAS DE 1S Y CON SOLAPAMIENTO)
-
-                    //long startTime = System.currentTimeMillis();
                     if(dfUtilizado == 2) {
                         dfUtilizado = 1;
                         featuresSegmentado1 = segmentameDatosConSolapamiento(df, 2);
@@ -245,18 +235,7 @@ public class ReconocerActividadFragment extends Fragment {
                     df = new DataFrame(colsNames);
                     timeAcumulated = 0;
 
-                    //long stopTime = System.currentTimeMillis();
-                    //long elapsedTime = stopTime - startTime;
-                    //System.out.println(elapsedTime);
 
-                    //DESCOMENTAR PARA GUARDAR DATOS DE DF Y FEATURES EN FICHERO -> PARA DEPURACIÓN DE DATOS
-                    //formatDataToCsvExternalStorage("DataSetSensores", df);
-                    //formatDataToCsvExternalStorage("DataSetFeatures", featuresSegmentado);
-
-                    //Ejecutar clasificador con los datos de features
-                    //clasificarActividad(featuresSegmentado);
-                    //BORRAR DF
-                    //
                     Message msg = new Message();
                     msg.obj = actividadPredicha;
                     modificadorActividad.sendMessage(msg);
@@ -275,7 +254,7 @@ public class ReconocerActividadFragment extends Fragment {
         nombreActividad = (TextView) view.findViewById(R.id.nombre_actividad);
         iconoActividad = (TextView) view.findViewById(R.id.icono_actividad);
 
-        iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_pausa, 0, 0, 0);
+        iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_0, 0, 0, 0);
 
         button = (Button) view.findViewById(R.id.boton_reconocer);
         button.setOnClickListener(new View.OnClickListener() {
@@ -283,6 +262,7 @@ public class ReconocerActividadFragment extends Fragment {
             public void onClick(View v) {
 
                 if(reconocedorEncendido == 0) {
+                    df = new DataFrame(colsNames);
                     //button.setEnabled(false);
                     reconocedorEncendido = 1;
                     nombreActividad.setText("Comenzando a reconocer...");
@@ -296,7 +276,7 @@ public class ReconocerActividadFragment extends Fragment {
                     reconocedorEncendido = 0;
                     nombreActividad.setText("Para volver a reconocer pulse el botón de abajo.");
                     button.setText("Comenzar a reconocer");
-                    iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_pausa, 0, 0, 0);
+                    iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_0, 0, 0, 0);
                 }
             }
         });
@@ -324,41 +304,6 @@ public class ReconocerActividadFragment extends Fragment {
         this.miSensorEventListenerGiroscopio.desactivarSensor();
     }
 
-    /*
-    //VENTANA DESLIZANTE 1 SEGUNDO SIN SOLAPAMIENTO
-    private DataFrame segmentameDatosSinSolapamiento(DataFrame df){
-        DataFrame retDf = new DataFrame();
-
-        DataFrame dataFrameMin = new DataFrame(this.feautresMinNames);
-        DataFrame dataFrameMax = new DataFrame(this.feautresMaxNames);
-
-        long timeStart = 0;
-        int startSlice = 0;
-
-        for (int row = 0; row < df.length(); row++){
-            if(timeStart == 0){
-                timeStart = (long) df.get(row, 0);
-                startSlice = row;
-            }
-
-            if((long) df.get(row, 0) >= timeStart + WINDOW_SZ ){
-                dataFrameMin.append(df.slice(startSlice,  row, 1, df.size()).min().row(0));
-                dataFrameMax.append(df.slice(startSlice,  row, 1, df.size()).max().row(0));
-                timeStart = 0;
-            }
-        }
-
-        //si el timestart es distinto de 0 significa que hay valores que se han quedado en la ventana sin procesar,
-        //ocurre cuando el número de datos que quedan es menor que el ancho de la ventana.
-        if(timeStart != 0 && !df.isEmpty()){
-            dataFrameMin.append(df.slice(startSlice,  df.length(), 1, df.size()).min().row(0));
-            dataFrameMax.append(df.slice(startSlice,  df.length(), 1, df.size()).max().row(0));
-        }
-
-        //join de los dataframes
-        return  dataFrameMin.join(dataFrameMax);
-    }
-*/
     private DataFrame segmentameDatosConSolapamiento(DataFrame df, int porcentajeSolapamiento){
         DataFrame retDf = new DataFrame();
 
@@ -394,7 +339,6 @@ public class ReconocerActividadFragment extends Fragment {
 
         //si el timestart es distinto de 0 significa que hay valores que se han quedado en la ventana sin procesar,
         //ocurre cuando el número de datos que quedan es menor que el ancho de la ventana.
-
         if(timeStart != 0 && !df.isEmpty()){
             list.add(new Pair<Integer, Integer>(startSlice, df.length() - 1));
 
@@ -447,7 +391,6 @@ public class ReconocerActividadFragment extends Fragment {
      * @param df
      * @return
      */
-    //TODO ARREGLAR ORDEN
     //PASAR SOLO EL DF DE LOS ACCEL
     private List giveMeCorrelation(DataFrame df){
         List retList = new ArrayList();
