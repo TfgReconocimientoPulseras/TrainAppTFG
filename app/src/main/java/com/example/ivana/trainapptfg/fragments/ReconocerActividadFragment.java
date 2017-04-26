@@ -225,7 +225,7 @@ public class ReconocerActividadFragment extends Fragment {
                     //timer.cancel();
 
                     //SEGMENTAR DATOS DEL DATAFRAME (VENTANAS DE 1S Y SIN SOLAPAMIENTO)
-                    //DataFrame features = segmentameDatosSinSolapamiento(df);
+                    // DataFrame features = segmentameDatosSinSolapamiento(df);
 
                     //2 -> SOLAPAMIENTO DEL 50%, 4-> SOLAPAMIENTO DEL 25%...
                     //SEGMENTACION CON SOLAPAMIENTO (VENTANAS DE 1S Y CON SOLAPAMIENTO)
