@@ -254,7 +254,7 @@ public class ReconocerActividadFragment extends Fragment {
         nombreActividad = (TextView) view.findViewById(R.id.nombre_actividad);
         iconoActividad = (TextView) view.findViewById(R.id.icono_actividad);
 
-        iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_0, 0, 0, 0);
+        iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_pausa, 0, 0, 0);
 
         button = (Button) view.findViewById(R.id.boton_reconocer);
         button.setOnClickListener(new View.OnClickListener() {
@@ -276,7 +276,7 @@ public class ReconocerActividadFragment extends Fragment {
                     reconocedorEncendido = 0;
                     nombreActividad.setText("Para volver a reconocer pulse el botón de abajo.");
                     button.setText("Comenzar a reconocer");
-                    iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_0, 0, 0, 0);
+                    iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_pausa, 0, 0, 0);
                 }
             }
         });
