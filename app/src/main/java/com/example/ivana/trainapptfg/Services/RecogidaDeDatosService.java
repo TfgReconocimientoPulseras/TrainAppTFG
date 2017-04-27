@@ -65,6 +65,8 @@ public class RecogidaDeDatosService extends Service{
     public void onCreate() {
         super.onCreate();
 
+        Log.d("Servicio - Recogida","Iniciado");
+
         df = new DataFrame(colsNames);
         this.timer = new Timer();
         this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -95,7 +97,7 @@ public class RecogidaDeDatosService extends Service{
 
                     //TODO ENCONTRAR LA MANERA DE PASARLE AL SEGMENTACIÓN DE DATOS SERVICE EL DF
                     df = new DataFrame(colsNames);
-                    Log.d("Servicio - Recogida!", "Ya han pasado 5 segundos\n");
+                    Log.d("Servicio - Recogida", "Ya han pasado 5 segundos\n");
                     timeAcumulated = 0;
 
                 }
@@ -111,6 +113,14 @@ public class RecogidaDeDatosService extends Service{
         return Service.START_STICKY;
     }
 
+    @Override
+    public void onDestroy(){
+        Log.d("Servicio - Recogida","Terminado");
+        timer.cancel();
+        desactivarSensores();
+        super.onDestroy();
+    }
+
     private void activarSensores() {
         this.miSensorEventListenerAcelerometro.activarSensor();
         this.miSensorEventListenerGiroscopio.activarSensor();
@@ -120,7 +130,4 @@ public class RecogidaDeDatosService extends Service{
         this.miSensorEventListenerAcelerometro.desactivarSensor();
         this.miSensorEventListenerGiroscopio.desactivarSensor();
     }
-
-    //TODO ON DESTROY!!!!!! CUIDADO ¬¬
-
 }
