@@ -1,5 +1,6 @@
 package com.example.ivana.trainapptfg.fragments;
 
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 
 import com.example.ivana.trainapptfg.DataTAD;
 import com.example.ivana.trainapptfg.R;
+import com.example.ivana.trainapptfg.Services.RecogidaDeDatosService;
 import com.example.ivana.trainapptfg.miSensorEventListener;
 
 import org.apache.commons.math3.complex.Complex;
@@ -258,22 +260,21 @@ public class ReconocerActividadFragment extends Fragment {
 
         button = (Button) view.findViewById(R.id.boton_reconocer);
         button.setOnClickListener(new View.OnClickListener() {
+            private Intent intent;
             @Override
             public void onClick(View v) {
 
                 if(reconocedorEncendido == 0) {
                     df = new DataFrame(colsNames);
-                    //button.setEnabled(false);
                     reconocedorEncendido = 1;
                     nombreActividad.setText("Comenzando a reconocer...");
                     button.setText("Parar el reconocimiento");
-                    activarSensores();
-                    timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
+                    intent = new Intent(getContext(), RecogidaDeDatosService.class);
+                    getActivity().startService(intent);
+                    //timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
                 }
                 else if(reconocedorEncendido == 1){
-                    desactivarSensores();
-                    timer.cancel();
-                    reconocedorEncendido = 0;
+                    getActivity().stopService(intent);
                     nombreActividad.setText("Para volver a reconocer pulse el botón de abajo.");
                     button.setText("Comenzar a reconocer");
                     iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_pausa, 0, 0, 0);
