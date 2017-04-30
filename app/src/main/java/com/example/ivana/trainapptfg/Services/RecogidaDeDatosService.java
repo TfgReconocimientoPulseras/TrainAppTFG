@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import joinery.DataFrame;
 
@@ -52,10 +54,16 @@ public class RecogidaDeDatosService extends Service{
     private TimerTask timerTask;
     private int timeAcumulated;
 
+    //COLAS BLOQUEANTES (CONCURRENCIA)//////////////////////////////////////////////////////////////////////////////////////////////////////
+    private BlockingQueue<DataFrame> bqRec_Segment;
+    private BlockingQueue<DataFrame> bqSegment_Clasif;
+    private BlockingQueue<Integer> bqClasif;
+    private Thread segmentacionDeDatosThread;
+    private Thread clasificacionDeDatosThread;
+
     //CONSTANTES/////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private static final int FREQUENCY_DEF = 100; //100ms
     private static final int DELAY_TIMER_TASK = 3000; //1000ms
-
 
     @Nullable
     @Override
@@ -78,6 +86,15 @@ public class RecogidaDeDatosService extends Service{
         this.miSensorEventListenerGiroscopio = new miSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
         this.timeAcumulated = 0;
 
+        //TODO FAIR POLICY????
+        //TODO TAMAÑO DE LAS COLAS?
+        this.bqRec_Segment = new ArrayBlockingQueue(5, true);
+        this.bqSegment_Clasif = new ArrayBlockingQueue(5, true);
+        this.bqClasif = new ArrayBlockingQueue<Integer>(20, true);
+
+        this.segmentacionDeDatosThread = new Thread(new SegmentacionDeDatosThread(bqRec_Segment, bqSegment_Clasif));
+        this.clasificacionDeDatosThread = new Thread(new ClasificacionDeDatosThread(bqSegment_Clasif, bqClasif));
+
         this.timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -99,11 +116,20 @@ public class RecogidaDeDatosService extends Service{
                     Log.d("Servicio - Recogida", "Ya han pasado 5 segundos\n");
 
                     //TODO ENCONTRAR LA MANERA DE PASARLE AL SEGMENTACIÓN DE DATOS SERVICE EL DF
+                    /**
                     Intent intent = new Intent(getApplicationContext(), SegmentacionDeDatosService.class);
                     Bundle bundle = new Bundle();
                     bundle.putBinder("df_raw_data", new DataFrameWrapperBinder(df));
                     intent.putExtras(bundle);
                     startService(intent);
+                     */
+                    try {
+                        Log.d("Servicio - Recogida", "Produzco dataframe\n");
+
+                        bqRec_Segment.put(df);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
                     df = new DataFrame(colsNames);
                     timeAcumulated = 0;
@@ -118,6 +144,8 @@ public class RecogidaDeDatosService extends Service{
                               int startId) {
         activarSensores();
         timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
+        segmentacionDeDatosThread.start();
+        clasificacionDeDatosThread.start();
         return Service.START_STICKY;
     }
 

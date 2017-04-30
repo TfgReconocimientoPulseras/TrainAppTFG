@@ -1,13 +1,7 @@
 package com.example.ivana.trainapptfg.Services;
 
-import android.app.Service;
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
+import android.provider.ContactsContract;
 import android.util.Log;
-
-import com.example.ivana.trainapptfg.DataFrameWrapperBinder;
 
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -23,15 +17,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 import joinery.DataFrame;
 
 /**
- * Created by Iván on 27/04/2017.
+ * Created by Iván on 30/04/2017.
  */
 
-public class SegmentacionDeDatosService extends Service {
+public class SegmentacionDeDatosThread implements Runnable {
 
+    private final BlockingQueue<DataFrame> queueConsume;
+    private final BlockingQueue<DataFrame> queueProduce;
     //NOMBRES PARA LOS DATAFRAMES////////////////////////////////////////////////////////////////////////////////////////////
 
     private Collection featuresMinNames = new ArrayList<String>(){{
@@ -95,66 +92,42 @@ public class SegmentacionDeDatosService extends Service {
     private static final int WINDOW_SZ = 1000; //In miliseconds --> 1000 = 1s
     private DataFrame dfSegmentado;
 
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    public SegmentacionDeDatosThread(BlockingQueue bqConsumeFrom, BlockingQueue bqProduceTo){
+        this.queueConsume = bqConsumeFrom;
+        this.queueProduce = bqProduceTo;
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.d("Servicio - Segmentacion","Iniciado");
+    public void run() {
 
+        while (true) {
+            try {
+                DataFrame dfRawData = consume(queueConsume);
+                Log.d("Segment_Thread", "He consumido un dataframe");
 
-    }
-
-
-    @Override
-    public int onStartCommand(Intent intent, int flags,
-                              int startId) {
-        //TODO COGER DF EN EL INTENT LLAMAR A SEGMENTAME DATOS CON SOLAPAMIENTO(DF,2)
-        final DataFrame df = ((DataFrameWrapperBinder)intent.getExtras().getBinder("df_raw_data")).getData();
-        Log.d("SegmentacionLENGTH: ", String.valueOf(df.length()));
-
-
-        //TODO HACER PRUEBAS PARA VER SI ES NECESARIO EJECUTAR EN THREAD APARTE
-        Thread t1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                dfSegmentado = segmentameDatosConSolapamiento(df,2);
-                //https://developer.android.com/reference/java/util/concurrent/BlockingQueue.html
+                queueProduce.put(produce(dfRawData));
+                Log.d("Segment_Thread", "He producido un dataframeSegmentado");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        });
+        }
 
-        t1.start();
+    }
+
+    private DataFrame produce(DataFrame df){
+        return segmentameDatosConSolapamiento(df, 2);
+    }
+
+    private DataFrame consume(BlockingQueue<DataFrame> bq){
+        DataFrame dfRet = null;
 
         try {
-            t1.join();
+            dfRet = bq.take();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
-        //TODO PASAR EL DF DEVUELTO POR SEGMENTAME DATOS AL SERVISE CLASIFICACION DE DATOS
-        Intent mIntent = new Intent(getApplicationContext(), ClasificacionDeDatosService.class);
-        Bundle bundle = new Bundle();
-        bundle.putBinder("df_segment_data", new DataFrameWrapperBinder(dfSegmentado));
-        mIntent.putExtras(bundle);
-        startService(mIntent);
 
-
-        //TODO PLANTEARSE USAR INTENTSERVICES O SERVICES?
-        //http://stackoverflow.com/questions/15524280/service-vs-intentservice
-        //TODO AUTODESTRUIRSE CUANDO HAYA FINALIZADO?
-        stopSelf();
-        return Service.START_STICKY;
-    }
-
-    @Override
-    public void onDestroy(){
-        Log.d("Servicio - Segmentación","Terminado");
-        super.onDestroy();
+        return dfRet;
     }
 
     private DataFrame segmentameDatosConSolapamiento(DataFrame df, int porcentajeSolapamiento){
