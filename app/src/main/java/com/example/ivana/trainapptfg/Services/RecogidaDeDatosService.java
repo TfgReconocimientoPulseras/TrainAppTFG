@@ -4,16 +4,18 @@ import android.app.Service;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.example.ivana.trainapptfg.DataFrameWrapperBinder;
 import com.example.ivana.trainapptfg.DataTAD;
 import com.example.ivana.trainapptfg.miSensorEventListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -94,10 +96,16 @@ public class RecogidaDeDatosService extends Service{
                 df.append(dataUnificada.getDataTADasArrayList());
 
                 if (timeAcumulated >= (5 * 1000)) { // tras 5 segundos para pruebas
+                    Log.d("Servicio - Recogida", "Ya han pasado 5 segundos\n");
 
                     //TODO ENCONTRAR LA MANERA DE PASARLE AL SEGMENTACIÓN DE DATOS SERVICE EL DF
+                    Intent intent = new Intent(getApplicationContext(), SegmentacionDeDatosService.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putBinder("df_raw_data", new DataFrameWrapperBinder(df));
+                    intent.putExtras(bundle);
+                    startService(intent);
+
                     df = new DataFrame(colsNames);
-                    Log.d("Servicio - Recogida", "Ya han pasado 5 segundos\n");
                     timeAcumulated = 0;
 
                 }

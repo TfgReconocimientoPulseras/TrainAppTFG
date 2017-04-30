@@ -6,6 +6,8 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.example.ivana.trainapptfg.DataFrameWrapperBinder;
+
 import joinery.DataFrame;
 
 /**
@@ -16,7 +18,7 @@ public class ClasificacionDeDatosService extends Service {
 
     private static final int NUM_ACTIVIDADES = 5;
     private static final double PRECISION_ACEPTADA_ACIERTO = 0.5;
-
+    private int num = 0;
 
     @Nullable
     @Override
@@ -36,6 +38,11 @@ public class ClasificacionDeDatosService extends Service {
     public int onStartCommand(Intent intent, int flags,
                               int startId) {
         //TODO LLAMAR A CLASIFICARACTIVIDAD CON EL DATAFRAME PASADO POR EL INTENT (DATOS SEGMENTADOS)
+        DataFrame df = ((DataFrameWrapperBinder)intent.getExtras().getBinder("df_segment_data")).getData();
+        Log.d("ClasificacionLENGTH: ", String.valueOf(df.length()));
+        Log.d("ClasificacionNUM: ", String.valueOf(num));
+        num++;
+        //stopSelf();
         return Service.START_STICKY;
     }
 

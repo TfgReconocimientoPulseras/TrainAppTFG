@@ -2,9 +2,12 @@ package com.example.ivana.trainapptfg.Services;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.example.ivana.trainapptfg.DataFrameWrapperBinder;
 
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -90,6 +93,7 @@ public class SegmentacionDeDatosService extends Service {
 
     //CONSTANTES/////////////////////////////////////////////////////////////////
     private static final int WINDOW_SZ = 1000; //In miliseconds --> 1000 = 1s
+    private DataFrame dfSegmentado;
 
 
     @Nullable
@@ -111,8 +115,39 @@ public class SegmentacionDeDatosService extends Service {
     public int onStartCommand(Intent intent, int flags,
                               int startId) {
         //TODO COGER DF EN EL INTENT LLAMAR A SEGMENTAME DATOS CON SOLAPAMIENTO(DF,2)
+        final DataFrame df = ((DataFrameWrapperBinder)intent.getExtras().getBinder("df_raw_data")).getData();
+        Log.d("SegmentacionLENGTH: ", String.valueOf(df.length()));
+
+
+        //TODO HACER PRUEBAS PARA VER SI ES NECESARIO EJECUTAR EN THREAD APARTE
+        Thread t1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                dfSegmentado = segmentameDatosConSolapamiento(df,2);
+
+            }
+        });
+
+        t1.start();
+
+        try {
+            t1.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
         //TODO PASAR EL DF DEVUELTO POR SEGMENTAME DATOS AL SERVISE CLASIFICACION DE DATOS
+        Intent mIntent = new Intent(getApplicationContext(), ClasificacionDeDatosService.class);
+        Bundle bundle = new Bundle();
+        bundle.putBinder("df_segment_data", new DataFrameWrapperBinder(dfSegmentado));
+        mIntent.putExtras(bundle);
+        startService(mIntent);
+
+
+        //TODO PLANTEARSE USAR INTENTSERVICES O SERVICES?
+        //http://stackoverflow.com/questions/15524280/service-vs-intentservice
         //TODO AUTODESTRUIRSE CUANDO HAYA FINALIZADO?
+        stopSelf();
         return Service.START_STICKY;
     }
 
