@@ -13,8 +13,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service android:name=".Services.RecogidaDeDatosService" />
-        <service android:name=".Services.SegmentacionDeDatosService" />
-        <service android:name=".Services.ClasificacionDeDatosService" />
 
         <activity android:name=".MainActivity">
             <intent-filter>

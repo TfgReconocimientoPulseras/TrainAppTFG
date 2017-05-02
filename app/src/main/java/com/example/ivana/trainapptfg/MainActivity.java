@@ -1,5 +1,6 @@
 package com.example.ivana.trainapptfg;
 
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -28,11 +29,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ViewPager viewPager;
 
     private int[] icons = {
-            R.drawable.ic_home_black_24dp,
             R.drawable.ic_directions_run_black_24dp,
-            R.drawable.ic_today_black_24dp,
             R.drawable.ic_history_black_24dp,
-            R.drawable.ic_group_black_24dp
     };
 
     @Override
@@ -69,15 +67,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        /*
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -127,11 +116,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
+        if (id == R.id.nav_register_activity) {
+            Intent recogida = new Intent(this, RecogerDatosBienvenida.class);
+            startActivity(recogida);
+        } /*else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
 
@@ -139,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         } else if (id == R.id.nav_send) {
 
-        }
+        }*/
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -154,12 +142,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initTabsWithIcons(){
-        tabLayout.getTabAt(0).setIcon(icons[1]);
+        tabLayout.getTabAt(0).setIcon(icons[0]);
         tabLayout.getTabAt(0).getIcon().setColorFilter(getResources().getColor(R.color.colorWhite), PorterDuff.Mode.SRC_IN);
 
-        //tabLayout.getTabAt(1).setIcon(icons[2]);
-        tabLayout.getTabAt(1).setIcon(icons[3]);
-        //tabLayout.getTabAt(3).setIcon(icons[4]);
+        tabLayout.getTabAt(1).setIcon(icons[1]);
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {
@@ -191,26 +177,4 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return null;
         }
     }
-    /*
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_dehaze_black_24dp);
-        //getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_list);
-
-
-
-    }
-
-
-*/
-
-
 }

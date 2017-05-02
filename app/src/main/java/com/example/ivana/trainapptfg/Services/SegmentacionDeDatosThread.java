@@ -1,6 +1,5 @@
 package com.example.ivana.trainapptfg.Services;
 
-import android.provider.ContactsContract;
 import android.util.Log;
 
 import org.apache.commons.math3.complex.Complex;
@@ -20,10 +19,6 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import joinery.DataFrame;
-
-/**
- * Created by Iván on 30/04/2017.
- */
 
 public class SegmentacionDeDatosThread implements Runnable {
 
@@ -178,6 +173,7 @@ public class SegmentacionDeDatosThread implements Runnable {
 
 
         //TODO PARA PRUEBAS BORRAR CUANDO NO SEA NECESARIO
+        /*
         for (Pair p: list) {
             int i = (Integer)p.getKey();
             int f = (Integer)p.getValue();
@@ -186,7 +182,7 @@ public class SegmentacionDeDatosThread implements Runnable {
             long diff = tFin - tIni;
             Log.d("PRUEBAS DE TIEMPOS", "tIni: " + tIni + " tFin: " + tFin + "Diff: " + diff);
 
-        }
+        }*/
 
         for (Pair p: list) {
             int i = (Integer)p.getKey();

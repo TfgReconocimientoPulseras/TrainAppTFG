@@ -6,17 +6,9 @@ import java.util.concurrent.BlockingQueue;
 
 import joinery.DataFrame;
 
-/**
- * Created by Iván on 30/04/2017.
- */
-
 public class ClasificacionDeDatosThread implements Runnable {
     private final BlockingQueue<DataFrame> queueConsume;
     private final BlockingQueue<Integer> queueProduce;
-
-    private static final int NUM_ACTIVIDADES = 5;
-    private static final double PRECISION_ACEPTADA_ACIERTO = 0.5;
-    private int num = 0;
 
     public ClasificacionDeDatosThread(BlockingQueue bqConsumeFrom, BlockingQueue bqProduceTo){
         this.queueConsume = bqConsumeFrom;
@@ -54,39 +46,6 @@ public class ClasificacionDeDatosThread implements Runnable {
     private int produce(DataFrame df, int i){
         return getPredictClass(i,df);
     }
-
-    /*
-    private int clasificarActividad(DataFrame df){
-        int frecuenciaAparicion[] = new int[NUM_ACTIVIDADES];
-        double max = 0;
-        int posMax = 0;
-
-        for (int i = 0; i < df.length(); i++) {
-            frecuenciaAparicion[(getPredictClass(i, df) - 1)]++;
-        }
-
-        for (int i = 0; i < NUM_ACTIVIDADES; i++) {
-            if (frecuenciaAparicion[i] > max) {
-                max = frecuenciaAparicion[i];
-                posMax = i;
-            }
-        }
-
-        Log.d("RecogerDatos", "MAX: " + Double.toString(max));
-        Log.d("RecogerDatos", "DF SIZE: " + Integer.toString(df.length()));
-        Log.d("RecogerDatos", "FREQ: " + Double.toString(((Double)(max/df.length()))));
-        for(int i = 0; i < NUM_ACTIVIDADES; i++){
-            Log.d("RecogerDatos", "Actividad " + Integer.toString(i+1) + " " + Integer.toString(frecuenciaAparicion[i]));
-        }
-        Log.d("RecogerDatos", "-----------------------------------------");
-
-        if((double)(max /df.length()) > PRECISION_ACEPTADA_ACIERTO) {
-            return (posMax + 1);
-        }
-        else{
-            return 0;
-        }
-    }*/
 
     private int getPredictClass(int i, DataFrame df){
         if((double)df.get(i, "accel_z_max") <= 0.270629882812)

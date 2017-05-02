@@ -10,12 +10,6 @@ import android.view.ViewGroup;
 import com.example.ivana.trainapptfg.R;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
-/**
- * TODO CLASE DE PRUEBA, BORRAR CUANDO NO SEA NECESARIO
- */
 public class HistorialFragment extends Fragment {
 
 
