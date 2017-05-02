@@ -22,15 +22,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".RecogerDatosBienvenida"
+            android:name=".AsistenteRecogidaDatos.RecogerDatosBienvenida"
             android:label="@string/app_name">
         </activity>
         <activity
-            android:name=".RecogerDatosFormulario"
+            android:name=".AsistenteRecogidaDatos.RecogerDatosFormulario"
             android:label="@string/app_name">
         </activity>
         <activity
-            android:name=".RecogerDatosRecogida"
+            android:name=".AsistenteRecogidaDatos.RecogerDatosRecogida"
             android:label="@string/app_name">
         </activity>
     </application>

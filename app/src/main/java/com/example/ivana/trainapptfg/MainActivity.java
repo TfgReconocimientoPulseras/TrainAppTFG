@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.ivana.trainapptfg.AsistenteRecogidaDatos.RecogerDatosBienvenida;
 import com.example.ivana.trainapptfg.fragments.HistorialFragment;
 import com.example.ivana.trainapptfg.fragments.ReconocerActividadFragment;
 

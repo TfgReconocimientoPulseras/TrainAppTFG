@@ -1,4 +1,4 @@
-package com.example.ivana.trainapptfg;
+package com.example.ivana.trainapptfg.Utilidades;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;

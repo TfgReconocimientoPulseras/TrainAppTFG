@@ -1,4 +1,4 @@
-package com.example.ivana.trainapptfg;
+package com.example.ivana.trainapptfg.AsistenteRecogidaDatos;
 
 import android.Manifest;
 import android.app.Activity;
@@ -26,6 +26,10 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.ivana.trainapptfg.Utilidades.DataTAD;
+import com.example.ivana.trainapptfg.R;
+import com.example.ivana.trainapptfg.Utilidades.miSensorEventListener;
 
 import java.io.File;
 import java.io.FileNotFoundException;

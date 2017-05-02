@@ -1,10 +1,12 @@
-package com.example.ivana.trainapptfg;
+package com.example.ivana.trainapptfg.AsistenteRecogidaDatos;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+
+import com.example.ivana.trainapptfg.R;
 
 public class RecogerDatosBienvenida extends Activity {
 

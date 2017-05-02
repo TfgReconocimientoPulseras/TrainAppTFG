@@ -9,8 +9,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.example.ivana.trainapptfg.DataTAD;
-import com.example.ivana.trainapptfg.miSensorEventListener;
+import com.example.ivana.trainapptfg.Utilidades.DataTAD;
+import com.example.ivana.trainapptfg.Threads.AnalizarClasificacionThread;
+import com.example.ivana.trainapptfg.Threads.ClasificacionDeDatosThread;
+import com.example.ivana.trainapptfg.Threads.SegmentacionDeDatosThread;
+import com.example.ivana.trainapptfg.Utilidades.miSensorEventListener;
 
 import java.util.ArrayList;
 import java.util.Collection;

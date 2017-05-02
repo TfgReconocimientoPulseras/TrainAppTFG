@@ -1,4 +1,4 @@
-package com.example.ivana.trainapptfg;
+package com.example.ivana.trainapptfg.AsistenteRecogidaDatos;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.example.ivana.trainapptfg.R;
 
 
 public class RecogerDatosFormulario extends Activity {
