@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.ivana.trainapptfg.fragments.FourFragment">
+    tools:context="com.example.ivana.trainapptfg.Fragments.FourFragment">
 
     <Button
         android:id="@+id/button1"

@@ -1,4 +1,4 @@
-package com.example.ivana.trainapptfg.fragments;
+package com.example.ivana.trainapptfg.Fragments;
 
 
 import android.os.Bundle;

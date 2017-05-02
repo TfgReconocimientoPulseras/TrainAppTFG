@@ -18,8 +18,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.ivana.trainapptfg.AsistenteRecogidaDatos.RecogerDatosBienvenida;
-import com.example.ivana.trainapptfg.fragments.HistorialFragment;
-import com.example.ivana.trainapptfg.fragments.ReconocerActividadFragment;
+import com.example.ivana.trainapptfg.Fragments.HistorialFragment;
+import com.example.ivana.trainapptfg.Fragments.ReconocerActividadFragment;
 
 import java.util.ArrayList;
 import java.util.List;

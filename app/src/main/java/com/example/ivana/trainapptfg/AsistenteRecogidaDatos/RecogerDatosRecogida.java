@@ -29,7 +29,7 @@ import android.widget.Toast;
 
 import com.example.ivana.trainapptfg.Utilidades.DataTAD;
 import com.example.ivana.trainapptfg.R;
-import com.example.ivana.trainapptfg.Utilidades.miSensorEventListener;
+import com.example.ivana.trainapptfg.Utilidades.MiSensorEventListener;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -56,8 +56,8 @@ public class RecogerDatosRecogida extends Activity {
 
     //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
     private SensorManager mSensorManager;
-    private miSensorEventListener miSensorEventListenerAcelerometro;
-    private miSensorEventListener miSensorEventListenerGiroscopio;
+    private MiSensorEventListener miSensorEventListenerAcelerometro;
+    private MiSensorEventListener miSensorEventListenerGiroscopio;
     private Sensor mAccelerometer;
     private Sensor mGyroscope;
 
@@ -152,8 +152,8 @@ public class RecogerDatosRecogida extends Activity {
         this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        this.miSensorEventListenerAcelerometro = new miSensorEventListener(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
-        this.miSensorEventListenerGiroscopio = new miSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+        this.miSensorEventListenerAcelerometro = new MiSensorEventListener(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+        this.miSensorEventListenerGiroscopio = new MiSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
 
         this.dataListAccel = new ArrayList<DataTAD>();
         this.dataListGyro = new ArrayList<DataTAD>();

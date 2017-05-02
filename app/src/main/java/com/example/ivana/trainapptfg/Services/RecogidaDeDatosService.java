@@ -13,7 +13,7 @@ import com.example.ivana.trainapptfg.Utilidades.DataTAD;
 import com.example.ivana.trainapptfg.Threads.AnalizarClasificacionThread;
 import com.example.ivana.trainapptfg.Threads.ClasificacionDeDatosThread;
 import com.example.ivana.trainapptfg.Threads.SegmentacionDeDatosThread;
-import com.example.ivana.trainapptfg.Utilidades.miSensorEventListener;
+import com.example.ivana.trainapptfg.Utilidades.MiSensorEventListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,8 +44,8 @@ public class RecogidaDeDatosService extends Service{
 
     //GESTIÓN DE SENSORES///////////////////////////////////////////////////////////////////////////////////////////////////
     private SensorManager mSensorManager;
-    private miSensorEventListener miSensorEventListenerAcelerometro;
-    private miSensorEventListener miSensorEventListenerGiroscopio;
+    private MiSensorEventListener miSensorEventListenerAcelerometro;
+    private MiSensorEventListener miSensorEventListenerGiroscopio;
     private Sensor mAccelerometer;
     private Sensor mGyroscope;
 
@@ -65,6 +65,7 @@ public class RecogidaDeDatosService extends Service{
     //CONSTANTES/////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private static final int FREQUENCY_DEF = 100; //100ms
     private static final int DELAY_TIMER_TASK = 3000; //1000ms
+    private static final int COLLECTION_TIME = 5000; //5000ms - 5 s para recoger datos y segmentarlos...
 
     @Nullable
     @Override
@@ -83,8 +84,8 @@ public class RecogidaDeDatosService extends Service{
         this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        this.miSensorEventListenerAcelerometro = new miSensorEventListener(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
-        this.miSensorEventListenerGiroscopio = new miSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+        this.miSensorEventListenerAcelerometro = new MiSensorEventListener(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+        this.miSensorEventListenerGiroscopio = new MiSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
         this.timeAcumulated = 0;
 
         this.broadcaster = LocalBroadcastManager.getInstance(this);
@@ -116,7 +117,8 @@ public class RecogidaDeDatosService extends Service{
                 //lo añadimos al dataframe
                 df.append(dataUnificada.getDataTADasArrayList());
 
-                if (timeAcumulated >= (5 * 1000)) { // tras 5 segundos para pruebas
+
+                if (timeAcumulated >= COLLECTION_TIME) { // tras 5 segundos para pruebas
                     Log.d("Servicio - Recogida", "Ya han pasado 5 segundos\n");
 
                     try {

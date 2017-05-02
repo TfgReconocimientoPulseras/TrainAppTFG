@@ -1,4 +1,4 @@
-package com.example.ivana.trainapptfg.fragments;
+package com.example.ivana.trainapptfg.Fragments;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
