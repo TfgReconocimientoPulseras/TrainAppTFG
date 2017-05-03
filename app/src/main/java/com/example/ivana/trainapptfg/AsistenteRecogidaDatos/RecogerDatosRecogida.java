@@ -212,11 +212,9 @@ public class RecogerDatosRecogida extends Activity {
                     miSensorEventListenerGiroscopio.desactivarSensor();
 
                     timer.cancel();
-                    formatDataToCsvExternalStorage(dataListAccel, 1);    //Sensor.TYPE_ACCELEROMETER
-                    formatDataToCsvExternalStorage(dataListGyro, 2);     //Sensor.TYPE_GYROSCOPE
-                    formatDataToCsvExternalStorage(dataListSensores, 3); //Sensor.TYPE_ALL
-
                     numFileCreated++;
+                    formatDataToCsvExternalStorage(dataListSensores); //Sensor.TYPE_ALL
+
 
                     Message msg = new Message();
                     msg.obj = numFileCreated;
@@ -258,7 +256,8 @@ public class RecogerDatosRecogida extends Activity {
     }
 
     private void formatDataToCsvInternalStorage(ArrayList<DataTAD> list, int type) {
-        String fileName = this.nameUser + "_" + this.nameActivity + "_" + String.valueOf(type) + ".csv";
+        //TODO ADD TIMESTAMP TO NOT OVERRIDE OLDER FILES.
+        String fileName = this.nameUser + "_" + this.nameActivity + "_" + numFileCreated + ".csv";
 
         OutputStreamWriter out = null;
         try {
@@ -285,8 +284,8 @@ public class RecogerDatosRecogida extends Activity {
         }
     }
 
-    private void formatDataToCsvExternalStorage(ArrayList<DataTAD> list, int type) {
-        String fileName = new Date().getTime() + "_" + this.nameUser + "_" + this.nameActivity + "_" + String.valueOf(type) + ".csv";
+    private void formatDataToCsvExternalStorage(ArrayList<DataTAD> list) {
+        String fileName = this.nameUser + "_" + this.nameActivity + "_" + new Date().getTime() + ".csv";
 
         File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles");
         directory.mkdirs();
@@ -329,9 +328,10 @@ public class RecogerDatosRecogida extends Activity {
             dataListAccel.add(dAccel);
             dataListGyro.add(dGyro);
 
+            //TODO COMPROBAR QUE ESTO FUNCIONE CORRECTAMENTE
             float[] aux = new float[NUM_ATRIB_ACCEL + NUM_ATRIB_GYRO];
-            System.arraycopy(dAccel.getValues(), 0, aux, 0, NUM_ATRIB_ACCEL);
-            System.arraycopy(dGyro.getValues(), 0, aux, NUM_ATRIB_ACCEL, NUM_ATRIB_GYRO);
+            System.arraycopy(dGyro.getValues(), 0, aux, 0, NUM_ATRIB_GYRO);
+            System.arraycopy(dAccel.getValues(), 0, aux, NUM_ATRIB_GYRO, NUM_ATRIB_ACCEL);
             dataListSensores.add(new DataTAD(timeInMillis, aux));
         }
 

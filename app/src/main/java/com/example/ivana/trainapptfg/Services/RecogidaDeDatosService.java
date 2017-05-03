@@ -150,6 +150,8 @@ public class RecogidaDeDatosService extends Service{
     @Override
     public void onDestroy(){
         Log.d("Servicio - Recogida","Terminado");
+        //TODO TERMINAR LOS THREADS INICIADOS
+
         timer.cancel();
         desactivarSensores();
         super.onDestroy();
