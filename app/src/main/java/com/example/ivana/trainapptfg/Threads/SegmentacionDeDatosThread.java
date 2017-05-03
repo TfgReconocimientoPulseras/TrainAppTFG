@@ -99,11 +99,12 @@ public class SegmentacionDeDatosThread implements Runnable {
             try {
                 DataFrame dfRawData = consume(queueConsume);
                 Log.d("Segment_Thread", "He consumido un dataframe");
-
                 queueProduce.put(produce(dfRawData));
                 Log.d("Segment_Thread", "He producido un dataframeSegmentado");
+
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.d("Thread - Segmentacion", "Interrupted");
+                return;
             }
         }
 
@@ -113,14 +114,11 @@ public class SegmentacionDeDatosThread implements Runnable {
         return segmentameDatosConSolapamiento(df, 2);
     }
 
-    private DataFrame consume(BlockingQueue<DataFrame> bq){
+    private DataFrame consume(BlockingQueue<DataFrame> bq) throws InterruptedException {
         DataFrame dfRet = null;
 
-        try {
-            dfRet = bq.take();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        dfRet = bq.take();
+
 
         return dfRet;
     }

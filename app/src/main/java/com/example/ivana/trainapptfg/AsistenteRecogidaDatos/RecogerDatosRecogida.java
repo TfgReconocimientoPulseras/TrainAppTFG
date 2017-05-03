@@ -215,7 +215,9 @@ public class RecogerDatosRecogida extends Activity {
                     numFileCreated++;
                     formatDataToCsvExternalStorage(dataListSensores); //Sensor.TYPE_ALL
 
-
+                    dataListSensores.clear();
+                    dataListAccel.clear();
+                    dataListGyro.clear();
                     Message msg = new Message();
                     msg.obj = numFileCreated;
                     modificadorFinalizador.sendMessage(msg);
@@ -285,7 +287,8 @@ public class RecogerDatosRecogida extends Activity {
     }
 
     private void formatDataToCsvExternalStorage(ArrayList<DataTAD> list) {
-        String fileName = this.nameUser + "_" + this.nameActivity + "_" + new Date().getTime() + ".csv";
+        //TODO ADD TIMESTAMP TO NOT OVERRIDE OLDER FILES.
+        String fileName = this.nameUser + "_" + this.nameActivity + "_" + numFileCreated + ".csv";
 
         File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles");
         directory.mkdirs();

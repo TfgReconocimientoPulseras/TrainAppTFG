@@ -27,18 +27,15 @@ public class ClasificacionDeDatosThread implements Runnable {
                 }
 
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.d("Thread - Clasificacion", "Interrupted");
+                return;
             }
         }
     }
-    private DataFrame consume(BlockingQueue<DataFrame> bq){
+    private DataFrame consume(BlockingQueue<DataFrame> bq) throws InterruptedException {
         DataFrame dfRet = null;
 
-        try {
-            dfRet = bq.take();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        dfRet = bq.take();
 
         return dfRet;
     }
