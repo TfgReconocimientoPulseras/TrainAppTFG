@@ -10,10 +10,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.graphics.drawable.DrawableWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.ivana.trainapptfg.R;
@@ -38,27 +40,27 @@ public class ReconocerActividadFragment extends Fragment {
 
             if(f == 0){
                 texto = "No tengo muy claro lo que estás haciendo.";
-                iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_0, 0, 0, 0);
+                //iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_0, 0, 0, 0);
             }
             else if(f == 1){
                 texto = "Estas caminando.";
-                iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_1, 0, 0, 0);
+                //iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_1, 0, 0, 0);
             }
             else if(f == 2){
                 texto = "Estás barriendo.";
-                iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_2, 0, 0, 0);
+                //iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_2, 0, 0, 0);
             }
             else if(f == 3){
                 texto = "Estás de pie.";
-                iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_3, 0, 0, 0);
+               // iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_3, 0, 0, 0);
             }
             else if(f == 4){
                 texto = "Estas subiendo las escaleras.";
-                iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_4, 0, 0, 0);
+                //iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_4, 0, 0, 0);
             }
             else if(f == 5){
                 texto = "Estás bajando las escaleras.";
-                iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_5, 0, 0, 0);
+                //iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_act_5, 0, 0, 0);
             }
             nombreActividad.setText(texto);
         }
@@ -76,7 +78,7 @@ public class ReconocerActividadFragment extends Fragment {
     //GESTIÓN ELEMENTOS GRÁFICOS
     private Button button;
     private TextView nombreActividad;
-    private TextView iconoActividad;
+    private ImageView iconoActividad;
 
     //BROADCAST RECEIVER
     private BroadcastReceiver receiver;
@@ -97,9 +99,8 @@ public class ReconocerActividadFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_reconocer_actividad, container, false);
 
         nombreActividad = (TextView) view.findViewById(R.id.nombre_actividad);
-        iconoActividad = (TextView) view.findViewById(R.id.icono_actividad);
+        iconoActividad = (ImageView) view.findViewById(R.id.icono_actividad);
 
-        iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_pausa, 0, 0, 0);
         receiver = new BroadcastReceiver(){
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -127,7 +128,7 @@ public class ReconocerActividadFragment extends Fragment {
                     nombreActividad.setText("Para volver a reconocer pulse el botón de abajo.");
                     button.setText("Comenzar a reconocer");
                     reconocedorEncendido = 0;
-                    iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_pausa, 0, 0, 0);
+                    //iconoActividad.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ico_pausa, 0, 0, 0);
                 }
             }
         });
