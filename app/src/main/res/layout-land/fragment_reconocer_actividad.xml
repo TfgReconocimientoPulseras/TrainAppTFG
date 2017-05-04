@@ -27,23 +27,13 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_heightPercent="20%" />
 
-    <FrameLayout
-        android:id="@+id/panel_end"
+    <Button
+        android:id="@+id/boton_reconocer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        app:layout_heightPercent="20%">
-
-        <Button
-            android:id="@+id/boton_reconocer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity = "center"
-            android:text="Comenzar a reconocer"
-            android:layout_alignParentBottom="false"
-            android:duplicateParentState="false" />
-
-    </FrameLayout>
+        android:gravity="center"
+        app:layout_heightPercent="20%"
+        android:layout_below="@+id/nombre_actividad"
+        android:text="Comenzar a reconocer"/>
 
 </android.support.percent.PercentRelativeLayout>
