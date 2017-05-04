@@ -3,9 +3,11 @@ package com.example.ivana.trainapptfg.AsistenteRecogidaDatos;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.FragmentManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -27,6 +29,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.ivana.trainapptfg.MainActivity;
 import com.example.ivana.trainapptfg.Utilidades.DataTAD;
 import com.example.ivana.trainapptfg.R;
 import com.example.ivana.trainapptfg.Utilidades.MiSensorEventListener;
@@ -90,10 +93,9 @@ public class RecogerDatosRecogida extends Activity {
             if((Integer)msg.obj == (NUM_ARCHIVOS_CREAR - 1))
                 createSimpleDialog("¡Explendido! Ya casi estamos acabando. Vamos a repetir la prueba por última vez.");
             else if((Integer)msg.obj == NUM_ARCHIVOS_CREAR) {
-                createSimpleDialog("¡Genial! Hemos acabado.");
                 numFileCreated = 0;
-                Intent recogida = new Intent (RecogerDatosRecogida.this, RecogerDatosBienvenida.class);
-                startActivity(recogida);
+                notificarDialogFinal();
+
             }
             else
                 createSimpleDialog("¡Muy bien! Vamos a volver a repetir la prueba. Vuelve a pulsar el botón de play.");
@@ -139,6 +141,30 @@ public class RecogerDatosRecogida extends Activity {
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .build();
         nm.notify(1, noti);
+    }
+
+    public void notificarDialogFinal(){
+        AlertDialog.Builder dialogoFinal = new AlertDialog.Builder(this);
+        dialogoFinal.setTitle("Ey!");
+        dialogoFinal.setMessage("Hemos terminado. ¿Quieres repetir el asistente?");
+        dialogoFinal.setPositiveButton("Repetir", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent recogida = new Intent (RecogerDatosRecogida.this, RecogerDatosBienvenida.class);
+                recogida.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(recogida);
+            }
+        });
+        dialogoFinal.setNegativeButton("Finalizar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent recogida = new Intent (RecogerDatosRecogida.this, MainActivity.class);
+                recogida.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(recogida);
+            }
+        });
+
+        dialogoFinal.show();
     }
 
     protected void onCreate(Bundle savedInstanceState){
