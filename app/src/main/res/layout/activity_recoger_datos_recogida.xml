@@ -1,82 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <RelativeLayout
+    <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary">
+        app:layout_heightPercent="40%"
+        android:background="@color/colorPrimary"
+        android:id="@+id/relativeLayout2">
 
         <TextView
             android:id="@+id/textView5"
+            app:layout_heightPercent="100%"
+            app:layout_widthPercent="100%"
+            android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginTop="20dp"
             android:text="Ahora vamos a tomar datos mientras realizas los movimientos de la actividad. Repetiremos esta acción unas veces. Cuando estés preparado pulsa el botón del play."
             android:textColor="@android:color/background_light"
             android:textSize="24dp" />
 
+    </android.support.percent.PercentRelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        app:layout_heightPercent="15%"
+        android:layout_height="95dp"
+        android:layout_below="@+id/relativeLayout2"
+        android:layout_alignParentStart="true">
+
+        <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/numArchivosCreadosRecogida"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="64dp"
+                android:background="@drawable/ico_temp"
+                android:gravity="center"
+                android:text="0/3"
+                android:textSize="30sp" />
+
+            <TextView
+                android:id="@+id/temporizadorRecogida"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginEnd="57dp"
+                android:background="@drawable/ico_temp"
+                android:gravity="center"
+                android:text="30"
+                android:textSize="30sp" />
+
+            </android.support.percent.PercentRelativeLayout>
+
+
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="95dp">
-
-        <TextView
-            android:id="@+id/numArchivosCreadosRecogida"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="64dp"
-            android:background="@drawable/ico_temp"
-            android:paddingLeft="18dp"
-            android:paddingTop="18dp"
-            android:text="0/3"
-            android:textSize="30sp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true" />
-
-        <TextView
-            android:id="@+id/temporizadorRecogida"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginEnd="57dp"
-            android:background="@drawable/ico_temp"
-            android:paddingLeft="25dp"
-            android:paddingTop="18dp"
-            android:text="30"
-            android:textSize="30sp" />
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="168dp">
+        app:layout_heightPercent="30%"
+        android:layout_height="168dp"
+        android:layout_above="@+id/linearLayout2"
+        android:layout_alignParentStart="true">
 
         <Button
             android:id="@+id/buttonPlayRecogida"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
+            android:onClick="onClickButtonPlay"
             android:layout_centerVertical="true"
             android:background="#86BF9F"
-            android:drawableBottom="@drawable/ico_play"
-            android:onClick="onClickButtonPlay"
-            android:text="Play"
-            android:textColor="#FFFFFF" />
+            android:text="Comenzar"
+            android:textSize="20dp"
+            android:textColor="#FFFFFF"/>
 
     </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        app:layout_heightPercent="15%"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/linearLayout2">
 
         <ProgressBar
             android:id="@+id/progressBarRecogida"
@@ -86,4 +105,4 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-</LinearLayout>
+</android.support.percent.PercentRelativeLayout>

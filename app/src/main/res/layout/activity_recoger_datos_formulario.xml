@@ -1,34 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
-        android:orientation="horizontal">
+        app:layout_heightPercent="35%"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
 
         <TextView
             android:id="@+id/textView8"
             android:layout_width="match_parent"
+            app:layout_heightPercent="100%"
+            app:layout_widthPercent="100%"
+            android:gravity="center"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginTop="20dp"
             android:layout_weight="1"
             android:text="Antes de comenzar, necesitamos saber unas cositas..."
             android:textColor="#FFFFFF"
-            android:textSize="35dp" />
-    </LinearLayout>
+            android:textSize="25dp" />
+    </android.support.percent.PercentRelativeLayout>
 
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_heightPercent="45%"
         android:columnCount="2"
-        android:rowCount="6">
+        android:rowCount="6"
+        android:id="@+id/gridLayout"
+        android:layout_below="@+id/linearLayout"
+        android:layout_alignParentStart="true">
 
         <TextView
             android:id="@+id/textView6"
@@ -86,16 +95,19 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        app:layout_heightPercent="20%"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true">
 
         <Button
             android:id="@+id/buttonNextForumulario"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
+            android:layout_marginBottom="25dp"
             android:layout_marginLeft="100dp"
             android:layout_marginRight="100dp"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="25dp"
             android:layout_weight="0.27"
             android:background="#86BF9F"
             android:onClick="onClickButtonNext"
@@ -103,4 +115,4 @@
             android:textColor="#FFFFFF" />
     </LinearLayout>
 
-</LinearLayout>
+</android.support.percent.PercentRelativeLayout>

@@ -10,6 +10,10 @@ import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.media.MediaScannerConnection;
@@ -19,6 +23,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
@@ -88,6 +93,11 @@ public class RecogerDatosRecogida extends Activity {
         @Override
         public void handleMessage(Message msg) {
             buttonRecord.setEnabled(true);
+            //buttonRecord.setBackgroundColor(Color.rgb(134, 191, 159));
+            //buttonRecord.setBackgroundResource(R.color.colorPrimary);
+            //buttonRecord.setBackgroundResource(R.drawable.ico_play);
+            buttonRecord.setBackgroundColor(buttonRecord.getContext().getResources().getColor(R.color.colorPrimary));
+            buttonRecord.setText("Comenzar");
 
 
             if((Integer)msg.obj == (NUM_ARCHIVOS_CREAR - 1))
@@ -123,15 +133,19 @@ public class RecogerDatosRecogida extends Activity {
         }
     };
 
-    public void notificationAviso() {
-        Intent i = new Intent(this, this.getClass());
-        i.putExtra("notificationID", 1);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, 0);
-        NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+    public void notificationAviso(int num) {
+        Intent i = new Intent(getBaseContext(), getBaseContext().getClass());
 
         CharSequence contentTitle = "Grabando actividad";
         CharSequence contentText = "Hemos terminado una parte. Podemos continuar.";
+
+        if(num == NUM_ARCHIVOS_CREAR){
+            contentText = "Hemos terminado.";
+        }
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+
         Notification noti = new NotificationCompat.Builder(this)
                 .setContentIntent(pendingIntent)
                 .setContentTitle(contentTitle)
@@ -191,7 +205,10 @@ public class RecogerDatosRecogida extends Activity {
 
         this.numArchivosCreados = (TextView) findViewById(R.id.numArchivosCreadosRecogida);
         this.temporizador = (TextView) findViewById(R.id.temporizadorRecogida);
+
         this.buttonRecord = (Button) findViewById(R.id.buttonPlayRecogida);
+        this.buttonRecord.setText("Comenzar");
+
         this.progressBar = (ProgressBar) findViewById(R.id.progressBarRecogida);
 
         this.numFileCreated = 0;
@@ -210,6 +227,10 @@ public class RecogerDatosRecogida extends Activity {
         this.timer = new Timer();
 
         this.buttonRecord.setEnabled(false);
+        this.buttonRecord.setBackgroundResource(0);
+        this.buttonRecord.setBackgroundResource(R.drawable.ico_rel_arena);
+        buttonRecord.setBackgroundColor(Color.rgb(223, 229, 229));
+        this.buttonRecord.setText("En proceso...");
 
         this.progressBar.setProgress(0);
 
@@ -248,7 +269,7 @@ public class RecogerDatosRecogida extends Activity {
                     msg.obj = numFileCreated;
                     modificadorFinalizador.sendMessage(msg);
 
-                    notificationAviso();
+                    notificationAviso(numFileCreated);
                 }
             }
         };
