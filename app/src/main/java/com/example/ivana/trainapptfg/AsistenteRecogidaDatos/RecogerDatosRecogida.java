@@ -228,7 +228,8 @@ public class RecogerDatosRecogida extends Activity {
 
         this.buttonRecord.setEnabled(false);
         this.buttonRecord.setBackgroundResource(0);
-        this.buttonRecord.setBackgroundResource(R.drawable.ico_rel_arena);
+        //TODO AAQUI FALTABA UN ICONO EN EL RESPOSITORIO "ICO_REL_ARENA"
+        this.buttonRecord.setBackgroundResource(R.drawable.ic_history_black_24dp);
         buttonRecord.setBackgroundColor(Color.rgb(223, 229, 229));
         this.buttonRecord.setText("En proceso...");
 
@@ -236,7 +237,7 @@ public class RecogerDatosRecogida extends Activity {
 
         this.activarSensores();
 
-        this.progressBar.setMax((this.TIEMPO_POR_ARCHIVO));
+        this.progressBar.setMax((TIEMPO_POR_ARCHIVO));
 
         temporizador.setText(Integer.toString(TIEMPO_POR_ARCHIVO/1000));
 
