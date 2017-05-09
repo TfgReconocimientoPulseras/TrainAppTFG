@@ -3,6 +3,7 @@ package com.example.ivana.trainapptfg.EstadosFSM;
 public class EstadoActividad extends Estado {
     private int actividad;
 
+    //
     public EstadoActividad(int actividad){
         super();
         this.actividad = actividad;

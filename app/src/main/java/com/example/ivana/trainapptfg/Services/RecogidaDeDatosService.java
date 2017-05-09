@@ -66,6 +66,9 @@ public class RecogidaDeDatosService extends Service{
     private static final int FREQUENCY_DEF = 100; //100ms
     private static final int DELAY_TIMER_TASK = 3000; //1000ms
     private static final int COLLECTION_TIME = 5000; //5000ms - 5 s para recoger datos y segmentarlos...
+    private static final int TAM_COLA_RECOGIDA = 5;
+    private static final int TAM_COLA_CLASIFICACION = 5;
+    private static final int TAM_COLA_RESULTADOS = 30;
 
     @Nullable
     @Override
@@ -91,10 +94,9 @@ public class RecogidaDeDatosService extends Service{
         this.broadcaster = LocalBroadcastManager.getInstance(this);
 
         //TODO FAIR POLICY????
-        //TODO TAMAÑO DE LAS COLAS?
-        this.bqRec_Segment = new ArrayBlockingQueue(5, true);
-        this.bqSegment_Clasif = new ArrayBlockingQueue(5, true);
-        this.bqResultados = new ArrayBlockingQueue<Integer>(30, true);
+        this.bqRec_Segment = new ArrayBlockingQueue(TAM_COLA_RECOGIDA, true);
+        this.bqSegment_Clasif = new ArrayBlockingQueue(TAM_COLA_CLASIFICACION, true);
+        this.bqResultados = new ArrayBlockingQueue<Integer>(TAM_COLA_RESULTADOS, true);
 
         this.segmentacionDeDatosThread = new Thread(new SegmentacionDeDatosThread(bqRec_Segment, bqSegment_Clasif));
         this.clasificacionDeDatosThread = new Thread(new ClasificacionDeDatosThread(bqSegment_Clasif, bqResultados));

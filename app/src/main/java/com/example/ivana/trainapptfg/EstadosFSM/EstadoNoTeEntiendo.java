@@ -25,13 +25,10 @@ public class EstadoNoTeEntiendo extends Estado {
             contUltAct = 1;
             ultAct = numeroActividad;
         }
-
-
-        //TODO CAMBIAR VALOR POR VARIABLE
-        if(contUltAct != 3){
+        if(contUltAct != MIN_ACT_SEGUIDAS_IGUALES){
             retEstado = new EstadoNoTeEntiendo(this.contUltAct, this.ultAct);
         }
-        else if(contUltAct == 3){
+        else if(contUltAct == MIN_ACT_SEGUIDAS_IGUALES){
             retEstado = new EstadoActividad(this.ultAct);
         }
 

@@ -227,9 +227,6 @@ public class RecogerDatosRecogida extends Activity {
         this.timer = new Timer();
 
         this.buttonRecord.setEnabled(false);
-        this.buttonRecord.setBackgroundResource(0);
-        //TODO AAQUI FALTABA UN ICONO EN EL RESPOSITORIO "ICO_REL_ARENA"
-        this.buttonRecord.setBackgroundResource(R.drawable.ic_history_black_24dp);
         buttonRecord.setBackgroundColor(Color.rgb(223, 229, 229));
         this.buttonRecord.setText("En proceso...");
 

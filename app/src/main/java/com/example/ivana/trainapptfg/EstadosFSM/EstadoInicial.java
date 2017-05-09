@@ -32,7 +32,6 @@ public class EstadoInicial extends Estado {
 
         }
         else if(contGlobal >= Estado.MAX_SIZE){
-            //TODO CAMBIAR VALOR POR VARIABLE
             retEstado = new EstadoNoTeEntiendo(this.contUltAct, this.ultAct);
 
         }
@@ -52,7 +51,6 @@ public class EstadoInicial extends Estado {
 
     @Override
     public int getActividad() {
-        //TODO PREGUNTAR QUE DEVOLVER
         return -1;
     }
 }

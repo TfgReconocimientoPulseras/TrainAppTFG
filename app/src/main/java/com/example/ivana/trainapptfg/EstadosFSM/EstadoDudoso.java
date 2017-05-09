@@ -33,7 +33,6 @@ public class EstadoDudoso extends Estado {
             }
         }
         else if(contGlobal >= Estado.MAX_SIZE){
-            //TODO CAMBIAR VALOR POR VARIABLE
             retEstado = new EstadoNoTeEntiendo(this.contUltAct, this.ultAct);
         }
 
