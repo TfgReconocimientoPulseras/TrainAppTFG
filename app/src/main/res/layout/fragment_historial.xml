@@ -1,13 +1,49 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.example.ivana.trainapptfg.Fragments.HistorialFragment">
-
+    android:layout_height="match_parent">
     <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Ventana que contendrá el historial de actividades realizadas ;)" />
 
-</FrameLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="174dp"
+        app:layout_heightPercent="30%"
+
+        android:id="@+id/relativeLayout"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Aquí puedes ver tu actividad a lo largo de los días"
+            android:textColor="@color/colorPrimaryDark"
+            android:gravity="center"
+            android:textSize="35dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true" />
+    </RelativeLayout>
+
+    <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+        android:layout_width="match_parent"
+        android:layout_height="174dp"
+        app:layout_heightPercent="70%"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true">
+
+        <CalendarView
+            android:id="@+id/calendario_historial"
+            android:layout_width="wrap_content"
+            app:layout_heightPercent="100%"
+            app:layout_widthPercent="100%"
+            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentStart="true" />
+    </android.support.percent.PercentRelativeLayout>
+
+</android.support.percent.PercentRelativeLayout>
