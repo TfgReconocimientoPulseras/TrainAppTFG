@@ -3,7 +3,6 @@ package com.example.ivana.trainapptfg.AsistenteRecogidaDatos;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.FragmentManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -11,9 +10,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.media.MediaScannerConnection;
@@ -23,7 +19,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
@@ -35,8 +30,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ivana.trainapptfg.MainActivity;
-import com.example.ivana.trainapptfg.Utilidades.DataTAD;
 import com.example.ivana.trainapptfg.R;
+import com.example.ivana.trainapptfg.Utilidades.DataTAD;
 import com.example.ivana.trainapptfg.Utilidades.MiSensorEventListener;
 
 import java.io.File;
@@ -45,7 +40,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -86,6 +80,7 @@ public class RecogerDatosRecogida extends Activity {
     private static final String PATH_DATA_DIR =  Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles";
     private static final int FREQUENCY_DEF = 100;
     private static final String TAG = "RecogerDatos";
+    private static final String FILES_HEAD = "timestamp,gyro-alpha,gyro-beta,gyro-gamma,accel-x,accel-y,accel-z\n";
     private static final int NUM_ARCHIVOS_CREAR = 3;
     private static final int TIEMPO_POR_ARCHIVO = 30000;
 
@@ -343,7 +338,7 @@ public class RecogerDatosRecogida extends Activity {
         try {
             FileOutputStream fOs = new FileOutputStream(file);
             OutputStreamWriter oSw = new OutputStreamWriter(fOs);
-
+            oSw.write(FILES_HEAD);
             for (DataTAD dataItem : list) {
                 String formatted = dataItem.formattedString() + "\n";
                 oSw.write(formatted);
