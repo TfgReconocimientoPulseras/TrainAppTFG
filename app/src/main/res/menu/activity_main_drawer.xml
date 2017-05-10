@@ -2,10 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
-    <item
-        android:id="@+id/nav_register_activity"
-        android:icon="@drawable/ic_add_black_36dp"
-        android:title="Registrar nueva actividad" />
+        <item
+            android:id="@+id/nav_register_activity"
+            android:icon="@drawable/ic_add_black_36dp"
+            android:title="Registrar nueva actividad" />
         <item
             android:id="@+id/synchBluetooth"
             android:icon="@drawable/ic_sync_black_24dp"
