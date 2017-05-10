@@ -16,7 +16,7 @@ public class HistorialDiaConcreto extends Activity {
         setContentView(R.layout.activity_historial_dia_concreto);
         this.textoPruebas = (TextView)findViewById(R.id.textoPrueba);
         Intent i = getIntent();
-        this.textoPruebas.setText("Aquí aparecerá una lista con las actividades que has realizado en el día " + Integer.toString(i.getIntExtra("dayOfMonth", 1)) + " de " + Integer.toString(i.getIntExtra("month", 1)) + " del " + Integer.toString(i.getIntExtra("year", 1970)) + " ;)");
+        this.textoPruebas.setText("Aquí aparecerá una lista con las actividades que has realizado en el día " + Integer.toString(i.getIntExtra("dayOfMonth", 1)) + " del " + Integer.toString(i.getIntExtra("month", 1) + 1) + " del " + Integer.toString(i.getIntExtra("year", 1970)) + " ;)");
     }
 
     protected void onResume() {

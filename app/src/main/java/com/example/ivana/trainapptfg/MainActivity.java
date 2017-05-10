@@ -1,7 +1,11 @@
 package com.example.ivana.trainapptfg;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PorterDuff;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -18,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.ivana.trainapptfg.AsistenteRecogidaDatos.RecogerDatosBienvenida;
+import com.example.ivana.trainapptfg.AsistenteRecogidaDatos.RecogerDatosRecogida;
 import com.example.ivana.trainapptfg.Fragments.HistorialFragment;
 import com.example.ivana.trainapptfg.Fragments.ReconocerActividadFragment;
 
@@ -38,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        comprobarExistenciaSensores();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -175,6 +181,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public CharSequence getPageTitle(int position) {
             //return mFragmentTitleList.get(position);
             return null;
+        }
+    }
+
+    private void comprobarExistenciaSensores(){
+
+        SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
+        Sensor acc = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        Sensor gyr = sm.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+
+        if(acc == null || gyr == null){
+            Intent salir = new Intent (MainActivity.this, NoSensores.class);
+            startActivity(salir);
         }
     }
 }
