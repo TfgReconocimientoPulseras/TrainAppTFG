@@ -1,7 +1,5 @@
 package com.example.ivana.trainapptfg;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.hardware.Sensor;
@@ -21,8 +19,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.ivana.trainapptfg.AsistenteRecogidaDatos.RecogerDatosBienvenida;
-import com.example.ivana.trainapptfg.AsistenteRecogidaDatos.RecogerDatosRecogida;
+import com.example.ivana.trainapptfg.Activities.AsistenteRecogidaDatos.RecogerDatosBienvenida;
+import com.example.ivana.trainapptfg.Activities.Bluetooth.ListarYConectarBluetooth;
 import com.example.ivana.trainapptfg.Fragments.HistorialFragment;
 import com.example.ivana.trainapptfg.Fragments.ReconocerActividadFragment;
 
@@ -125,9 +123,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.nav_register_activity) {
             Intent recogida = new Intent(this, RecogerDatosBienvenida.class);
             startActivity(recogida);
-        } /*else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.synchBluetooth) {
+            Intent intent = new Intent(this, ListarYConectarBluetooth.class);
+            startActivity(intent);
+        }
+        /*else if (id == R.id.nav_manage) {
 
         } else if (id == R.id.nav_share) {
 

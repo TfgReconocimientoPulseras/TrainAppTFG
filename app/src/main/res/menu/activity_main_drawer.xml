@@ -6,11 +6,11 @@
         android:id="@+id/nav_register_activity"
         android:icon="@drawable/ic_add_black_36dp"
         android:title="Registrar nueva actividad" />
-        <!--item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
         <item
+            android:id="@+id/synchBluetooth"
+            android:icon="@drawable/ic_sync_black_24dp"
+            android:title="Listar dispositivos" />
+        <!--item
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Slideshow" />
