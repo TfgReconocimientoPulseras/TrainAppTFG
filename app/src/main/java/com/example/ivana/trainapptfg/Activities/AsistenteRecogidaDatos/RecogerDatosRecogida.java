@@ -33,6 +33,7 @@ import com.example.ivana.trainapptfg.MainActivity;
 import com.example.ivana.trainapptfg.R;
 import com.example.ivana.trainapptfg.Utilidades.DataTAD;
 import com.example.ivana.trainapptfg.Utilidades.MiSensorEventListener;
+import com.example.ivana.trainapptfg.Utilidades.Utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -180,10 +181,7 @@ public class RecogerDatosRecogida extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recoger_datos_recogida);
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE);
-        }
-
+        askForStoragePermission();
         this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -380,21 +378,6 @@ public class RecogerDatosRecogida extends Activity {
 
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
-        switch (requestCode){
-            case REQUEST_WRITE_EXTERNAL_STORAGE:
-                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
-                }
-                else{
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }
 
     //MIRAR QUE SE ESTÉ REALIZANDO BIEN
     private void actualizaMemoria(){
@@ -404,5 +387,27 @@ public class RecogerDatosRecogida extends Activity {
                 //showMessageToast("hola");
             }
         });
+    }
+
+    private void askForStoragePermission(){
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
+        if(grantResults.length > 0){
+            switch (requestCode){
+                case REQUEST_WRITE_EXTERNAL_STORAGE:
+                    if(!Utils.checkPermissionsResult(this, permissions, grantResults)){
+                        System.exit(0);
+                    };
+                    break;
+                default:
+                    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            }
+        }
     }
 }

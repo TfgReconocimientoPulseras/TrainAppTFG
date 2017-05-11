@@ -1,16 +1,20 @@
 package com.example.ivana.trainapptfg.Activities.Bluetooth;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -18,19 +22,24 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.ivana.trainapptfg.R;
+import com.example.ivana.trainapptfg.Utilidades.Utils;
 
 import java.util.ArrayList;
 
 //https://developer.android.com/guide/topics/connectivity/bluetooth-le.html
+//DOCUMENTACION PARA REALIZAR ESCANEO -> http://www.londatiga.net/it/programming/android/how-to-programmatically-scan-or-discover-android-bluetooth-device/
 public class ListarYConectarBluetooth extends AppCompatActivity {
+    private static final int REQUEST_ACCESS_COARSE_LOCATION = 222;
 
     private static final int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter mBluetoothAdapter;
-    private BluetoothManager bluetoothManager;
+    //private BluetoothManager bluetoothManager;
 
     private ListView listView;
     private ArrayAdapter<String> adapter;
+    private IntentFilter filter;
 
+    /*
     private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(final BluetoothDevice device, int rssi,
@@ -43,13 +52,31 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                 }
             });
         }
+    };*/
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                Log.d("BLUETOOTH", "DISCOVERY STARTED");
+//discovery starts, we can show progress dialog or perform other tasks
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+//discovery finishes, dismis progress dialog
+                Log.d("BLUETOOTH", "DISCOVERY FINISHED");
+
+            } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+//bluetooth device found
+                BluetoothDevice device = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                Log.d("BLUETOOTH", "DEVICE DISCOVERED");
+
+            }
+        }
     };
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listar_yconectar_bluetooth);
+        askForLocationPermission();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -66,8 +93,13 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         }
 
         //OBRTENEMOS EL SERVICIO DE BLUETOOTH Y EL ADAPTADOR
-        this.bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        this.mBluetoothAdapter = bluetoothManager.getAdapter();
+        //this.bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+
 
         //COMPROBAMOS QUE ESTÉ ACTIVADO EL BLUETOOTH
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
@@ -106,7 +138,6 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
         });
 
-        scanLeDevice(mBluetoothAdapter.isEnabled());
 
     }
     private boolean mScanning;
@@ -115,6 +146,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 10000;
 
+    /*
     private void scanLeDevice(final boolean enable) {
         if (enable) {
             // Stops scanning after a pre-defined scan period.
@@ -136,6 +168,36 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
             mBluetoothAdapter.startLeScan(mLeScanCallback);
         }
 
+    }*/
+
+    @Override
+    public void onDestroy(){
+        mBluetoothAdapter.cancelDiscovery();
+        unregisterReceiver(mReceiver);
+        super.onDestroy();
+    }
+    private void askForLocationPermission(){
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_ACCESS_COARSE_LOCATION);
+        }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
+        if(grantResults.length > 0){
+            switch (requestCode){
+                case REQUEST_ACCESS_COARSE_LOCATION:
+                    if(!Utils.checkPermissionsResult(this, permissions, grantResults)){
+                        System.exit(0);
+                    }
+                    else{
+                        registerReceiver(mReceiver, filter);
+                        mBluetoothAdapter.startDiscovery();
+                    };
+                    break;
+                default:
+                    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            }
+        }
+    }
 }
