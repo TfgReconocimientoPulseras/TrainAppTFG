@@ -15,6 +15,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -29,62 +31,54 @@ import java.util.ArrayList;
 //https://developer.android.com/guide/topics/connectivity/bluetooth-le.html
 //DOCUMENTACION PARA REALIZAR ESCANEO -> http://www.londatiga.net/it/programming/android/how-to-programmatically-scan-or-discover-android-bluetooth-device/
 public class ListarYConectarBluetooth extends AppCompatActivity {
+    //Comprobacion de permisos dados
     private static final int REQUEST_ACCESS_COARSE_LOCATION = 222;
-
+    //Comprobacion si bluetooth esta activado
     private static final int REQUEST_ENABLE_BT = 1;
-    private BluetoothAdapter mBluetoothAdapter;
-    //private BluetoothManager bluetoothManager;
 
+    private BluetoothAdapter mBluetoothAdapter;
+
+    //Gestion de la lista de dispositivos
     private ListView listView;
     private ArrayAdapter<String> adapter;
+    private ArrayList<String> list;
+
     private IntentFilter filter;
 
-    /*
-    private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
-        @Override
-        public void onLeScan(final BluetoothDevice device, int rssi,
-                             byte[] scanRecord) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    adapter.add(device.getAddress());
-                    adapter.notifyDataSetChanged();
-                }
-            });
-        }
-    };*/
-
+    //Atiende a los eventos del bluetooth
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-                Log.d("BLUETOOTH", "DISCOVERY STARTED");
-//discovery starts, we can show progress dialog or perform other tasks
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-//discovery finishes, dismis progress dialog
+                Log.d("BLUETOOTH", "DISCOVERY STARTED"); //lo que se ejecuta cuando el bluetooth comienza a escanear
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) { //lo que se ejecuta cuando el bluetooth finaliza el escaneo
                 Log.d("BLUETOOTH", "DISCOVERY FINISHED");
 
-            } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-//bluetooth device found
-                BluetoothDevice device = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            } else if (BluetoothDevice.ACTION_FOUND.equals(action)) { //lo que se ejecuta cuando el bluetooth encuentra un dispositivo
+                final BluetoothDevice device = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 Log.d("BLUETOOTH", "DEVICE DISCOVERED");
 
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        list.add(device.getAddress());
+                        adapter.notifyDataSetChanged();
+                    }
+                });
             }
         }
     };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listar_yconectar_bluetooth);
-        askForLocationPermission();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
 
-        //TODO EDITAR ESTA VISTA PARA QUE SALGA UN LISTADO DE LOS DISPOSITIVOS BLUETOOTH CERCANOS Y QUE AL HACER "PULL TO REFRESH ACTUALICE LA LISTA"
-        //https://git.ti.com/sensortag-20-android/sensortag-20-android/blobs/master/sensortag20/BleSensorTag/src/main/java/com/example/ti/ble/sensortag/MainActivity.java
-        //import com.example.ti.ble.common.BleDeviceInfo;
-        //import com.example.ti.ble.common.BluetoothLeService;
+        //Solicitud de permisos
+        askForLocationPermission();
 
         //COMPROBACION PARA VER SI EL DISPOSITIVO ES COMPATIBLE CON BLE, EN OTRO CASO MOSTRAR QUE NO LO ES
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -92,8 +86,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
             finish();
         }
 
-        //OBRTENEMOS EL SERVICIO DE BLUETOOTH Y EL ADAPTADOR
-        //this.bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        //OBRTENEMOS EL ADAPTADOR DEL BLUETOOTH
         this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_FOUND);
@@ -107,16 +100,48 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
 
+        //REGISTRAR BROADCAST BLUETOOTH
+        registerReceiver(mReceiver, filter);
 
+        //INICIALIZAR LISTA (MODELO Y GRAFICA)
+        inicializarListaGraficaYModelo();
+    }
+
+
+    @Override
+    public void onDestroy(){
+        mBluetoothAdapter.cancelDiscovery();
+        unregisterReceiver(mReceiver);
+        super.onDestroy();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_bluetooth, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if(id == R.id.action_refresh){
+            list.clear();
+            adapter.notifyDataSetChanged();
+            mBluetoothAdapter.startDiscovery();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void inicializarListaGraficaYModelo(){
+
+        //INICIALIZAMOS ELEMENTO GRAFICO/////////////////////////////////////////////////////////////////
         this.listView = (ListView) findViewById(R.id.list);
-
-        final ArrayList<String> list = new ArrayList<String>();
-
-        this.adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, android.R.id.text1, list);
-
-        listView.setAdapter(adapter);
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -138,50 +163,23 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
         });
 
+        //INICIALIZAMOS MODELO LISTA//////////////////////////////////////////////////////////////////////
+        this.list = new ArrayList<String>();
 
+        //INICIALIZAMOS ADAPTADOR/////////////////////////////////////////////////////////////////////////
+        this.adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, android.R.id.text1, list);
+
+        listView.setAdapter(adapter);
     }
-    private boolean mScanning;
 
-
-    // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 10000;
-
-    /*
-    private void scanLeDevice(final boolean enable) {
-        if (enable) {
-            // Stops scanning after a pre-defined scan period.
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mScanning = false;
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                    //mBluetoothAdapter.cancelDiscovery();
-                    //mBluetoothAdapter.getBluetoothLeScanner().startScan(mLeScanCallback);
-                }
-            }, SCAN_PERIOD);
-
-            mScanning = true;
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
-            //mBluetoothAdapter.startDiscovery();
-        } else {
-            mScanning = false;
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
-        }
-
-    }*/
-
-    @Override
-    public void onDestroy(){
-        mBluetoothAdapter.cancelDiscovery();
-        unregisterReceiver(mReceiver);
-        super.onDestroy();
-    }
     private void askForLocationPermission(){
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_ACCESS_COARSE_LOCATION);
         }
     }
 
+    //CUANDO SE SOLICITA LOS PERMISOS(requestPermissions()), SE LLAMA A LA SIGUIENTE FUNCION PARA SABER QUE PERMISOS HAN SIDO CONCEDIDOS
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
         if(grantResults.length > 0){
@@ -190,10 +188,6 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                     if(!Utils.checkPermissionsResult(this, permissions, grantResults)){
                         System.exit(0);
                     }
-                    else{
-                        registerReceiver(mReceiver, filter);
-                        mBluetoothAdapter.startDiscovery();
-                    };
                     break;
                 default:
                     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
