@@ -2,7 +2,11 @@ package com.example.ivana.trainapptfg.Activities.Bluetooth;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +31,7 @@ import com.example.ivana.trainapptfg.R;
 import com.example.ivana.trainapptfg.Utilidades.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 //https://developer.android.com/guide/topics/connectivity/bluetooth-le.html
 //DOCUMENTACION PARA REALIZAR ESCANEO -> http://www.londatiga.net/it/programming/android/how-to-programmatically-scan-or-discover-android-bluetooth-device/
@@ -37,11 +42,13 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
     private static final int REQUEST_ENABLE_BT = 1;
 
     private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothGatt mBluetoothGatt;
 
     //Gestion de la lista de dispositivos
     private ListView listView;
     private ArrayAdapter<String> adapter;
     private ArrayList<String> list;
+    private HashMap<String, BluetoothDevice> listaDevices;
 
     private IntentFilter filter;
 
@@ -62,12 +69,44 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                     @Override
                     public void run() {
                         list.add(device.getAddress());
+                        listaDevices.put(device.getAddress(), device);
                         adapter.notifyDataSetChanged();
                     }
                 });
             }
         }
     };
+
+    private final BluetoothGattCallback mBtleCallback = new BluetoothGattCallback() {
+        @Override
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+            super.onCharacteristicChanged(gatt, characteristic);
+            // this will get called anytime you perform a read or write characteristic operation
+        }
+
+        @Override
+        public void onConnectionStateChange(final BluetoothGatt gatt, final int status, final int newState) {
+            // this will get called when a device connects or disconnects
+            Log.d("BLUETOOTH", "//////////////////////////////////////////////////////////////");
+            Log.d("BLUETOOTH", "Interacción con dispositivo. STATUS: " + String.valueOf(status) + " NEWSTATE: " + String.valueOf(newState));
+            Log.d("BLUETOOTH", "//////////////////////////////////////////////////////////////");
+
+            if(status == BluetoothGatt.GATT_SUCCESS){
+                Log.d("BLUETOOTH", "Conectado a dispositivo");
+
+            }
+            else{
+                Log.d("BLUETOOTH", "No se ha podido conectar a dispositivo");
+            }
+        }
+
+        @Override
+        public void onServicesDiscovered(final BluetoothGatt gatt, final int status) {
+            // this will get called after the client initiates a BluetoothGatt.discoverServices() call
+        }
+    };
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,9 +169,10 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         int id = item.getItemId();
 
         if(id == R.id.action_refresh){
-            list.clear();
-            adapter.notifyDataSetChanged();
-            mBluetoothAdapter.startDiscovery();
+            this.list.clear();
+            this.listaDevices.clear();
+            this.adapter.notifyDataSetChanged();
+            this.mBluetoothAdapter.startDiscovery();
         }
 
         return super.onOptionsItemSelected(item);
@@ -142,6 +182,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
         //INICIALIZAMOS ELEMENTO GRAFICO/////////////////////////////////////////////////////////////////
         this.listView = (ListView) findViewById(R.id.list);
+        this.listaDevices = new HashMap<String, BluetoothDevice>();
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -158,6 +199,8 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(),
                         "Position :" + itemPosition + "  ListItem : " + itemValue, Toast.LENGTH_LONG)
                         .show();
+
+                conectarseDispositivo(itemValue);
 
             }
 
@@ -193,5 +236,13 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
             }
         }
+    }
+
+    private void conectarseDispositivo(String mac){
+        BluetoothDevice device = this.listaDevices.get(mac);
+
+        this.mBluetoothGatt = device.connectGatt(this, false, this.mBtleCallback);
+        //mBluetoothGatt.close();
+        //mBluetoothGatt = null;
     }
 }
