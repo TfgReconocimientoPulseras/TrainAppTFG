@@ -7,6 +7,8 @@ import android.graphics.PorterDuff;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -26,10 +28,12 @@ import android.widget.Toast;
 
 import com.example.ivana.trainapptfg.Activities.AsistenteRecogidaDatos.RecogerDatosBienvenida;
 import com.example.ivana.trainapptfg.Activities.Bluetooth.ListarYConectarBluetooth;
+import com.example.ivana.trainapptfg.DataBase.DatabaseAdapter;
 import com.example.ivana.trainapptfg.Fragments.HistorialFragment;
 import com.example.ivana.trainapptfg.Fragments.ReconocerActividadFragment;
 import com.example.ivana.trainapptfg.Utilidades.Utils;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,6 +90,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        DatabaseAdapter db = new DatabaseAdapter(this);
+        db.open();
+        long id = db.insertActivity("caminar");
+        long id2 = db.insertActivity("correr");
+        long id3 = db.insertActivity("aplaudir");
+        long id4 = db.insertActivity("aplaudirTT");
+
+        long idHistory = db.insertarNuevoRegistroAlHistorial(id4, System.currentTimeMillis(), 0);
+        db.deleteActivty(id4);
+        db.close();
 
     }
 
