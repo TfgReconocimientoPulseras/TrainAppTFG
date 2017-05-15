@@ -2,18 +2,19 @@ package com.example.ivana.trainapptfg.Activities.Bluetooth;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -32,6 +33,10 @@ import com.example.ivana.trainapptfg.Utilidades.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Queue;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 //https://developer.android.com/guide/topics/connectivity/bluetooth-le.html
 //DOCUMENTACION PARA REALIZAR ESCANEO -> http://www.londatiga.net/it/programming/android/how-to-programmatically-scan-or-discover-android-bluetooth-device/
@@ -49,6 +54,42 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
     private ArrayList<String> list;
     private HashMap<String, BluetoothDevice> listaDevices;
+
+    //UUID Pulsera CCC
+    private static final UUID UUID_CCC = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+
+    //UUID Pulsera Humedad
+    private static final UUID UUID_HUMIDITY_SERVICE =     UUID.fromString("f000aa20-0451-4000-b000-000000000000");
+    private static final UUID UUID_HUMIDITY_DATA =        UUID.fromString("f000aa21-0451-4000-b000-000000000000");
+    private static final UUID UUID_HUMIDITY_CONF =        UUID.fromString("f000aa22-0451-4000-b000-000000000000");
+
+    //UUID Pulsera Acelerometro
+    private static final UUID UUID_ACELEROMETRO_SERVICE = UUID.fromString("f000aa80-0451-4000-b000-000000000000");
+    private static final UUID UUID_ACELEROMETRO_DATA =    UUID.fromString("f000aa81-0451-4000-b000-000000000000");
+    private static final UUID UUID_ACELEROMETRO_CONF =    UUID.fromString("f000aa82-0451-4000-b000-000000000000");
+
+    //ENCENDER/APAGAR SENSOR HUMEDAD
+    private static final byte[] ENCENDER_SENSOR_HUMEDAD = {0x01};
+    private static final byte[] APAGAR_SENSOR_HUMEDAD = {0x00};
+
+    //ENCENDER/APAGAR SENSOR ACELERÓMETRO
+    private static final byte[] ENCENDER_SENSOR_ACELEROMETRO = {0x3f, 0x00}; //array de bytes, bytes[0] es el byte menos significativo
+    private static final byte[] APAGAR_SENSOR_ACELEROMETRO = {0x00, 0x00};
+
+    //COLAS DE ESCRITURA PARA SENSOR
+    private static final Queue<Object> sWriteQueue = new ConcurrentLinkedQueue<Object>();
+    private static boolean sIsWritting = false;
+
+    //Elementos (servicios/caracteristicas) de la pulsera
+    private List<BluetoothGattService> mBleServices;
+
+    private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            final int status = intent.getIntExtra("EXTRA_STATUS", BluetoothGatt.GATT_SUCCESS);
+        }
+    };
 
     private IntentFilter filter;
 
@@ -77,32 +118,79 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         }
     };
 
-    private final BluetoothGattCallback mBtleCallback = new BluetoothGattCallback() {
+    private BluetoothGattCallback mBtleCallback = new BluetoothGattCallback() {
+        @Override
+        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            super.onConnectionStateChange(gatt, status, newState);
+
+            Log.d("BLUETOOTH", "Estado de conexión bluetooth: " + (newState == BluetoothProfile.STATE_CONNECTED ? "Connected" : "Disconnected"));
+
+            if(newState == BluetoothProfile.STATE_CONNECTED){
+                //setState(State.CONNECTED);
+                mBluetoothGatt.discoverServices();
+            }
+            else{
+                //setState(State.IDDLE);
+            }
+        }
+
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            super.onServicesDiscovered(gatt, status);
+
+            if(status == BluetoothGatt.GATT_SUCCESS){
+                Log.d("BLUETOOTH", "Servicios descubiertos :)");
+                //obtenerCaracteristicasDescriptoresHumedad(mBluetoothGatt);
+                obtenerCaracteristicasDescriptoresAcelerometro(mBluetoothGatt);
+            }
+        }
+
+        @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            super.onCharacteristicWrite(gatt, characteristic, status);
+            Log.d("BLUETOOTH", "onCharacteristicWrite: " + status);
+            sIsWritting = false;
+            nextWrite(); //Si la cola de escriuras y no se está escribiendo -> escribeme
+        }
+
+        @Override
+        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+            super.onDescriptorWrite(gatt, descriptor, status);
+            Log.d("BLUETOOTH", "onDescriptorWrite: " + status);
+            sIsWritting = false;
+            nextWrite(); //Si la cola de escriuras y no se está escribiendo -> escribeme
+        }
+
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicChanged(gatt, characteristic);
-            // this will get called anytime you perform a read or write characteristic operation
-        }
+            Log.d("BLUETOOTH", "onCharacteristicChanged");
 
-        @Override
-        public void onConnectionStateChange(final BluetoothGatt gatt, final int status, final int newState) {
-            // this will get called when a device connects or disconnects
-            Log.d("BLUETOOTH", "//////////////////////////////////////////////////////////////");
-            Log.d("BLUETOOTH", "Interacción con dispositivo. STATUS: " + String.valueOf(status) + " NEWSTATE: " + String.valueOf(newState));
-            Log.d("BLUETOOTH", "//////////////////////////////////////////////////////////////");
+            //SI SON DATOS DE TIPO HUMEDAD
+            /*if(characteristic.getUuid().equals(UUID_HUMIDITY_DATA)){
+                int t = shortUnsignedAtOffset(characteristic, 0);
+                int h = shortUnsignedAtOffset(characteristic, 2);
+                t = t - (t % 4);
+                h = h - (h % 4);
 
-            if(status == BluetoothGatt.GATT_SUCCESS){
-                Log.d("BLUETOOTH", "Conectado a dispositivo");
+                float humidity = (-6f) + 125f * (h / 65535f);
+                float temperature = -46.85f +
+                        175.72f/65536f * (float)t;
+                Log.d("HUMEDAD-TEMPERATURA", "Value: " + humidity + " : " + temperature);
+            }*/
+
+            if(characteristic.getUuid().equals(UUID_ACELEROMETRO_DATA)){
+                Integer x = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 0);
+                Integer y = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 1);
+                Integer z = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 2) * -1;
+
+                double scaledX = x / 64.0;
+                double scaledY = x / 64.0;
+                double scaledZ = x / 64.0;
+
+                Log.d("ACELEROMETRO", "Value: " + scaledX + ":" + scaledY + " : " + scaledZ);
 
             }
-            else{
-                Log.d("BLUETOOTH", "No se ha podido conectar a dispositivo");
-            }
-        }
-
-        @Override
-        public void onServicesDiscovered(final BluetoothGatt gatt, final int status) {
-            // this will get called after the client initiates a BluetoothGatt.discoverServices() call
         }
     };
 
@@ -238,11 +326,94 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         }
     }
 
-    private void conectarseDispositivo(String mac){
+    public void conectarseDispositivo(String mac){
         BluetoothDevice device = this.listaDevices.get(mac);
-
-        this.mBluetoothGatt = device.connectGatt(this, false, this.mBtleCallback);
-        //mBluetoothGatt.close();
-        //mBluetoothGatt = null;
+        if(device != null){
+            this.mBluetoothGatt = device.connectGatt(this, true, this.mBtleCallback);
+        }
     }
+
+    private void obtenerCaracteristicasDescriptoresHumedad(BluetoothGatt gatt){
+        BluetoothGattService humedadService = gatt.getService(UUID_HUMIDITY_SERVICE);
+        if(humedadService != null){
+            BluetoothGattCharacteristic humedadCharacteristic = humedadService.getCharacteristic(UUID_HUMIDITY_DATA);
+            BluetoothGattCharacteristic humedadConf = humedadService.getCharacteristic(UUID_HUMIDITY_CONF);
+
+            if(humedadCharacteristic != null && humedadConf != null){
+                BluetoothGattDescriptor config = humedadCharacteristic.getDescriptor(UUID_CCC);
+
+                if(config != null){
+                    mBluetoothGatt.setCharacteristicNotification(humedadCharacteristic, true);
+
+                    humedadConf.setValue(ENCENDER_SENSOR_HUMEDAD);
+                    write(humedadConf);
+
+                    config.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                    write(config);
+                }
+            }
+        }
+    }
+
+    private void obtenerCaracteristicasDescriptoresAcelerometro(BluetoothGatt gatt){
+        BluetoothGattService acelerometroService = gatt.getService(UUID_ACELEROMETRO_SERVICE);
+        if(acelerometroService != null){
+            BluetoothGattCharacteristic acelerometroCharacteristic = acelerometroService.getCharacteristic(UUID_ACELEROMETRO_DATA);
+            BluetoothGattCharacteristic acelerometroConf = acelerometroService.getCharacteristic(UUID_ACELEROMETRO_CONF);
+
+            if(acelerometroCharacteristic != null && acelerometroConf != null){
+                BluetoothGattDescriptor config = acelerometroCharacteristic.getDescriptor(UUID_CCC);
+
+                if(config != null){
+                    mBluetoothGatt.setCharacteristicNotification(acelerometroCharacteristic, true);
+
+                    acelerometroConf.setValue(ENCENDER_SENSOR_ACELEROMETRO);
+                    write(acelerometroConf);
+
+                    config.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                    write(config);
+                }
+            }
+        }
+    }
+
+    //Si no hay nadie escrbiendo y la lista no está vacia, que escriba el siguiente que tiene de escribir
+    private synchronized void nextWrite(){
+        if(!sIsWritting && !sWriteQueue.isEmpty()){
+            doWrite(sWriteQueue.poll()); //escribirá el primero de la lista
+        }
+    }
+
+    //Realiza el proceso de escritura diferenciando entre descriptor/característica
+    private synchronized void doWrite(Object o){
+        if(o instanceof BluetoothGattCharacteristic){
+            sIsWritting = true;
+            mBluetoothGatt.writeCharacteristic((BluetoothGattCharacteristic)o);
+        }
+        else if(o instanceof BluetoothGattDescriptor){
+            sIsWritting = true;
+            mBluetoothGatt.writeDescriptor((BluetoothGattDescriptor)o);
+        }
+        else{
+            nextWrite();
+        }
+    }
+
+    private synchronized void write(Object o){
+        if(sWriteQueue.isEmpty() && !sIsWritting){
+            doWrite(o);
+        }else{
+            sWriteQueue.add(o);
+        }
+    }
+
+    private static Integer shortUnsignedAtOffset(BluetoothGattCharacteristic characteristic, int offset) {
+
+        Integer lowerByte = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+        Integer upperByte = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 1);
+
+        return (upperByte << 8) + lowerByte;
+    }
+
+
 }
