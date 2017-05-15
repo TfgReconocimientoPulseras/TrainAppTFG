@@ -21,14 +21,13 @@ import android.view.MenuItem;
 
 import com.example.ivana.trainapptfg.Activities.AsistenteRecogidaDatos.RecogerDatosBienvenida;
 import com.example.ivana.trainapptfg.Activities.Bluetooth.ListarYConectarBluetooth;
+import com.example.ivana.trainapptfg.Activities.ListarActividades;
 import com.example.ivana.trainapptfg.DataBase.DatabaseAdapter;
 import com.example.ivana.trainapptfg.Fragments.HistorialFragment;
 import com.example.ivana.trainapptfg.Fragments.ReconocerActividadFragment;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 
@@ -85,8 +84,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        /**
-         * PRUEBAS BBDD
+/*
         DatabaseAdapter db = new DatabaseAdapter(this);
         db.open();
         long id = db.insertActivity("caminar");
@@ -107,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         db.deleteActivty(id4);
         db.close();
-         **/
+*/
 
     }
 
@@ -159,9 +157,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(this, ListarYConectarBluetooth.class);
             startActivity(intent);
         }
-        /*else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
+        else if (id == R.id.listActivity) {
+            Intent intent = new Intent(this, ListarActividades.class);
+            startActivity(intent);
+        }
+        /*else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
 

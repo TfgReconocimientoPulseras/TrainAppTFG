@@ -23,7 +23,7 @@ public class DatabaseAdapter {
     private static final String TAG = "DataBaseAdapter";
 
     //VERSION BD
-    private static final int DATABASE_VERSION = 15;
+    private static final int DATABASE_VERSION = 18;
 
     //Nombre de la BD
     private static final String DB_NAME = "AppDB";
@@ -36,6 +36,9 @@ public class DatabaseAdapter {
     private static final String KEY_ID = "id";
     private static final String KEY_ACTIVIDAD = "actividad";
 
+    //Columnas TABLA_ACTIVIDADES
+    private static final String KEY_FECHACREACION = "fechaCreacion";
+
     //Columnas TABBLA_HISTORIAL
     private static final String KEY_FECHAINI = "fechaIni";
     private static final String KEY_FECHAFIN = "fechaFin";
@@ -44,7 +47,8 @@ public class DatabaseAdapter {
 
     private static final String CREAR_TABLA_ACTIVIDADES = "CREATE TABLE "
             + TABLA_ACTIVIDADES + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-            + KEY_ACTIVIDAD + " TEXT NOT NULL UNIQUE" + ")";
+            + KEY_ACTIVIDAD + " TEXT NOT NULL UNIQUE,"
+            + KEY_FECHACREACION + " DATETIME DEFAULT (datetime('now', 'localtime')))";
 
     private static final String BORRAR_TABLA_ACTIVIDADES = "DROP TABLE IF EXISTS " + TABLA_ACTIVIDADES;
 
@@ -113,6 +117,21 @@ public class DatabaseAdapter {
         return id;
     }
 
+    public ActivityDataTransfer getDataTransfer(long id){
+        ActivityDataTransfer activityDataTransfer = null;
+        String query = "SELECT * FROM " + TABLA_ACTIVIDADES + " WHERE " + KEY_ID + "=" + id;
+        Cursor c = db.rawQuery(query, null);
+
+        while(c.getCount() == 1 && c.moveToNext()){
+            String actividad = c.getString(c.getColumnIndex(KEY_ACTIVIDAD));
+            Date fCreacion = getDateFromSqlite(c.getString(c.getColumnIndex(KEY_FECHACREACION)));
+            activityDataTransfer = new ActivityDataTransfer(id, actividad, fCreacion);
+        }
+
+        return activityDataTransfer;
+
+    }
+
     public long insertarNuevoRegistroAlHistorial(long idActivity, long tIni, long tFin){
         String s = getDateTimeToSqlite(tIni);
         String s1 = getDateTimeToSqlite(tFin);
@@ -145,6 +164,25 @@ public class DatabaseAdapter {
             Date fFin = getDateFromSqlite(c.getString(c.getColumnIndex(KEY_FECHAFIN)));
             HistoryDataTransfer historyDataTransfer = new HistoryDataTransfer(id, actividad, fIni, fFin);
             retList.add(historyDataTransfer);
+        }
+
+        return retList;
+    }
+
+
+    public List<ActivityDataTransfer> listarActividadesSistema(){
+        List<ActivityDataTransfer> retList = new ArrayList<>();
+
+        String query = "SELECT * FROM " + TABLA_ACTIVIDADES;
+        Cursor c = db.rawQuery(query, null);
+
+        while(c.moveToNext()){
+            int id = c.getInt(c.getColumnIndex(KEY_ID));
+            String actividad = c.getString(c.getColumnIndex(KEY_ACTIVIDAD));
+            Date fCreacion = getDateFromSqlite(c.getString(c.getColumnIndex(KEY_FECHACREACION)));
+
+            ActivityDataTransfer activityDataTransfer = new ActivityDataTransfer(id, actividad, fCreacion);
+            retList.add(activityDataTransfer);
         }
 
         return retList;
