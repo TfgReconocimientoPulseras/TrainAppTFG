@@ -2,14 +2,16 @@ package com.example.ivana.trainapptfg.DataBase;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.ContactsContract;
 import android.util.Log;
 
-import java.io.StringWriter;
-import java.sql.Date;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Ivan on 14/05/2017.
@@ -21,7 +23,7 @@ public class DatabaseAdapter {
     private static final String TAG = "DataBaseAdapter";
 
     //VERSION BD
-    private static final int DATABASE_VERSION = 11;
+    private static final int DATABASE_VERSION = 15;
 
     //Nombre de la BD
     private static final String DB_NAME = "AppDB";
@@ -79,7 +81,7 @@ public class DatabaseAdapter {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w(TAG, "Actualizando BD de la version " + oldVersion + " a " + newVersion + "lo cual destruirá todos los datos");
+            Log.w(TAG, "Actualizando BD de la version " + oldVersion + " a " + newVersion + " lo cual destruirá todos los datos");
             db.execSQL(BORRAR_TABLA_ACTIVIDADES);
             db.execSQL(BORRAR_TABLA_HISTORIAL);
             onCreate(db);
@@ -130,10 +132,41 @@ public class DatabaseAdapter {
         return ret > 0;
     }
 
+    public List<HistoryDataTransfer> dameActividadesFecha(String fecha){
+        //SELECT * FROM historial WHERE date(fechaIni)=date('2017-05-14')
+        List<HistoryDataTransfer> retList = new ArrayList<>();
+        String query = "SELECT * FROM " + TABLA_HISTORIAL + " WHERE date(" + KEY_FECHAINI + ")=date(?)";
+        Cursor c = db.rawQuery(query, new String[]{fecha});
+
+        while(c.moveToNext()){
+            int id = c.getInt(c.getColumnIndex(KEY_ID));
+            int actividad = c.getInt(c.getColumnIndex(KEY_ACTIVIDAD));
+            Date fIni = getDateFromSqlite(c.getString(c.getColumnIndex(KEY_FECHAINI)));
+            Date fFin = getDateFromSqlite(c.getString(c.getColumnIndex(KEY_FECHAFIN)));
+            HistoryDataTransfer historyDataTransfer = new HistoryDataTransfer(id, actividad, fIni, fFin);
+            retList.add(historyDataTransfer);
+        }
+
+        return retList;
+    }
+
     private static String getDateTimeToSqlite(long timeInMillis){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return dateFormat.format(new java.util.Date(timeInMillis));
     }
+
+    private static Date getDateFromSqlite(String date){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date d = new Date();
+        try {
+            d = dateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return d;
+    }
+
 
     //C:\Users\Ivan\AppData\Local\Android\sdk\platform-tools
     //adb shell

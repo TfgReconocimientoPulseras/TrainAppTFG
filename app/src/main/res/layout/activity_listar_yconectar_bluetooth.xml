@@ -6,10 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.example.ivana.trainapptfg.Activities.Bluetooth.ListarYConectarBluetooth">
 
-    <include
-        layout="@layout/content_listar_yconectar_bluetooth"
-        android:layout_height="match_parent"
-        android:layout_weight="1" />
+    <include layout="@layout/content_listar_yconectar_bluetooth" />
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"

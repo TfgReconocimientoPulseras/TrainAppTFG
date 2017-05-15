@@ -14,6 +14,10 @@ import android.widget.CalendarView;
 import com.example.ivana.trainapptfg.Historial.HistorialDiaConcreto;
 import com.example.ivana.trainapptfg.R;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 
 public class HistorialFragment extends Fragment {
 
@@ -42,10 +46,18 @@ public class HistorialFragment extends Fragment {
         this.calendario.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.YEAR, year);
+                cal.set(Calendar.MONTH, month);
+                cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                Date dateRepresentation = cal.getTime();
+
+                String dateString = dateFormat.format(dateRepresentation);
                 Intent intent = new Intent(getContext(), HistorialDiaConcreto.class);
-                intent.putExtra("year", year);
-                intent.putExtra("month", month);
-                intent.putExtra("dayOfMonth", dayOfMonth);
+                intent.putExtra("dayToShow", dateString);
+
                 startActivity(intent);
             }
         });
