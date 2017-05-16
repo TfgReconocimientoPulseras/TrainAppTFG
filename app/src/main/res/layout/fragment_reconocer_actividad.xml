@@ -14,6 +14,7 @@
         app:layout_heightPercent="40%"
         app:layout_widthPercent="70%"
         android:gravity="center_horizontal"
+        android:background="@drawable/borde"
 
 
         android:layout_marginLeft="40dp"
@@ -25,17 +26,19 @@
     <TextView
         android:id="@+id/nombre_actividad"
         android:layout_width="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/icono_actividad"
 
         android:gravity="center"
         android:text="Para comenzar a reconocer la actividad pulse el botón de abajo."
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
+        android:textColor="@color/colorPrimaryDark"
+
+        android:background="@drawable/borde"
 
         app:layout_heightPercent="40%"
-        android:layout_above="@+id/panel_end" />
+        android:layout_below="@+id/icono_actividad"
+        android:layout_centerHorizontal="true" />
 
     <FrameLayout
         android:id="@+id/panel_end"

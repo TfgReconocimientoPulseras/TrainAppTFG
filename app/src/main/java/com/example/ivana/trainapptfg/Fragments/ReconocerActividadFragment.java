@@ -58,6 +58,14 @@ public class ReconocerActividadFragment extends Fragment {
                 texto = "Estás barriendo.";
                 iconoActividad.setBackgroundResource(R.drawable.ico_act_2);
             }
+            else if(f == -20){
+                texto = "Empiezo a notar algo....";
+                iconoActividad.setBackgroundResource(R.drawable.ico_pensando);
+            }
+            else if(f == -40){
+                texto = "Debes estar haciendo algo como...";
+                iconoActividad.setBackgroundResource(R.drawable.ico_idea);
+            }
             nombreActividad.setText(texto);
         }
     };

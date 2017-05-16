@@ -53,6 +53,7 @@ public class RecogidaDeDatosService extends Service{
     private Timer timer;
     private TimerTask timerTask;
     private int timeAcumulated;
+    private boolean comenzando = true;
 
     //COLAS BLOQUEANTES (CONCURRENCIA)//////////////////////////////////////////////////////////////////////////////////////////////////////
     private BlockingQueue<DataFrame> bqRec_Segment;
@@ -65,7 +66,7 @@ public class RecogidaDeDatosService extends Service{
     //CONSTANTES/////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private static final int FREQUENCY_DEF = 100; //100ms
     private static final int DELAY_TIMER_TASK = 3000; //1000ms
-    private static final int COLLECTION_TIME = 5000; //5000ms - 5 s para recoger datos y segmentarlos...
+    private static final int COLLECTION_TIME = 2000; //5000ms - 5 s para recoger datos y segmentarlos...
     private static final int TAM_COLA_RECOGIDA = 5;
     private static final int TAM_COLA_CLASIFICACION = 5;
     private static final int TAM_COLA_RESULTADOS = 30;
@@ -92,6 +93,11 @@ public class RecogidaDeDatosService extends Service{
         this.timeAcumulated = 0;
 
         this.broadcaster = LocalBroadcastManager.getInstance(this);
+
+
+        Intent intent = new Intent("estado_actualizado");
+        intent.putExtra("estado", -20);
+        broadcaster.sendBroadcast(intent);
 
         //TODO FAIR POLICY????
         this.bqRec_Segment = new ArrayBlockingQueue(TAM_COLA_RECOGIDA, true);
@@ -133,6 +139,17 @@ public class RecogidaDeDatosService extends Service{
                     df = new DataFrame(colsNames);
                     timeAcumulated = 0;
 
+                }
+                else{
+                    if(comenzando){
+                        Log.d("Servicio - Recogida", "Iniciando...\n");
+                        if(timeAcumulated >= 250){
+                            Intent intent = new Intent("estado_actualizado");
+                            intent.putExtra("estado", -40);
+                            broadcaster.sendBroadcast(intent);
+                            comenzando = false;
+                        }
+                    }
                 }
             }
         };
