@@ -45,160 +45,124 @@ public class ClasificacionDeDatosThread implements Runnable {
     }
 
     private int getPredictClass(int i, DataFrame df){
-        if((double)df.get(i, "gyro_gamma_max") <= 0.288688659668)
-            if((double)df.get(i, "gyro_gamma_avg") <= -0.0725975036621)
-                if((double)df.get(i, "accel_x_med") <= 3.93776702881)
-                    if((double)df.get(i, "accel_y_std") <= 0.334382146597)
-                        if((double)df.get(i, "gyro_beta_max") <= 0.799121797085)
-                            if((double)df.get(i, "accel_z_std") <= 0.439901858568)
-                                return 3;
-                            else //if(accel_z_std > 0.439901858568)
-                                return 1;
-                        else //if(gyro_beta_max > 0.799121797085)
-                            if((double)df.get(i, "accel_x_avg") <= 3.07346057892)
-                                return 2;
-                            else //if(accel_x_avg > 3.07346057892)
-                                return 1;
-                    else //if(accel_y_std > 0.334382146597)
-                        if((double)df.get(i, "accel_y_std") <= 0.670810461044)
-                            if((double)df.get(i, "accel_y_max") <= -8.11328697205)
-                                return 1;
-                            else //if(accel_y_max > -8.11328697205)
-                                return 2;
-                        else //if(accel_y_std > 0.670810461044)
-                            if((double)df.get(i, "accel_y_max") <= -0.670837402344)
-                                return 2;
-                            else //if(accel_y_max > -0.670837402344)
-                                return 1;
-                else //if(accel_x_med > 3.93776702881)
-                    if((double)df.get(i, "gyro_gamma_avg") <= -0.256838232279)
-                        if((double)df.get(i, "gyro_beta_avg") <= 1.19128644466)
-                            if((double)df.get(i, "accel_y_std") <= 0.47832852602)
-                                return 4;
-                            else //if(accel_y_std > 0.47832852602)
-                                return 4;
-                        else //if(gyro_beta_avg > 1.19128644466)
-                            if((double)df.get(i, "gyro_gamma_med") <= -1.28017807007)
-                                return 1;
-                            else //if(gyro_gamma_med > -1.28017807007)
-                                return 2;
-                    else //if(gyro_gamma_avg > -0.256838232279)
-                        if((double)df.get(i, "gyro_gamma_max") <= 0.157119750977)
-                            if((double)df.get(i, "gyro_alpha_std") <= 0.142421230674)
-                                return 3;
-                            else //if(gyro_alpha_std > 0.142421230674)
-                                return 4;
-                        else //if(gyro_gamma_max > 0.157119750977)
-                            if((double)df.get(i, "xy_cor") <= -0.0170060098171)
-                                return 2;
-                            else //if(xy_cor > -0.0170060098171)
-                                return 3;
-            else //if(gyro_gamma_avg > -0.0725975036621)
-                if((double)df.get(i, "accel_y_std") <= 0.324032753706)
-                    return 3;
-                else //if(accel_y_std > 0.324032753706)
-                    if((double)df.get(i, "y_fft") <= 109.977348328)
-                        if((double)df.get(i, "gyro_gamma_max") <= 0.0921401977539)
-                            return 4;
-                        else //if(gyro_gamma_max > 0.0921401977539)
-                            return 1;
-                    else //if(y_fft > 109.977348328)
-                        if((double)df.get(i, "accel_y_std") <= 0.556065320969)
+        if((double)df.get(i, "gyro_gamma_max") <= 0.209456175566)
+            if((double)df.get(i, "accel_y_std") <= 0.242084830999)
+                if((double)df.get(i, "gyro_alpha_min") <= -0.308585643768)
+                    if((double)df.get(i, "accel_x_max") <= 9.31309700012)
+                        if((double)df.get(i, "gyro_beta_std") <= 0.167273283005)
                             return 3;
-                        else //if(accel_y_std > 0.556065320969)
-                            return 2;
-        else //if(gyro_gamma_max > 0.288688659668)
-            if((double)df.get(i, "accel_y_avg") <= -8.46217155457)
-                if((double)df.get(i, "accel_x_max") <= 7.61885070801)
-                    if((double)df.get(i, "accel_y_max") <= -7.25489044189)
-                        if((double)df.get(i, "gyro_gamma_min") <= -0.783500671387)
-                            if((double)df.get(i, "gyro_alpha_max") <= 0.646278917789)
-                                return 1;
-                            else //if(gyro_alpha_max > 0.646278917789)
-                                return 1;
-                        else //if(gyro_gamma_min > -0.783500671387)
-                            if((double)df.get(i, "accel_x_min") <= 1.68486702442)
-                                return 2;
-                            else //if(accel_x_min > 1.68486702442)
+                        else //if(gyro_beta_std > 0.167273283005)
+                            if((double)df.get(i, "gyro_alpha_min") <= -0.643096804619)
                                 return 3;
-                    else //if(accel_y_max > -7.25489044189)
-                        if((double)df.get(i, "accel_z_avg") <= 3.68591809273)
-                            if((double)df.get(i, "accel_x_avg") <= 2.43097448349)
-                                return 2;
-                            else //if(accel_x_avg > 2.43097448349)
+                            else //if(gyro_alpha_min > -0.643096804619)
                                 return 1;
-                        else //if(accel_z_avg > 3.68591809273)
-                            if((double)df.get(i, "gyro_gamma_min") <= -1.37046051025)
-                                return 4;
-                            else //if(gyro_gamma_min > -1.37046051025)
-                                return 2;
-                else //if(accel_x_max > 7.61885070801)
-                    if((double)df.get(i, "gyro_gamma_min") <= -1.48977661133)
-                        if((double)df.get(i, "xz_cor") <= -0.0134727042168)
-                            if((double)df.get(i, "accel_x_max") <= 8.62800598145)
-                                return 4;
-                            else //if(accel_x_max > 8.62800598145)
-                                return 4;
-                        else //if(xz_cor > -0.0134727042168)
-                            if((double)df.get(i, "accel_x_med") <= 4.4800491333)
-                                return 1;
-                            else //if(accel_x_med > 4.4800491333)
-                                return 4;
-                    else //if(gyro_gamma_min > -1.48977661133)
-                        if((double)df.get(i, "accel_y_min") <= -14.0640029907)
+                    else //if(accel_x_max > 9.31309700012)
+                        if((double)df.get(i, "gyro_gamma_med") <= -0.250750094652)
+                            return 4;
+                        else //if(gyro_gamma_med > -0.250750094652)
                             return 2;
-                        else //if(accel_y_min > -14.0640029907)
-                            if((double)df.get(i, "accel_x_std") <= 1.013027668)
-                                return 2;
-                            else //if(accel_x_std > 1.013027668)
+                else //if(gyro_alpha_min > -0.308585643768)
+                    if((double)df.get(i, "gyro_beta_min") <= -1.05088806152)
+                        return 1;
+                    else //if(gyro_beta_min > -1.05088806152)
+                        return 3;
+            else //if(accel_y_std > 0.242084830999)
+                if((double)df.get(i, "accel_y_max") <= 2.62441110611)
+                    if((double)df.get(i, "accel_x_med") <= 2.50304412842)
+                        if((double)df.get(i, "gyro_gamma_min") <= -0.18482208252)
+                            return 1;
+                        else //if(gyro_gamma_min > -0.18482208252)
+                            if((double)df.get(i, "accel_y_med") <= -3.60224342346)
+                                return 4;
+                            else //if(accel_y_med > -3.60224342346)
                                 return 1;
-            else //if(accel_y_avg > -8.46217155457)
-                if((double)df.get(i, "gyro_gamma_min") <= -1.53284239769)
-                    if((double)df.get(i, "gyro_gamma_max") <= 2.01449012756)
-                        if((double)df.get(i, "gyro_alpha_max") <= 1.3117338419)
-                            if((double)df.get(i, "yz_cor") <= -0.701584339142)
-                                return 4;
-                            else //if(yz_cor > -0.701584339142)
-                                return 4;
-                        else //if(gyro_alpha_max > 1.3117338419)
-                            if((double)df.get(i, "accel_z_min") <= -0.2079962641)
-                                return 4;
-                            else //if(accel_z_min > -0.2079962641)
-                                return 2;
-                    else //if(gyro_gamma_max > 2.01449012756)
-                        if((double)df.get(i, "gyro_beta_min") <= -2.68766021729)
-                            if((double)df.get(i, "gyro_gamma_med") <= 0.414778411388)
-                                return 4;
-                            else //if(gyro_gamma_med > 0.414778411388)
+                    else //if(accel_x_med > 2.50304412842)
+                        if((double)df.get(i, "accel_y_std") <= 0.506831645966)
+                            if((double)df.get(i, "gyro_gamma_med") <= -0.263118743896)
                                 return 1;
-                        else //if(gyro_beta_min > -2.68766021729)
-                            if((double)df.get(i, "xz_cor") <= 0.740190625191)
+                            else //if(gyro_gamma_med > -0.263118743896)
+                                return 3;
+                        else //if(accel_y_std > 0.506831645966)
+                            if((double)df.get(i, "gyro_beta_max") <= 1.56587266922)
                                 return 4;
-                            else //if(xz_cor > 0.740190625191)
+                            else //if(gyro_beta_max > 1.56587266922)
+                                return 1;
+                else //if(accel_y_max > 2.62441110611)
+                    return 2;
+        else //if(gyro_gamma_max > 0.209456175566)
+            if((double)df.get(i, "accel_y_avg") <= -8.48324775696)
+                if((double)df.get(i, "accel_x_max") <= 8.04502105713)
+                    if((double)df.get(i, "accel_y_min") <= -10.8130435944)
+                        if((double)df.get(i, "accel_x_med") <= 4.60125732422)
+                            if((double)df.get(i, "gyro_gamma_min") <= -0.466049194336)
+                                return 1;
+                            else //if(gyro_gamma_min > -0.466049194336)
+                                return 1;
+                        else //if(accel_x_med > 4.60125732422)
+                            if((double)df.get(i, "gyro_beta_min") <= -1.39317393303)
+                                return 1;
+                            else //if(gyro_beta_min > -1.39317393303)
                                 return 4;
-                else //if(gyro_gamma_min > -1.53284239769)
-                    if((double)df.get(i, "accel_x_med") <= 4.7153339386)
-                        if((double)df.get(i, "accel_y_min") <= -12.7256469727)
-                            if((double)df.get(i, "accel_x_max") <= 3.74657869339)
-                                return 2;
-                            else //if(accel_x_max > 3.74657869339)
-                                return 2;
-                        else //if(accel_y_min > -12.7256469727)
-                            if((double)df.get(i, "accel_z_med") <= 2.66837310791)
-                                return 2;
-                            else //if(accel_z_med > 2.66837310791)
-                                return 2;
-                    else //if(accel_x_med > 4.7153339386)
-                        if((double)df.get(i, "accel_y_med") <= -3.95844578743)
-                            if((double)df.get(i, "gyro_gamma_max") <= 1.25952076912)
+                    else //if(accel_y_min > -10.8130435944)
+                        if((double)df.get(i, "gyro_gamma_min") <= -0.682512402534)
+                            if((double)df.get(i, "accel_z_avg") <= 3.95836639404)
+                                return 1;
+                            else //if(accel_z_avg > 3.95836639404)
                                 return 4;
-                            else //if(gyro_gamma_max > 1.25952076912)
+                        else //if(gyro_gamma_min > -0.682512402534)
+                            if((double)df.get(i, "accel_x_max") <= 3.54990386963)
+                                return 3;
+                            else //if(accel_x_max > 3.54990386963)
+                                return 1;
+                else //if(accel_x_max > 8.04502105713)
+                    if((double)df.get(i, "accel_x_med") <= 4.50099945068)
+                        if((double)df.get(i, "yz_cor") <= 0.531381249428)
+                            if((double)df.get(i, "accel_x_min") <= 0.725691199303)
                                 return 4;
-                        else //if(accel_y_med > -3.95844578743)
-                            if((double)df.get(i, "gyro_gamma_max") <= 1.63673436642)
-                                return 2;
-                            else //if(gyro_gamma_max > 1.63673436642)
+                            else //if(accel_x_min > 0.725691199303)
+                                return 1;
+                        else //if(yz_cor > 0.531381249428)
+                            return 4;
+                    else //if(accel_x_med > 4.50099945068)
+                        if((double)df.get(i, "accel_x_max") <= 8.52625274658)
+                            if((double)df.get(i, "xz_cor") <= -0.193183273077)
                                 return 4;
+                            else //if(xz_cor > -0.193183273077)
+                                return 1;
+                        else //if(accel_x_max > 8.52625274658)
+                            return 4;
+            else //if(accel_y_avg > -8.48324775696)
+                if((double)df.get(i, "accel_y_max") <= 4.24551773071)
+                    if((double)df.get(i, "accel_x_max") <= 8.47423171997)
+                        if((double)df.get(i, "gyro_gamma_min") <= -1.3512878418)
+                            if((double)df.get(i, "gyro_beta_max") <= 2.33505249023)
+                                return 4;
+                            else //if(gyro_beta_max > 2.33505249023)
+                                return 1;
+                        else //if(gyro_gamma_min > -1.3512878418)
+                            if((double)df.get(i, "accel_x_med") <= 5.54896402359)
+                                return 1;
+                            else //if(accel_x_med > 5.54896402359)
+                                return 4;
+                    else //if(accel_x_max > 8.47423171997)
+                        if((double)df.get(i, "accel_y_med") <= 0.981155395508)
+                            if((double)df.get(i, "gyro_gamma_max") <= 1.2589943409)
+                                return 4;
+                            else //if(gyro_gamma_max > 1.2589943409)
+                                return 4;
+                        else //if(accel_y_med > 0.981155395508)
+                            if((double)df.get(i, "z_fft") <= 161.493133545)
+                                return 3;
+                            else //if(z_fft > 161.493133545)
+                                return 1;
+                else //if(accel_y_max > 4.24551773071)
+                    if((double)df.get(i, "accel_y_med") <= 0.325078427792)
+                        if((double)df.get(i, "xy_cor") <= -0.523706614971)
+                            return 4;
+                        else //if(xy_cor > -0.523706614971)
+                            return 2;
+                    else //if(accel_y_med > 0.325078427792)
+                        return 2;
 
     }
 }

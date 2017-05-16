@@ -19,6 +19,8 @@ import java.util.List;
 
 public class DatabaseAdapter {
 
+    //TODO QUIZÁS SERÍA ÓPTIMO DIVIDIR ESTA CLASE EN TRANSFER Y DAO
+
     //TAG
     private static final String TAG = "DataBaseAdapter";
 

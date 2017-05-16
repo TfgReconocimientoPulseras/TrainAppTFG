@@ -180,13 +180,26 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
             }*/
 
             if(characteristic.getUuid().equals(UUID_ACELEROMETRO_DATA)){
-                Integer x = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 0);
+                /*Integer x = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 0);
                 Integer y = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 1);
                 Integer z = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 2) * -1;
+                characteristic.
 
                 double scaledX = x / 64.0;
                 double scaledY = x / 64.0;
-                double scaledZ = x / 64.0;
+                double scaledZ = x / 64.0;*/
+
+                byte[] valores = characteristic.getValue();
+
+                float x = (valores[7] << 8) +  valores[6];
+                float y = (valores[9] << 8) +  valores[8];
+                float z = (valores[11] << 8) +  valores[10];
+
+                double SCALE = 64.0;
+
+                double scaledX = x / SCALE;
+                double scaledY = y / SCALE;
+                double scaledZ = (z / SCALE) * (-1);
 
                 Log.d("ACELEROMETRO", "Value: " + scaledX + ":" + scaledY + " : " + scaledZ);
 

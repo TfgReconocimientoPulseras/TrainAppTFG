@@ -47,8 +47,8 @@ public class ReconocerActividadFragment extends Fragment {
                 iconoActividad.setBackgroundResource(R.drawable.ico_act_1);
             }
             else if(f == 2){
-                texto = "Están utilizando las escaleras.";
-                iconoActividad.setBackgroundResource(R.drawable.ico_act_4);
+                texto = "Estás aplaudiendo.";
+                iconoActividad.setBackgroundResource(R.drawable.ico_act_8);
             }
             else if(f == 3){
                 texto = "Estás quieto.";
