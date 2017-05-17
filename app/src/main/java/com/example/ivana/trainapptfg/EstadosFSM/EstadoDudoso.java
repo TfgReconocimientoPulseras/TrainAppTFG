@@ -32,6 +32,9 @@ public class EstadoDudoso extends Estado {
                 ultAct = numeroActividad;
             }
         }
+
+        //TODO MODIFICAR ESTO PARA QUE LLEGUEN MÁS LETRAS SEGUIDAS PARA QUE HAYA QUE CAMBIAR DE ACTIVIDAD, EN CAMBIO SI LLEGAN DE LA MISMA ACTIVIDAD
+        //TODO SI NO VOLVER AL ESTADO NO ENTIENDO
         else if(contGlobal >= Estado.MAX_SIZE){
             retEstado = new EstadoNoTeEntiendo(this.contUltAct, this.ultAct);
         }

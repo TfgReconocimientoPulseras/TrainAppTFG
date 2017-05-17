@@ -169,6 +169,7 @@ public class RecogidaDeDatosService extends Service{
     @Override
     public void onDestroy(){
         Log.d("Servicio - Recogida","Terminado");
+
         timer.cancel();
         desactivarSensores();
 
