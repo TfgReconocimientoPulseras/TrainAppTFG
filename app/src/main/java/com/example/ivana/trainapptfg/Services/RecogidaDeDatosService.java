@@ -21,6 +21,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Semaphore;
 
 import joinery.DataFrame;
 
@@ -48,6 +49,8 @@ public class RecogidaDeDatosService extends Service{
     private MiSensorEventListener miSensorEventListenerGiroscopio;
     private Sensor mAccelerometer;
     private Sensor mGyroscope;
+    private long timestampIni = 0;
+
 
     //GESTIÓN DE TIMER//////////////////////////////////////////////////////////////////////////////////////////////////////
     private Timer timer;
@@ -57,6 +60,7 @@ public class RecogidaDeDatosService extends Service{
 
     //COLAS BLOQUEANTES (CONCURRENCIA)//////////////////////////////////////////////////////////////////////////////////////////////////////
     private BlockingQueue<DataFrame> bqRec_Segment;
+    private ArrayBlockingQueue bqSegment_Recog;
     private BlockingQueue<DataFrame> bqSegment_Clasif;
     private BlockingQueue<Integer> bqResultados;
     private Thread segmentacionDeDatosThread;
@@ -65,8 +69,8 @@ public class RecogidaDeDatosService extends Service{
 
     //CONSTANTES/////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private static final int FREQUENCY_DEF = 100; //100ms
-    private static final int DELAY_TIMER_TASK = 3000; //1000ms
-    private static final int COLLECTION_TIME = 2000; //5000ms - 5 s para recoger datos y segmentarlos...
+    private static final int DELAY_TIMER_TASK = 1500; //1000ms
+    private static final int COLLECTION_TIME = 1000; //5000ms - 5 s para recoger datos y segmentarlos...
     private static final int TAM_COLA_RECOGIDA = 5;
     private static final int TAM_COLA_CLASIFICACION = 5;
     private static final int TAM_COLA_RESULTADOS = 30;
@@ -101,17 +105,20 @@ public class RecogidaDeDatosService extends Service{
 
         //TODO FAIR POLICY????
         this.bqRec_Segment = new ArrayBlockingQueue(TAM_COLA_RECOGIDA, true);
+        this.bqSegment_Recog = new ArrayBlockingQueue(TAM_COLA_RECOGIDA, true);
         this.bqSegment_Clasif = new ArrayBlockingQueue(TAM_COLA_CLASIFICACION, true);
         this.bqResultados = new ArrayBlockingQueue<Integer>(TAM_COLA_RESULTADOS, true);
 
-        this.segmentacionDeDatosThread = new Thread(new SegmentacionDeDatosThread(bqRec_Segment, bqSegment_Clasif));
+
+        this.segmentacionDeDatosThread = new Thread(new SegmentacionDeDatosThread(bqRec_Segment, bqSegment_Clasif, bqSegment_Recog));
         this.clasificacionDeDatosThread = new Thread(new ClasificacionDeDatosThread(bqSegment_Clasif, bqResultados));
         this.anlisisClasificacionDeDatosThread = new Thread(new AnalizarClasificacionThread(bqResultados, broadcaster));
 
         this.timerTask = new TimerTask() {
+
             @Override
             public void run() {
-                timeAcumulated += FREQUENCY_DEF;
+                //timeAcumulated += FREQUENCY_DEF;
 
                 DataTAD dataAccel = miSensorEventListenerAcelerometro.obtenerDatosSensor();
                 DataTAD dataGyro = miSensorEventListenerGiroscopio.obtenerDatosSensor();
@@ -120,12 +127,36 @@ public class RecogidaDeDatosService extends Service{
                 float[] floatUnificada = DataTAD.concatenateValues(dataGyro.getValues(), dataAccel.getValues());
                 DataTAD dataUnificada = new DataTAD(System.currentTimeMillis(), floatUnificada);
 
-                int actividadPredicha = -1;
-
-                //lo añadimos al dataframe
                 df.append(dataUnificada.getDataTADasArrayList());
 
+                int actividadPredicha = -1;
+                int filaActual = df.length();
 
+                //lo añadimos al dataframe
+                if(timestampIni == 0){
+                    timestampIni = (Long) df.get(filaActual - 1, 0);
+                }
+
+                //TODO CUANDO SE HA COMPLETADO LA PRIMERA VENTANA EL TIMESTAMP ACTUAL ES EL DE LA PRIMERA,NO EL DE LA ULTIMA
+                long timestampActual = (Long) df.get(filaActual - 1, 0);
+
+                if( (timestampActual - timestampIni) >= COLLECTION_TIME + 10 || (timestampActual - timestampIni) >= COLLECTION_TIME - 10){
+                    Log.d("Servicio - Recogida", "Ya han pasado " + COLLECTION_TIME + " segundos\n");
+                    try {
+                        Log.d("Servicio - Recogida", "Produzco dataframe LONGITUD: " + df.length() + "\n");
+                        bqRec_Segment.put(df);
+                        df = (DataFrame) bqSegment_Recog.take();
+                        df = df.resetIndex();
+                        Log.d("Servicio - Recogida", "Consumo dataframe del servicio de procesado\n");
+
+                        timestampIni = 0;
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+/**
                 if (timeAcumulated >= COLLECTION_TIME) { // tras 5 segundos para pruebas
                     Log.d("Servicio - Recogida", "Ya han pasado 5 segundos\n");
 
@@ -151,7 +182,10 @@ public class RecogidaDeDatosService extends Service{
                         }
                     }
                 }
+ */
             }
+
+
         };
     }
 

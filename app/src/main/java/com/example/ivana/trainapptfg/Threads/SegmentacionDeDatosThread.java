@@ -1,5 +1,6 @@
 package com.example.ivana.trainapptfg.Threads;
 
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import org.apache.commons.math3.complex.Complex;
@@ -24,6 +25,8 @@ public class SegmentacionDeDatosThread implements Runnable {
 
     private final BlockingQueue<DataFrame> queueConsume;
     private final BlockingQueue<DataFrame> queueProduce;
+    private final BlockingQueue<DataFrame> queueProcRecog;
+
     //NOMBRES PARA LOS DATAFRAMES////////////////////////////////////////////////////////////////////////////////////////////
 
     private Collection featuresMinNames = new ArrayList<String>(){{
@@ -87,9 +90,10 @@ public class SegmentacionDeDatosThread implements Runnable {
     private static final int WINDOW_SZ = 1000; //In miliseconds --> 1000 = 1s
     private DataFrame dfSegmentado;
 
-    public SegmentacionDeDatosThread(BlockingQueue bqConsumeFrom, BlockingQueue bqProduceTo){
+    public SegmentacionDeDatosThread(BlockingQueue bqConsumeFrom, BlockingQueue bqProduceTo, BlockingQueue queueProcRecog){
         this.queueConsume = bqConsumeFrom;
         this.queueProduce = bqProduceTo;
+        this.queueProcRecog = queueProcRecog;
     }
 
     @Override
@@ -99,7 +103,7 @@ public class SegmentacionDeDatosThread implements Runnable {
             try {
                 DataFrame dfRawData = consume(queueConsume);
                 Log.d("Segment_Thread", "He consumido un dataframe");
-                queueProduce.put(produce(dfRawData));
+                //queueProduce.put(produce(dfRawData));
                 Log.d("Segment_Thread", "He producido un dataframeSegmentado");
 
             } catch (InterruptedException e) {
@@ -117,7 +121,28 @@ public class SegmentacionDeDatosThread implements Runnable {
     private DataFrame consume(BlockingQueue<DataFrame> bq) throws InterruptedException {
         DataFrame dfRet = null;
 
+        //TODO PARAMETRIZAR
+        int timeOverlap = WINDOW_SZ/2;
+
+
         dfRet = bq.take();
+
+        //ENVIAMOS AL PROCESO DE RECOGIDA LA COLA EL ULTIMO MEDIO SEGUNDO DE RECOGIDA
+        int row = dfRet.length() - 1;
+        int rowFinal = row;
+        long timestampFinal = (long) dfRet.get(rowFinal, 0);
+        long timestampActual = (long) dfRet.get(row, 0);
+
+        //TODO PARAMETRIZAR NUMEROS
+        while((timestampFinal - timestampActual) <= (timeOverlap - 15)){
+            row--;
+            timestampActual = (long) dfRet.get(row, 0);
+        }
+
+
+        //TODO HACER SLICE DEL DF [ROW, ROWFINAL] Y METERLO A LA COLA PARA QUE LO COJA EL SERVICIO DE RECOGIDA DE DATOS
+        DataFrame df = dfRet.slice(row, rowFinal + 1);
+        this.queueProcRecog.put(df);
 
 
         return dfRet;
