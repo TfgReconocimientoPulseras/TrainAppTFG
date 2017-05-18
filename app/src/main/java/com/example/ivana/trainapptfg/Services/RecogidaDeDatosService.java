@@ -134,11 +134,15 @@ public class RecogidaDeDatosService extends Service{
 
                 //lo añadimos al dataframe
                 if(timestampIni == 0){
-                    timestampIni = (Long) df.get(filaActual - 1, 0);
+                    timestampIni = (Long) df.get(0, 0);
+                    filaActual = 0;
+                }
+                else{
+                    filaActual = df.length() - 1;
                 }
 
                 //TODO CUANDO SE HA COMPLETADO LA PRIMERA VENTANA EL TIMESTAMP ACTUAL ES EL DE LA PRIMERA,NO EL DE LA ULTIMA
-                long timestampActual = (Long) df.get(filaActual - 1, 0);
+                long timestampActual = (Long) df.get(filaActual, 0);
 
                 if( (timestampActual - timestampIni) >= COLLECTION_TIME + 10 || (timestampActual - timestampIni) >= COLLECTION_TIME - 10){
                     Log.d("Servicio - Recogida", "Ya han pasado " + COLLECTION_TIME + " segundos\n");

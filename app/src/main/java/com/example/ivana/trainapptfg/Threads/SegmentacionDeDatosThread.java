@@ -103,7 +103,7 @@ public class SegmentacionDeDatosThread implements Runnable {
             try {
                 DataFrame dfRawData = consume(queueConsume);
                 Log.d("Segment_Thread", "He consumido un dataframe");
-                //queueProduce.put(produce(dfRawData));
+                queueProduce.put(produce(dfRawData));
                 Log.d("Segment_Thread", "He producido un dataframeSegmentado");
 
             } catch (InterruptedException e) {
@@ -115,7 +115,8 @@ public class SegmentacionDeDatosThread implements Runnable {
     }
 
     private DataFrame produce(DataFrame df){
-        return segmentameDatosConSolapamiento(df, 2);
+        //return segmentameDatosConSolapamiento(df, 2);
+        return procesameDatos(df);
     }
 
     private DataFrame consume(BlockingQueue<DataFrame> bq) throws InterruptedException {
@@ -148,6 +149,34 @@ public class SegmentacionDeDatosThread implements Runnable {
         return dfRet;
     }
 
+
+    private DataFrame procesameDatos(DataFrame df){
+        DataFrame retDf = new DataFrame();
+
+        DataFrame dataFrameMin = new DataFrame(this.featuresMinNames);
+        DataFrame dataFrameMax = new DataFrame(this.featuresMaxNames);
+        DataFrame dataFrameMean = new DataFrame(this.featuresMeanNames);
+        DataFrame dataFrameMedian = new DataFrame(this.featuresMedianNames);
+        DataFrame dataFrameStd = new DataFrame(this.featuresStdNames);
+        DataFrame dataFrameCorr = new DataFrame(this.featuresCorrNames);
+        DataFrame dataFrameFft = new DataFrame(this.featuresFftNames);
+        
+
+        dataFrameMin.append(df.slice(0, df.length(), 1, df.size()).min().row(0));
+        dataFrameMax.append(df.slice(0, df.length(), 1, df.size()).max().row(0));
+        dataFrameMean.append(df.slice(0, df.length(), 1, df.size()).mean().row(0));
+        dataFrameMedian.append(df.slice(0, df.length(), 1, df.size()).median().row(0));
+        dataFrameStd.append(df.slice(0, df.length(), 1, df.size()).stddev().row(0));
+        dataFrameCorr.append(giveMeCorrelation(df.slice(0, df.length(), 1, df.size())));
+        dataFrameFft.append(giveMeFFT(df.slice(0, df.length(), 1, df.size())));
+
+        //join de los dataframes
+        return dataFrameMean.join(dataFrameMin).join(dataFrameMax).join(dataFrameStd).join(dataFrameCorr).join(dataFrameFft).join(dataFrameMedian);
+
+    }
+
+
+    //TODO YA LE PASAMOS LA VENTANA DE 1 SEGUNDO Y REALIZAMOS EL SOLAPAMIENTO -> YA NO HARIA FALTA HACER CON SOLAPAMIENTO, SOLAMENTE CON LA VENTANA BASTARÍA?
     private DataFrame segmentameDatosConSolapamiento(DataFrame df, int porcentajeSolapamiento){
         DataFrame retDf = new DataFrame();
 
