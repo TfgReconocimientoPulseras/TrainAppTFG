@@ -45,6 +45,16 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
     private static final int REQUEST_ACCESS_COARSE_LOCATION = 222;
     //Comprobacion si bluetooth esta activado
     private static final int REQUEST_ENABLE_BT = 1;
+    private static final double GRAVITIY = 9.81;
+
+
+    // Accelerometer ranges
+    private static final int ACC_RANGE_2G = 0;
+    private static final int ACC_RANGE_4G = 1;
+    private static final int ACC_RANGE_8G = 2;
+    private static final int ACC_RANGE_16G = 3;
+
+    private static final int ACC_RANGE_ACTUAL_CONF = 0x03;
 
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothGatt mBluetoothGatt;
@@ -73,7 +83,9 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
     private static final byte[] APAGAR_SENSOR_HUMEDAD = {0x00};
 
     //ENCENDER/APAGAR SENSOR ACELERÓMETRO
-    private static final byte[] ENCENDER_SENSOR_ACELEROMETRO = {0x3f, 0x00}; //array de bytes, bytes[0] es el byte menos significativo
+    //0x3f para encender con rango 2g
+    //0x
+    private static final byte[] ENCENDER_SENSOR_ACELEROMETRO = {0x3f, 0x02}; //array de bytes, bytes[0] es el byte menos significativo
     private static final byte[] APAGAR_SENSOR_ACELEROMETRO = {0x00, 0x00};
 
     //COLAS DE ESCRITURA PARA SENSOR
@@ -191,27 +203,27 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
                 byte[] valores = characteristic.getValue();
 
-                float acc_x = (valores[7] << 8) +  valores[6];
-                float acc_y = (valores[9] << 8) +  valores[8];
-                float acc_z = (valores[11] << 8) +  valores[10];
+                double acc_x = (valores[7] << 8) +  valores[6];
+                double acc_y = (valores[9] << 8) +  valores[8];
+                double acc_z = (valores[11] << 8) +  valores[10];
 
-                double SCALE_ACC = 4096.0;
 
-                double acc_scaledX = acc_x / SCALE_ACC * (-1);
-                double acc_scaledY = acc_y / SCALE_ACC;
-                double acc_scaledZ = (acc_z / SCALE_ACC) * (-1);
+                //TODO REVISAR DIRECCIONES (-1) Z(-1) X(-1) Y(1)
+                double acc_scaledX = sensorMpu9250AccConvert(acc_x) * GRAVITIY;
+                double acc_scaledY = sensorMpu9250AccConvert(acc_y) * GRAVITIY;
+                double acc_scaledZ = sensorMpu9250AccConvert(acc_z) * GRAVITIY;
 
                 Log.d("ACELEROMETRO", "Value: " + acc_scaledX + " : " + acc_scaledY + " : " + acc_scaledZ);
 
-                float gyro_x = (valores[1] << 8) +  valores[0];
-                float gyro_y = (valores[2] << 8) +  valores[2];
-                float gyro_z = (valores[5] << 8) +  valores[4];
+                double gyro_x = (valores[1] << 8) +  valores[0];
+                double gyro_y = (valores[3] << 8) +  valores[2];
+                double gyro_z = (valores[5] << 8) +  valores[4];
 
-                double SCALE_GYRO = 128.0;
 
-                double gyro_scaledX = acc_x / SCALE_GYRO;
-                double gyro_scaledY = acc_y / SCALE_GYRO;
-                double gyro_scaledZ = (acc_z / SCALE_GYRO);
+                //TODO CONVERTIR A RADIANES/SEGUNDO
+                double gyro_scaledX = sensorMpu9250GyroConvert(gyro_x);
+                double gyro_scaledY = sensorMpu9250AccConvert(gyro_y);
+                double gyro_scaledZ = sensorMpu9250AccConvert(gyro_z);
 
                 Log.d("GIROSCOPIO  ", "Value: " + gyro_scaledX + " : " + gyro_scaledY + " : " + gyro_scaledZ);
 
@@ -393,6 +405,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                     mBluetoothGatt.setCharacteristicNotification(acelerometroCharacteristic, true);
 
                     acelerometroConf.setValue(ENCENDER_SENSOR_ACELEROMETRO);
+
                     write(acelerometroConf);
 
                     config.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
@@ -440,5 +453,42 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         return (upperByte << 8) + lowerByte;
     }
 
+    private double sensorMpu9250GyroConvert(double data){
+        //-- calculate rotation, unit deg/s, range -250, +250
+        return (data * 1.0) / (65536 / 500);
+    }
+
+
+
+
+    private double sensorMpu9250AccConvert(double rawData) {
+        double v = -1;
+
+        int accRange = ENCENDER_SENSOR_ACELEROMETRO[1] & ACC_RANGE_ACTUAL_CONF;
+        switch (accRange)
+        {
+            case ACC_RANGE_2G:
+                //-- calculate acceleration, unit G, range -2, +2
+                v = (rawData * 1.0) / (32768/2);
+                break;
+
+            case ACC_RANGE_4G:
+                //-- calculate acceleration, unit G, range -4, +4
+                v = (rawData * 1.0) / (32768/4);
+                break;
+
+            case ACC_RANGE_8G:
+                //-- calculate acceleration, unit G, range -8, +8
+                v = (rawData * 1.0) / (32768/8);
+                break;
+
+            case ACC_RANGE_16G:
+                //-- calculate acceleration, unit G, range -16, +16
+                v = (rawData * 1.0) / (32768/16);
+                break;
+        }
+
+        return v;
+    }
 
 }

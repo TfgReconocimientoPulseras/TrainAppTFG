@@ -45,8 +45,6 @@ public class AnalizarClasificacionThread implements Runnable {
                     }
                 }
                 Log.d("AnalClasif","Resultado: " + estado.getActividad());
-
-                sleep(250);
             } catch (InterruptedException e) {
                 Log.d("Thread - AnalClasifi", "Interrupted");
                 return;
