@@ -191,17 +191,29 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
                 byte[] valores = characteristic.getValue();
 
-                float x = (valores[7] << 8) +  valores[6];
-                float y = (valores[9] << 8) +  valores[8];
-                float z = (valores[11] << 8) +  valores[10];
+                float acc_x = (valores[7] << 8) +  valores[6];
+                float acc_y = (valores[9] << 8) +  valores[8];
+                float acc_z = (valores[11] << 8) +  valores[10];
 
-                double SCALE = 64.0;
+                double SCALE_ACC = 4096.0;
 
-                double scaledX = x / SCALE;
-                double scaledY = y / SCALE;
-                double scaledZ = (z / SCALE) * (-1);
+                double acc_scaledX = acc_x / SCALE_ACC * (-1);
+                double acc_scaledY = acc_y / SCALE_ACC;
+                double acc_scaledZ = (acc_z / SCALE_ACC) * (-1);
 
-                Log.d("ACELEROMETRO", "Value: " + scaledX + ":" + scaledY + " : " + scaledZ);
+                Log.d("ACELEROMETRO", "Value: " + acc_scaledX + " : " + acc_scaledY + " : " + acc_scaledZ);
+
+                float gyro_x = (valores[1] << 8) +  valores[0];
+                float gyro_y = (valores[2] << 8) +  valores[2];
+                float gyro_z = (valores[5] << 8) +  valores[4];
+
+                double SCALE_GYRO = 128.0;
+
+                double gyro_scaledX = acc_x / SCALE_GYRO;
+                double gyro_scaledY = acc_y / SCALE_GYRO;
+                double gyro_scaledZ = (acc_z / SCALE_GYRO);
+
+                Log.d("GIROSCOPIO  ", "Value: " + gyro_scaledX + " : " + gyro_scaledY + " : " + gyro_scaledZ);
 
             }
         }
