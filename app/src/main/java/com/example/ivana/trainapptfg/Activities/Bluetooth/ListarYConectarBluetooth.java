@@ -209,9 +209,9 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
 
                 //TODO REVISAR DIRECCIONES (-1) Z(-1) X(-1) Y(1)
-                double acc_scaledX = sensorMpu9250AccConvert(acc_x) * GRAVITIY;
+                double acc_scaledX = (sensorMpu9250AccConvert(acc_x) * GRAVITIY) * (-1);
                 double acc_scaledY = sensorMpu9250AccConvert(acc_y) * GRAVITIY;
-                double acc_scaledZ = sensorMpu9250AccConvert(acc_z) * GRAVITIY;
+                double acc_scaledZ = (sensorMpu9250AccConvert(acc_z) * GRAVITIY) * (-1);
 
                 Log.d("ACELEROMETRO", "Value: " + acc_scaledX + " : " + acc_scaledY + " : " + acc_scaledZ);
 
@@ -220,10 +220,10 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                 double gyro_z = (valores[5] << 8) +  valores[4];
 
 
-                //TODO CONVERTIR A RADIANES/SEGUNDO
-                double gyro_scaledX = sensorMpu9250GyroConvert(gyro_x);
-                double gyro_scaledY = sensorMpu9250AccConvert(gyro_y);
-                double gyro_scaledZ = sensorMpu9250AccConvert(gyro_z);
+                //TODO CONVERTIR A RADIANES/SEGUNDO (ESTTAN EN GRAD/S)
+                double gyro_scaledX = (sensorMpu9250GyroConvert(gyro_x)) * (Math.PI/180);
+                double gyro_scaledY = (sensorMpu9250AccConvert(gyro_y)) * (Math.PI/180);;
+                double gyro_scaledZ = (sensorMpu9250AccConvert(gyro_z)) * (Math.PI/180);;
 
                 Log.d("GIROSCOPIO  ", "Value: " + gyro_scaledX + " : " + gyro_scaledY + " : " + gyro_scaledZ);
 
