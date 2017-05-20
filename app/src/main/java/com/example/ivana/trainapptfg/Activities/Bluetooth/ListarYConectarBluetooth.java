@@ -10,11 +10,14 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -29,6 +32,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.ivana.trainapptfg.R;
+import com.example.ivana.trainapptfg.Services.BluetoothLeService;
 import com.example.ivana.trainapptfg.Utilidades.Utils;
 
 import java.util.ArrayList;
@@ -68,25 +72,39 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
     //UUID Pulsera CCC
     private static final UUID UUID_CCC = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
-    //UUID Pulsera Humedad
-    private static final UUID UUID_HUMIDITY_SERVICE =     UUID.fromString("f000aa20-0451-4000-b000-000000000000");
-    private static final UUID UUID_HUMIDITY_DATA =        UUID.fromString("f000aa21-0451-4000-b000-000000000000");
-    private static final UUID UUID_HUMIDITY_CONF =        UUID.fromString("f000aa22-0451-4000-b000-000000000000");
-
-    //UUID Pulsera Acelerometro
-    private static final UUID UUID_ACELEROMETRO_SERVICE = UUID.fromString("f000aa80-0451-4000-b000-000000000000");
-    private static final UUID UUID_ACELEROMETRO_DATA =    UUID.fromString("f000aa81-0451-4000-b000-000000000000");
-    private static final UUID UUID_ACELEROMETRO_CONF =    UUID.fromString("f000aa82-0451-4000-b000-000000000000");
-
-    //ENCENDER/APAGAR SENSOR HUMEDAD
-    private static final byte[] ENCENDER_SENSOR_HUMEDAD = {0x01};
-    private static final byte[] APAGAR_SENSOR_HUMEDAD = {0x00};
+    //UUID Pulsera Acelerometro & Giroscopio CC2650 Sensor Tag
+    private static final UUID UUID_MOVEMENT_SERVICE = UUID.fromString("f000aa80-0451-4000-b000-000000000000");
+    private static final UUID UUID_MOVEMENT_DATA =    UUID.fromString("f000aa81-0451-4000-b000-000000000000");
+    private static final UUID UUID_MOVEMENT_CONF =    UUID.fromString("f000aa82-0451-4000-b000-000000000000");
+    private static final UUID UUID_MOVEMENT_PERIOD =  UUID.fromString("f000aa83-0451-4000-b000-000000000000");
 
     //ENCENDER/APAGAR SENSOR ACELERÓMETRO
     //0x3f para encender con rango 2g
     //0x
     private static final byte[] ENCENDER_SENSOR_ACELEROMETRO = {0x3f, 0x02}; //array de bytes, bytes[0] es el byte menos significativo
     private static final byte[] APAGAR_SENSOR_ACELEROMETRO = {0x00, 0x00};
+    //CONFIGURACION
+    //5432 1098 7654 3210
+    //XXXX XXXX XXXX XXXX
+    //0000 0010 0011 1111         -> 0x003F -> 0x02, 0x3F        ^    MENOS SIGNF  [0x3F, 0x02] MAS SIGNF
+    //0 gyro z                                                   |
+    //1 gyro y                                                   |
+    //2 gyro x
+    //3 accel z
+    //4 accel y
+    //5 accel x
+    //6 magnometer
+    //7 wake on motion
+    //8 accel range (2G 4G 8G 16G)  -> 8G : bit 9 a 1 y bit 8 a 0
+    //9 accel range (2G 4G 8G 16G)
+    //10 no se usa
+    //11 no se usa
+    //12 no se usa
+    //13 no se usa
+    //14 no se usa
+    //15 no se usa
+
+    private static final byte[] PERIODO_MOVEMENT_SENSOR = {0x0A};
 
     //COLAS DE ESCRITURA PARA SENSOR
     private static final Queue<Object> sWriteQueue = new ConcurrentLinkedQueue<Object>();
@@ -152,8 +170,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
             if(status == BluetoothGatt.GATT_SUCCESS){
                 Log.d("BLUETOOTH", "Servicios descubiertos :)");
-                //obtenerCaracteristicasDescriptoresHumedad(mBluetoothGatt);
-                obtenerCaracteristicasDescriptoresAcelerometro(mBluetoothGatt);
+                obtenerCaracteristicasDescriptoresAccelGyro(mBluetoothGatt);
             }
         }
 
@@ -191,7 +208,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                 Log.d("HUMEDAD-TEMPERATURA", "Value: " + humidity + " : " + temperature);
             }*/
 
-            if(characteristic.getUuid().equals(UUID_ACELEROMETRO_DATA)){
+            if(characteristic.getUuid().equals(UUID_MOVEMENT_DATA)){
                 /*Integer x = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 0);
                 Integer y = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 1);
                 Integer z = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 2) * -1;
@@ -210,7 +227,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
                 //TODO REVISAR DIRECCIONES (-1) Z(-1) X(-1) Y(1)
                 double acc_scaledX = (sensorMpu9250AccConvert(acc_x) * GRAVITIY) * (-1);
-                double acc_scaledY = sensorMpu9250AccConvert(acc_y) * GRAVITIY;
+                double acc_scaledY =  sensorMpu9250AccConvert(acc_y) * GRAVITIY;
                 double acc_scaledZ = (sensorMpu9250AccConvert(acc_z) * GRAVITIY) * (-1);
 
                 Log.d("ACELEROMETRO", "Value: " + acc_scaledX + " : " + acc_scaledY + " : " + acc_scaledZ);
@@ -221,9 +238,9 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
 
                 //TODO CONVERTIR A RADIANES/SEGUNDO (ESTTAN EN GRAD/S)
-                double gyro_scaledX = (sensorMpu9250GyroConvert(gyro_x)) * (Math.PI/180);
-                double gyro_scaledY = (sensorMpu9250AccConvert(gyro_y)) * (Math.PI/180);;
-                double gyro_scaledZ = (sensorMpu9250AccConvert(gyro_z)) * (Math.PI/180);;
+                double gyro_scaledX = (sensorMpu9250GyroConvert(gyro_x)) * (Math.PI/180) * (-1);
+                double gyro_scaledY = (sensorMpu9250GyroConvert(gyro_y)) * (Math.PI/180);
+                double gyro_scaledZ = (sensorMpu9250GyroConvert(gyro_z)) * (Math.PI/180) * (-1);
 
                 Log.d("GIROSCOPIO  ", "Value: " + gyro_scaledX + " : " + gyro_scaledY + " : " + gyro_scaledZ);
 
@@ -233,13 +250,38 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private BluetoothLeService mService;
+    boolean mBound = false;
+    private ServiceConnection mConnetion = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            BluetoothLeService.LocalBinder binder = (BluetoothLeService.LocalBinder) service;
+            mService = binder.getService();
+            Log.d("BIND", "mBound(true)");
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d("BIND", "mBound(false)");
+            mBound = false;
+        }
+    };
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+
+        Intent intent = new Intent(this, BluetoothLeService.class);
+        bindService(intent, mConnetion, Context.BIND_AUTO_CREATE);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listar_yconectar_bluetooth);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
 
         //Solicitud de permisos
         askForLocationPermission();
@@ -259,10 +301,10 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
 
         //COMPROBAMOS QUE ESTÉ ACTIVADO EL BLUETOOTH
-        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+        /*if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
+        }*/
 
         //REGISTRAR BROADCAST BLUETOOTH
         registerReceiver(mReceiver, filter);
@@ -294,6 +336,22 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         int id = item.getItemId();
 
         if(id == R.id.action_refresh){
+            if(mBound == true){
+                boolean ivan = false;
+
+                ivan = mService.mensaje_configurarBluetooth();
+
+                if(ivan){
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                }
+
+                if(mBound){
+                    unbindService(mConnetion);
+                    mBound = false;
+                }
+            }
+
             this.list.clear();
             this.listaDevices.clear();
             this.adapter.notifyDataSetChanged();
@@ -370,46 +428,27 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         }
     }
 
-    private void obtenerCaracteristicasDescriptoresHumedad(BluetoothGatt gatt){
-        BluetoothGattService humedadService = gatt.getService(UUID_HUMIDITY_SERVICE);
-        if(humedadService != null){
-            BluetoothGattCharacteristic humedadCharacteristic = humedadService.getCharacteristic(UUID_HUMIDITY_DATA);
-            BluetoothGattCharacteristic humedadConf = humedadService.getCharacteristic(UUID_HUMIDITY_CONF);
-
-            if(humedadCharacteristic != null && humedadConf != null){
-                BluetoothGattDescriptor config = humedadCharacteristic.getDescriptor(UUID_CCC);
-
-                if(config != null){
-                    mBluetoothGatt.setCharacteristicNotification(humedadCharacteristic, true);
-
-                    humedadConf.setValue(ENCENDER_SENSOR_HUMEDAD);
-                    write(humedadConf);
-
-                    config.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                    write(config);
-                }
-            }
-        }
-    }
-
-    private void obtenerCaracteristicasDescriptoresAcelerometro(BluetoothGatt gatt){
-        BluetoothGattService acelerometroService = gatt.getService(UUID_ACELEROMETRO_SERVICE);
+    private void obtenerCaracteristicasDescriptoresAccelGyro(BluetoothGatt gatt){
+        BluetoothGattService acelerometroService = gatt.getService(UUID_MOVEMENT_SERVICE);
         if(acelerometroService != null){
-            BluetoothGattCharacteristic acelerometroCharacteristic = acelerometroService.getCharacteristic(UUID_ACELEROMETRO_DATA);
-            BluetoothGattCharacteristic acelerometroConf = acelerometroService.getCharacteristic(UUID_ACELEROMETRO_CONF);
+            BluetoothGattCharacteristic movementCharacteristic = acelerometroService.getCharacteristic(UUID_MOVEMENT_DATA);
+            BluetoothGattCharacteristic movementConf = acelerometroService.getCharacteristic(UUID_MOVEMENT_CONF);
+            BluetoothGattCharacteristic movementPeriod = acelerometroService.getCharacteristic(UUID_MOVEMENT_PERIOD);
 
-            if(acelerometroCharacteristic != null && acelerometroConf != null){
-                BluetoothGattDescriptor config = acelerometroCharacteristic.getDescriptor(UUID_CCC);
+            if(movementCharacteristic != null && movementConf != null){
+                BluetoothGattDescriptor config = movementCharacteristic.getDescriptor(UUID_CCC);
 
                 if(config != null){
-                    mBluetoothGatt.setCharacteristicNotification(acelerometroCharacteristic, true);
+                    mBluetoothGatt.setCharacteristicNotification(movementCharacteristic, true);
 
-                    acelerometroConf.setValue(ENCENDER_SENSOR_ACELEROMETRO);
-
-                    write(acelerometroConf);
+                    movementConf.setValue(ENCENDER_SENSOR_ACELEROMETRO);
+                    write(movementConf);
 
                     config.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                     write(config);
+
+                    movementPeriod.setValue(PERIODO_MOVEMENT_SENSOR);
+                    write(movementPeriod);
                 }
             }
         }

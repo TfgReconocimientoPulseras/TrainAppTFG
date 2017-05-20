@@ -60,6 +60,8 @@
             android:label="@string/title_activity_listar_yconectar_bluetooth"
             android:theme="@style/AppTheme" />
         <activity android:name=".Activities.ListarActividades"></activity>
+
+        <service android:name=".Services.BluetoothLeService"></service>
     </application>
 
 </manifest>
