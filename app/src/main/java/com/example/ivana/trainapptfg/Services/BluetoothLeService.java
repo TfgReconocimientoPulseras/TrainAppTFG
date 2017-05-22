@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,6 +18,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import java.util.HashMap;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -67,9 +69,13 @@ public class BluetoothLeService extends Service {
     private static final Queue<Object> sWriteQueue = new ConcurrentLinkedQueue<Object>();
     private static boolean sIsWritting = false;
 
+    //OTRAS CONSTANTES
+    private static final double GRAVITIY = 9.81;
+
     //CLASES BLUETOOTH
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothGatt mBluetoothGatt;
+    private HashMap<String, BluetoothDevice> listaDevices;
     private IntentFilter filter;
 
     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
@@ -79,7 +85,7 @@ public class BluetoothLeService extends Service {
             final int status = intent.getIntExtra("EXTRA_STATUS", BluetoothGatt.GATT_SUCCESS);
         }
     };
-/*
+
     //Atiende a los eventos del bluetooth
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -93,14 +99,14 @@ public class BluetoothLeService extends Service {
                 final BluetoothDevice device = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 Log.d("BLUETOOTH", "DEVICE DISCOVERED");
 
-                runOnUiThread(new Runnable() {
+                /*runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         list.add(device.getAddress());
                         listaDevices.put(device.getAddress(), device);
                         adapter.notifyDataSetChanged();
                     }
-                });
+                });*/
             }
         }
     };
@@ -183,42 +189,24 @@ public class BluetoothLeService extends Service {
         }
     };
 
-    //Para poder ejecutar metodos del service desde una activity
-    private final IBinder mBinder = new LocalBinder();
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
-    public class LocalBinder extends Binder{
-        BluetoothLeService getService(){
-            return BluetoothLeService.this;
-        }
+        this.listaDevices = new HashMap<String, BluetoothDevice>();
+
     }
 
+    @Override
+    public void onDestroy(){
+        mBluetoothAdapter.cancelDiscovery();
+        unregisterReceiver(mReceiver);
+        super.onDestroy();
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    //Para poder ejecutar metodos del service desde una activity////////////////////////////////
+    private final IBinder mBinder = new LocalBinder();
 
     @Nullable
     @Override
@@ -226,42 +214,14 @@ public class BluetoothLeService extends Service {
         return mBinder;
     }
 
-    //Si no hay nadie escrbiendo y la lista no está vacia, que escriba el siguiente que tiene de escribir
-    private synchronized void nextWrite(){
-        if(!sIsWritting && !sWriteQueue.isEmpty()){
-            doWrite(sWriteQueue.poll()); //escribirá el primero de la lista
+    public class LocalBinder extends Binder{
+        public BluetoothLeService getService(){
+            return BluetoothLeService.this;
         }
     }
 
-    //Realiza el proceso de escritura diferenciando entre descriptor/característica
-    private synchronized void doWrite(Object o){
-        if(o instanceof BluetoothGattCharacteristic){
-            sIsWritting = true;
-            mBluetoothGatt.writeCharacteristic((BluetoothGattCharacteristic)o);
-        }
-        else if(o instanceof BluetoothGattDescriptor){
-            sIsWritting = true;
-            mBluetoothGatt.writeDescriptor((BluetoothGattDescriptor)o);
-        }
-        else{
-            nextWrite();
-        }
-    }
-
-    private synchronized void write(Object o){
-        if(sWriteQueue.isEmpty() && !sIsWritting){
-            doWrite(o);
-        }else{
-            sWriteQueue.add(o);
-        }
-    }*/
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-    }
-
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    //Metodos publicos accesibles de este servicio///////////////////////////////////////////////
     public boolean mensaje_configurarBluetooth(){
         boolean bluetoothDesactivado = false;
 
@@ -289,33 +249,120 @@ public class BluetoothLeService extends Service {
 
     }
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
+    public boolean mensaje_conectarDispositivo(String mac){
+        boolean conectado = false;
 
-
-    public class LocalBinder extends Binder{
-        public BluetoothLeService getService(){
-            return BluetoothLeService.this;
+        BluetoothDevice device = this.listaDevices.get(mac);
+        if(device != null){
+            this.mBluetoothGatt = device.connectGatt(this, true, this.mBtleCallback);
+            conectado = true;
         }
+
+        return conectado;
     }
 
-    private final IBinder mBinder = new LocalBinder();
+    public void mensaje_startDiscovery(){
+        this.listaDevices.clear();
+        this.mBluetoothAdapter.startDiscovery();
+    }
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-                Log.d("BLUETOOTH", "DISCOVERY STARTED"); //lo que se ejecuta cuando el bluetooth comienza a escanear
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) { //lo que se ejecuta cuando el bluetooth finaliza el escaneo
-                Log.d("BLUETOOTH", "DISCOVERY FINISHED");
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    //Metodos para convertir los datos obtenidos por la pulsera CC2650///////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    private double sensorMpu9250GyroConvert(double data){
+        //-- calculate rotation, unit deg/s, range -250, +250
+        return (data * 1.0) / (65536 / 500);
+    }
 
-            } else if (BluetoothDevice.ACTION_FOUND.equals(action)) { //lo que se ejecuta cuando el bluetooth encuentra un dispositivo
-                final BluetoothDevice device = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                Log.d("BLUETOOTH", "DEVICE DISCOVERED");
+    private double sensorMpu9250AccConvert(double rawData) {
+        double v = -1;
+
+        int accRange = ENCENDER_SENSOR_ACELEROMETRO[1] & ACC_RANGE_ACTUAL_CONF;
+        switch (accRange)
+        {
+            case ACC_RANGE_2G:
+                //-- calculate acceleration, unit G, range -2, +2
+                v = (rawData * 1.0) / (32768/2);
+                break;
+
+            case ACC_RANGE_4G:
+                //-- calculate acceleration, unit G, range -4, +4
+                v = (rawData * 1.0) / (32768/4);
+                break;
+
+            case ACC_RANGE_8G:
+                //-- calculate acceleration, unit G, range -8, +8
+                v = (rawData * 1.0) / (32768/8);
+                break;
+
+            case ACC_RANGE_16G:
+                //-- calculate acceleration, unit G, range -16, +16
+                v = (rawData * 1.0) / (32768/16);
+                break;
+        }
+
+        return v;
+    }
+
+    private void obtenerCaracteristicasDescriptoresAccelGyro(BluetoothGatt gatt){
+        BluetoothGattService acelerometroService = gatt.getService(UUID_MOVEMENT_SERVICE);
+        if(acelerometroService != null){
+            BluetoothGattCharacteristic movementCharacteristic = acelerometroService.getCharacteristic(UUID_MOVEMENT_DATA);
+            BluetoothGattCharacteristic movementConf = acelerometroService.getCharacteristic(UUID_MOVEMENT_CONF);
+            BluetoothGattCharacteristic movementPeriod = acelerometroService.getCharacteristic(UUID_MOVEMENT_PERIOD);
+
+            if(movementCharacteristic != null && movementConf != null){
+                BluetoothGattDescriptor config = movementCharacteristic.getDescriptor(UUID_CCC);
+
+                if(config != null){
+                    mBluetoothGatt.setCharacteristicNotification(movementCharacteristic, true);
+
+                    movementConf.setValue(ENCENDER_SENSOR_ACELEROMETRO);
+                    write(movementConf);
+
+                    config.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                    write(config);
+
+                    movementPeriod.setValue(PERIODO_MOVEMENT_SENSOR);
+                    write(movementPeriod);
+                }
             }
         }
-    };
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    //Metodos para escribir sobre caracteristicas bluetooth//////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+    //Si no hay nadie escribiendo y la lista no está vacia, que escriba el siguiente que tiene de escribir
+    private synchronized void nextWrite(){
+        if(!sIsWritting && !sWriteQueue.isEmpty()){
+            doWrite(sWriteQueue.poll()); //escribirá el primero de la lista
+        }
+    }
+
+    //Realiza el proceso de escritura diferenciando entre descriptor/característica
+    private synchronized void doWrite(Object o){
+        if(o instanceof BluetoothGattCharacteristic){
+            sIsWritting = true;
+            mBluetoothGatt.writeCharacteristic((BluetoothGattCharacteristic)o);
+        }
+        else if(o instanceof BluetoothGattDescriptor){
+            sIsWritting = true;
+            mBluetoothGatt.writeDescriptor((BluetoothGattDescriptor)o);
+        }
+        else{
+            nextWrite();
+        }
+    }
+
+    private synchronized void write(Object o){
+        if(sWriteQueue.isEmpty() && !sIsWritting){
+            doWrite(o);
+        }else{
+            sWriteQueue.add(o);
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
 }
