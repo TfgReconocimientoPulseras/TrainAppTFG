@@ -304,6 +304,28 @@ public class BluetoothLeService extends Service {
         this.mBluetoothAdapter.startDiscovery();
     }
 
+    public void mensaje_encenderSensorCC2650(){
+        if(this.config != null){
+            mBluetoothGatt.setCharacteristicNotification(movementCharacteristic, true);
+
+            movementConf.setValue(ENCENDER_SENSOR_ACELEROMETRO);
+            write(movementConf);
+
+            this.config.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+            write(config);
+
+            this.movementPeriod.setValue(PERIODO_MOVEMENT_SENSOR);
+            write(movementPeriod);
+        }
+    }
+
+    public void mensaje_apagarSensorCC2650(){
+        if(this.config != null) {
+            movementConf.setValue(APAGAR_SENSOR_ACELEROMETRO);
+            write(movementConf);
+        }
+    }
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     //Metodos para convertir los datos obtenidos por la pulsera CC2650///////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -350,29 +372,9 @@ public class BluetoothLeService extends Service {
             this.movementPeriod = acelerometroService.getCharacteristic(UUID_MOVEMENT_PERIOD);
 
             if(movementCharacteristic != null && movementConf != null){
-                BluetoothGattDescriptor config = movementCharacteristic.getDescriptor(UUID_CCC);
+                this.config = movementCharacteristic.getDescriptor(UUID_CCC);
             }
         }
-    }
-
-    private void encenderSensorCC2650(){
-        if(this.config != null){
-            mBluetoothGatt.setCharacteristicNotification(movementCharacteristic, true);
-
-            movementConf.setValue(ENCENDER_SENSOR_ACELEROMETRO);
-            write(movementConf);
-
-            this.config.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            write(config);
-
-            this.movementPeriod.setValue(PERIODO_MOVEMENT_SENSOR);
-            write(movementPeriod);
-        }
-    }
-
-    private void apagarSensorCC2650(){
-        movementConf.setValue(APAGAR_SENSOR_ACELEROMETRO);
-        write(movementConf);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
