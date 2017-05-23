@@ -25,13 +25,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.ivana.trainapptfg.MainActivity;
 import com.example.ivana.trainapptfg.R;
 import com.example.ivana.trainapptfg.Services.BluetoothLeService;
 import com.example.ivana.trainapptfg.Utilidades.Utils;
 
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 //https://developer.android.com/guide/topics/connectivity/bluetooth-le.html
 //DOCUMENTACION PARA REALIZAR ESCANEO -> http://www.londatiga.net/it/programming/android/how-to-programmatically-scan-or-discover-android-bluetooth-device/
@@ -51,7 +51,6 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
     private IntentFilter filter;
 
-    private BlockingQueue<String> queueDispositivosEncontrados;
     private MyResultReceiverBluetooth dispositivosEncontrados;
 
     public class MyResultReceiverBluetooth extends ResultReceiver {
@@ -63,7 +62,6 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         protected void onReceiveResult(int resultCode, Bundle resultData){
             //100 -> dispositivo bluetooth encontrado, lo mostramos en la lista
             if(resultCode == 100){
-                //list.add(device.getAddress());
                 list.add(resultData.getString("address"));
                 adapter.notifyDataSetChanged();
             }
@@ -91,7 +89,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         }
     };
 
-    private void desconexionService(){
+    public void desconexionService(){
         if(mBound){
             unbindService(mConnetion);
             mBound = false;
@@ -115,7 +113,6 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        this.queueDispositivosEncontrados = new ArrayBlockingQueue(20, true);
         this.dispositivosEncontrados = new MyResultReceiverBluetooth(null);
 
         //Solicitud de permisos
@@ -193,6 +190,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                 if(!mService.mensaje_conectarDispositivo(itemValue)){
                     Toast.makeText(getApplicationContext(), "No ha sido posible conectarse a " + itemValue, Toast.LENGTH_LONG).show();
                 }
+
 
             }
 

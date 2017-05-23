@@ -16,7 +16,6 @@ import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.ResultReceiver;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -84,6 +83,13 @@ public class BluetoothLeService extends Service {
     //VARIABLES DE CONTROL
     private boolean bluetoothConfigurado = false;
 
+    //CARACTERISTICAS/SERVICE/CONFIG DISPOSITIVO BLUETOOTH
+    BluetoothGattService acelerometroService;
+    BluetoothGattCharacteristic movementCharacteristic;
+    BluetoothGattCharacteristic movementConf;
+    BluetoothGattCharacteristic movementPeriod;
+    BluetoothGattDescriptor config;
+
     //CLASES BLUETOOTH
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothGatt mBluetoothGatt;
@@ -141,6 +147,8 @@ public class BluetoothLeService extends Service {
             }
             else{
                 //setState(State.IDDLE);
+                //TODO Realizar todas las tareas necesarias cuando se desconecte la pulsera
+                Log.d("BLUETOOTH", "Se ha desconectado el dispostivo bluetooth");
             }
         }
 
@@ -150,7 +158,7 @@ public class BluetoothLeService extends Service {
 
             if(status == BluetoothGatt.GATT_SUCCESS){
                 Log.d("BLUETOOTH", "Servicios descubiertos :)");
-                obtenerCaracteristicasDescriptoresAccelGyro(mBluetoothGatt);
+                obtenerCaracteristicasDescriptoresAccelGyroCC2650(mBluetoothGatt);
             }
         }
 
@@ -213,7 +221,6 @@ public class BluetoothLeService extends Service {
 
         this.listaDevices = new HashMap<String, BluetoothDevice>();
         this.queueDispositivosEncontrados = null;
-
     }
 
     @Override
@@ -248,7 +255,6 @@ public class BluetoothLeService extends Service {
             return BluetoothLeService.this;
         }
     }
-
     /////////////////////////////////////////////////////////////////////////////////////////////
     //Metodos publicos accesibles de este servicio///////////////////////////////////////////////
     public boolean mensaje_configurarBluetooth(){
@@ -336,30 +342,37 @@ public class BluetoothLeService extends Service {
         return v;
     }
 
-    private void obtenerCaracteristicasDescriptoresAccelGyro(BluetoothGatt gatt){
+    private void obtenerCaracteristicasDescriptoresAccelGyroCC2650(BluetoothGatt gatt){
         BluetoothGattService acelerometroService = gatt.getService(UUID_MOVEMENT_SERVICE);
         if(acelerometroService != null){
-            BluetoothGattCharacteristic movementCharacteristic = acelerometroService.getCharacteristic(UUID_MOVEMENT_DATA);
-            BluetoothGattCharacteristic movementConf = acelerometroService.getCharacteristic(UUID_MOVEMENT_CONF);
-            BluetoothGattCharacteristic movementPeriod = acelerometroService.getCharacteristic(UUID_MOVEMENT_PERIOD);
+            this.movementCharacteristic = acelerometroService.getCharacteristic(UUID_MOVEMENT_DATA);
+            this.movementConf = acelerometroService.getCharacteristic(UUID_MOVEMENT_CONF);
+            this.movementPeriod = acelerometroService.getCharacteristic(UUID_MOVEMENT_PERIOD);
 
             if(movementCharacteristic != null && movementConf != null){
                 BluetoothGattDescriptor config = movementCharacteristic.getDescriptor(UUID_CCC);
-
-                if(config != null){
-                    mBluetoothGatt.setCharacteristicNotification(movementCharacteristic, true);
-
-                    movementConf.setValue(ENCENDER_SENSOR_ACELEROMETRO);
-                    write(movementConf);
-
-                    config.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                    write(config);
-
-                    movementPeriod.setValue(PERIODO_MOVEMENT_SENSOR);
-                    write(movementPeriod);
-                }
             }
         }
+    }
+
+    private void encenderSensorCC2650(){
+        if(this.config != null){
+            mBluetoothGatt.setCharacteristicNotification(movementCharacteristic, true);
+
+            movementConf.setValue(ENCENDER_SENSOR_ACELEROMETRO);
+            write(movementConf);
+
+            this.config.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+            write(config);
+
+            this.movementPeriod.setValue(PERIODO_MOVEMENT_SENSOR);
+            write(movementPeriod);
+        }
+    }
+
+    private void apagarSensorCC2650(){
+        movementConf.setValue(APAGAR_SENSOR_ACELEROMETRO);
+        write(movementConf);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////

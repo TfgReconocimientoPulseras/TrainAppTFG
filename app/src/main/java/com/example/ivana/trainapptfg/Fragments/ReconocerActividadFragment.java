@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.ivana.trainapptfg.R;
+import com.example.ivana.trainapptfg.Services.BluetoothLeService;
 import com.example.ivana.trainapptfg.Services.RecogidaDeDatosService;
 
 import java.io.File;
@@ -30,6 +31,8 @@ import java.util.Date;
 import joinery.DataFrame;
 
 public class ReconocerActividadFragment extends Fragment {
+
+    private BluetoothLeService mServiceBluetooth;
 
 
     private Handler modificadorActividad = new Handler() {
@@ -93,7 +96,10 @@ public class ReconocerActividadFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
+
     }
 
     @Override
