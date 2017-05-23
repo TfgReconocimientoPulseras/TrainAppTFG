@@ -30,6 +30,8 @@ import com.example.ivana.trainapptfg.R;
 import com.example.ivana.trainapptfg.Services.BluetoothLeService;
 import com.example.ivana.trainapptfg.Utilidades.Utils;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -72,7 +74,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
     //Metodos y atributos para poder conectarse con el service//////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////
     private BluetoothLeService mService;
-    boolean mBound = false;
+    private boolean mBound = false;
     private ServiceConnection mConnetion = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -102,8 +104,11 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
     protected void onStart(){
         super.onStart();
 
-        Intent intent = new Intent(this, BluetoothLeService.class);
-        bindService(intent, mConnetion, Context.BIND_AUTO_CREATE);
+        //TODO salta excepcion cuando se sale de la ventana. arreglar
+        if(!mBound) {
+            Intent intent = new Intent(this, BluetoothLeService.class);
+            bindService(intent, mConnetion, Context.BIND_AUTO_CREATE);
+        }
     }
 
     @Override
@@ -190,8 +195,6 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                 if(!mService.mensaje_conectarDispositivo(itemValue)){
                     Toast.makeText(getApplicationContext(), "No ha sido posible conectarse a " + itemValue, Toast.LENGTH_LONG).show();
                 }
-
-
             }
 
         });
