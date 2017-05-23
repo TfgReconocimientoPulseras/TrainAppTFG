@@ -14,16 +14,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ResultReceiver;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.example.ivana.trainapptfg.Activities.Bluetooth.ListarYConectarBluetooth;
 
 import java.util.HashMap;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BluetoothLeService extends Service {
+
+    //Colas para transmision de informacion desde el service
+    private BlockingQueue<String> queueDispositivosEncontrados;
+    private ListarYConectarBluetooth.MyResultReceiverBluetooth resultReceiver;
 
     // Accelerometer ranges
     private static final int ACC_RANGE_2G = 0;
@@ -72,6 +81,9 @@ public class BluetoothLeService extends Service {
     //OTRAS CONSTANTES
     private static final double GRAVITIY = 9.81;
 
+    //VARIABLES DE CONTROL
+    private boolean bluetoothConfigurado = false;
+
     //CLASES BLUETOOTH
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothGatt mBluetoothGatt;
@@ -99,6 +111,11 @@ public class BluetoothLeService extends Service {
                 final BluetoothDevice device = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 Log.d("BLUETOOTH", "DEVICE DISCOVERED");
 
+                listaDevices.put(device.getAddress(), device);
+                Bundle bundle = new Bundle();
+                bundle.putString("address", device.getAddress());
+                //TODO crear constantes para los codigos de envio
+                resultReceiver.send(100, bundle);
                 /*runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -189,19 +206,31 @@ public class BluetoothLeService extends Service {
         }
     };
 
+
     @Override
     public void onCreate() {
         super.onCreate();
 
         this.listaDevices = new HashMap<String, BluetoothDevice>();
+        this.queueDispositivosEncontrados = null;
 
     }
 
     @Override
     public void onDestroy(){
         mBluetoothAdapter.cancelDiscovery();
-        unregisterReceiver(mReceiver);
+        if(bluetoothConfigurado){
+            unregisterReceiver(mReceiver);
+        }
         super.onDestroy();
+    }
+
+    public void inicializarColaDispositivosEncontrados(BlockingQueue<String> queueDispositivosEncontrados){
+        this.queueDispositivosEncontrados = queueDispositivosEncontrados;
+    }
+
+    public void inicializarResultReceiver(ListarYConectarBluetooth.MyResultReceiverBluetooth rr){
+        this.resultReceiver = rr;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
@@ -223,7 +252,8 @@ public class BluetoothLeService extends Service {
     /////////////////////////////////////////////////////////////////////////////////////////////
     //Metodos publicos accesibles de este servicio///////////////////////////////////////////////
     public boolean mensaje_configurarBluetooth(){
-        boolean bluetoothDesactivado = false;
+        //boolean bluetoothDesactivado = false;
+        boolean bluetoothActivado = true;
 
         //OBRTENEMOS EL ADAPTADOR DEL BLUETOOTH
         this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -237,15 +267,17 @@ public class BluetoothLeService extends Service {
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             /*Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);*/
-            bluetoothDesactivado = true;
+            bluetoothActivado = false;
         }
 
-        if(bluetoothDesactivado == false){
+        //TODO poner variable de bluetoothDesacitivado global para que en onDestroy no falle si no se ha registrado receiver
+        if(bluetoothActivado){
             //REGISTRAR BROADCAST BLUETOOTH
             registerReceiver(mReceiver, filter);
         }
 
-        return bluetoothDesactivado;
+        this.bluetoothConfigurado = bluetoothActivado;
+        return bluetoothActivado;
 
     }
 

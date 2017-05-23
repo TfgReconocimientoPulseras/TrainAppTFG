@@ -9,7 +9,9 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.ResultReceiver;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +30,8 @@ import com.example.ivana.trainapptfg.Services.BluetoothLeService;
 import com.example.ivana.trainapptfg.Utilidades.Utils;
 
 import java.util.ArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 //https://developer.android.com/guide/topics/connectivity/bluetooth-le.html
 //DOCUMENTACION PARA REALIZAR ESCANEO -> http://www.londatiga.net/it/programming/android/how-to-programmatically-scan-or-discover-android-bluetooth-device/
@@ -37,6 +41,8 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
     //Comprobacion si bluetooth esta activado
     private static final int REQUEST_ENABLE_BT = 1;
 
+    private boolean bluetoothConfigurado = false;
+
     //Gestion de la lista de dispositivos
     private ListView listView;
     private ArrayAdapter<String> adapter;
@@ -45,8 +51,28 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
     private IntentFilter filter;
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private BlockingQueue<String> queueDispositivosEncontrados;
+    private MyResultReceiverBluetooth dispositivosEncontrados;
 
+    public class MyResultReceiverBluetooth extends ResultReceiver {
+        public MyResultReceiverBluetooth(Handler handler){
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData){
+            //100 -> dispositivo bluetooth encontrado, lo mostramos en la lista
+            if(resultCode == 100){
+                //list.add(device.getAddress());
+                list.add(resultData.getString("address"));
+                adapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //Metodos y atributos para poder conectarse con el service//////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     private BluetoothLeService mService;
     boolean mBound = false;
     private ServiceConnection mConnetion = new ServiceConnection() {
@@ -65,6 +91,15 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         }
     };
 
+    private void desconexionService(){
+        if(mBound){
+            unbindService(mConnetion);
+            mBound = false;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Override
     protected void onStart(){
         super.onStart();
@@ -79,6 +114,9 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         setContentView(R.layout.activity_listar_yconectar_bluetooth);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        this.queueDispositivosEncontrados = new ArrayBlockingQueue(20, true);
+        this.dispositivosEncontrados = new MyResultReceiverBluetooth(null);
 
         //Solicitud de permisos
         askForLocationPermission();
@@ -170,6 +208,10 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         listView.setAdapter(adapter);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //Metodos que trabajan con el menu superior
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -187,19 +229,33 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
         if(id == R.id.action_refresh){
             if(mBound == true){
-                boolean ivan = false;
+                if(!bluetoothConfigurado){
+                    this.bluetoothConfigurado = mService.mensaje_configurarBluetooth();
+                }
 
-                ivan = mService.mensaje_configurarBluetooth();
 
-                if(ivan){
+                if(!bluetoothConfigurado){
                     Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+
+                    this.bluetoothConfigurado = mService.mensaje_configurarBluetooth();
+
+                    if(!this.bluetoothConfigurado){
+                        Toast.makeText(this, "Parece ser que el Bluetooth no se activado correctamente. " +
+                                "Actívelo manuealmanete para poder continuar.", Toast.LENGTH_LONG).show();
+                    }
                 }
 
-                if(mBound){
+                if(this.bluetoothConfigurado){
+                    //mService.inicializarColaDispositivosEncontrados(this.queueDispositivosEncontrados);
+                    mService.inicializarResultReceiver(this.dispositivosEncontrados);
+                    mService.mensaje_startDiscovery();
+                }
+
+                /*if(mBound){
                     unbindService(mConnetion);
                     mBound = false;
-                }
+                }*/
             }
 
             this.list.clear();
