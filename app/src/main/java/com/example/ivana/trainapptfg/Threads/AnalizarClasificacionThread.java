@@ -1,5 +1,6 @@
 package com.example.ivana.trainapptfg.Threads;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -7,6 +8,7 @@ import android.util.Log;
 import com.example.ivana.trainapptfg.EstadosFSM.Estado;
 import com.example.ivana.trainapptfg.EstadosFSM.EstadoInicial;
 
+import java.net.ConnectException;
 import java.util.concurrent.BlockingQueue;
 
 import static java.lang.Thread.sleep;
@@ -15,12 +17,13 @@ public class AnalizarClasificacionThread implements Runnable {
     private BlockingQueue<Integer> queueConsume;
     private Estado estado;
     private LocalBroadcastManager broadcaster;
+    private Context ctx;
 
-
-    public AnalizarClasificacionThread(BlockingQueue<Integer> bqConsume, LocalBroadcastManager bm){
+    public AnalizarClasificacionThread(BlockingQueue<Integer> bqConsume, LocalBroadcastManager bm, Context ctx){
         this.queueConsume = bqConsume;
-        this.estado = new EstadoInicial();
+        this.estado = new EstadoInicial(ctx);
         this.broadcaster = bm;
+        this.ctx = ctx;
 
         Log.d("AnalClasif","Resultado: " + estado.getActividad());
 

@@ -1,12 +1,15 @@
 package com.example.ivana.trainapptfg.EstadosFSM;
 
+import android.content.Context;
+
 public class EstadoInicial extends Estado {
     private int contGlobal;
     private int contUltAct;
     private int ultAct;
 
-    public EstadoInicial(){
+    public EstadoInicial(Context ctx){
         super();
+        setContext(ctx);
         this.contGlobal = 0;
         this.contUltAct = 0;
         this.ultAct = 0;

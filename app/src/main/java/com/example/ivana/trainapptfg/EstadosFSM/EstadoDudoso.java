@@ -1,5 +1,12 @@
 package com.example.ivana.trainapptfg.EstadosFSM;
 
+import android.content.Context;
+
+import com.example.ivana.trainapptfg.DataBase.DatabaseAdapter;
+
+import java.util.Date;
+import java.util.List;
+
 public class EstadoDudoso extends Estado {
     private int contGlobal;
     private int contUltAct;
@@ -36,10 +43,29 @@ public class EstadoDudoso extends Estado {
         //TODO MODIFICAR ESTO PARA QUE LLEGUEN MÁS LETRAS SEGUIDAS PARA QUE HAYA QUE CAMBIAR DE ACTIVIDAD, EN CAMBIO SI LLEGAN DE LA MISMA ACTIVIDAD
         //TODO SI NO VOLVER AL ESTADO NO ENTIENDO
         else if(contGlobal >= Estado.MAX_SIZE){
+            DatabaseAdapter db = new DatabaseAdapter(getContext());
+            db.open();
+            //TODO ME HE EQUIVOCADO, PONER FECHA FIN! EN HISTORY DATATRANSFER
+            historyDataTransfer.setfFin(new Date());
+            long id = db.insertarNuevoRegistroAlHistorial(historyDataTransfer);
+            db.close();
+
             retEstado = new EstadoNoTeEntiendo(this.contUltAct, this.ultAct);
+
         }
 
-        if(contUltAct == 3){
+        if(contUltAct == 3 && estadoAnterior.getActividad() == ultAct){
+            retEstado = estadoAnterior;
+        }
+        else if(contUltAct == 3 && estadoAnterior.getActividad() != ultAct){
+            DatabaseAdapter db = new DatabaseAdapter(getContext());
+
+            db.open();
+            //TODO ME HE EQUIVOCADO, PONER FECHA FIN! EN HISTORY DATATRANSFER
+            historyDataTransfer.setfFin(new Date());
+            long id = db.insertarNuevoRegistroAlHistorial(historyDataTransfer);
+            db.close();
+
             retEstado = new EstadoActividad(this.ultAct);
         }
 

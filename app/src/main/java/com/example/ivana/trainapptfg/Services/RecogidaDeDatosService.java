@@ -112,7 +112,7 @@ public class RecogidaDeDatosService extends Service{
 
         this.segmentacionDeDatosThread = new Thread(new SegmentacionDeDatosThread(bqRec_Segment, bqSegment_Clasif, bqSegment_Recog));
         this.clasificacionDeDatosThread = new Thread(new ClasificacionDeDatosThread(bqSegment_Clasif, bqResultados));
-        this.anlisisClasificacionDeDatosThread = new Thread(new AnalizarClasificacionThread(bqResultados, broadcaster));
+        this.anlisisClasificacionDeDatosThread = new Thread(new AnalizarClasificacionThread(bqResultados, broadcaster, getApplicationContext()));
 
         this.timerTask = new TimerTask() {
 

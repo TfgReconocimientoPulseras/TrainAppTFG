@@ -81,7 +81,7 @@ public class ListarActividades extends AppCompatActivity {
                         db.open();
                         long id = db.insertActivity(activity);
                         if( id != -1){
-                            list.add(db.getDataTransfer(id));
+                            list.add(db.getActivityDataTransfer(id));
                             adapter.notifyDataSetChanged();
                         }
                         else{

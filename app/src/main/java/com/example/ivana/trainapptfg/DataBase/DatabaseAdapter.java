@@ -25,7 +25,7 @@ public class DatabaseAdapter {
     private static final String TAG = "DataBaseAdapter";
 
     //VERSION BD
-    private static final int DATABASE_VERSION = 18;
+    private static final int DATABASE_VERSION = 25;
 
     //Nombre de la BD
     private static final String DB_NAME = "AppDB";
@@ -36,12 +36,14 @@ public class DatabaseAdapter {
 
     //Columnas comunes
     private static final String KEY_ID = "id";
-    private static final String KEY_ACTIVIDAD = "actividad";
 
     //Columnas TABLA_ACTIVIDADES
     private static final String KEY_FECHACREACION = "fechaCreacion";
+    private static final String KEY_ACTIVIDAD = "actividad";
 
-    //Columnas TABBLA_HISTORIAL
+
+    //Columnas TABLA_HISTORIAL
+    private static final String KEY_ACTIVIDAD_FK = "actividad";
     private static final String KEY_FECHAINI = "fechaIni";
     private static final String KEY_FECHAFIN = "fechaFin";
     private static final String KEY_DURACION = "duracion";
@@ -56,10 +58,10 @@ public class DatabaseAdapter {
 
     private static final String CREAR_TABLA_HISTORIAL = "CREATE TABLE " + TABLA_HISTORIAL
             + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-            + KEY_ACTIVIDAD + " INTEGER NOT NULL,"
+            + KEY_ACTIVIDAD_FK + " INTEGER NOT NULL,"
             + KEY_FECHAINI + " DATETIME NOT NULL,"
             + KEY_FECHAFIN + " DATETIME,"
-            + " FOREIGN KEY ("+KEY_ACTIVIDAD+") REFERENCES "+TABLA_ACTIVIDADES+"("+KEY_ID+") ON DELETE CASCADE"
+            + " FOREIGN KEY ("+KEY_ACTIVIDAD_FK+") REFERENCES "+TABLA_ACTIVIDADES+"("+KEY_ID+") ON DELETE CASCADE"
             + ")";
 
     private static final String BORRAR_TABLA_HISTORIAL = "DROP TABLE IF EXISTS " + TABLA_HISTORIAL;
@@ -119,7 +121,7 @@ public class DatabaseAdapter {
         return id;
     }
 
-    public ActivityDataTransfer getDataTransfer(long id){
+    public ActivityDataTransfer getActivityDataTransfer(long id){
         ActivityDataTransfer activityDataTransfer = null;
         String query = "SELECT * FROM " + TABLA_ACTIVIDADES + " WHERE " + KEY_ID + "=" + id;
         Cursor c = db.rawQuery(query, null);
@@ -134,16 +136,33 @@ public class DatabaseAdapter {
 
     }
 
-    public long insertarNuevoRegistroAlHistorial(long idActivity, long tIni, long tFin){
-        String s = getDateTimeToSqlite(tIni);
-        String s1 = getDateTimeToSqlite(tFin);
+
+    public long insertarNuevoRegistroAlHistorial(HistoryDataTransfer historyDataTransfer){
+        String s = "";
+        String s1 = "";
+
+        if(historyDataTransfer.getfIni() == null){
+            s = getDateTimeToSqlite(0);
+        }
+        else{
+            s = getDateTimeToSqlite(historyDataTransfer.getfIni().getTime());
+        }
+
+        if(historyDataTransfer.getfFin() == null){
+            s1 = getDateTimeToSqlite(0);
+        }
+        else{
+            s1 = getDateTimeToSqlite(historyDataTransfer.getfFin().getTime());
+        }
+
         ContentValues values = new ContentValues();
-        values.put(KEY_ACTIVIDAD, idActivity);
+        values.put(KEY_ACTIVIDAD_FK, historyDataTransfer.getActividad());
         values.put(KEY_FECHAINI, s);
         values.put(KEY_FECHAFIN, s1);
 
 
         long id = db.insert(TABLA_HISTORIAL, null, values);
+        historyDataTransfer.setId(id);
 
         return id;
     }
@@ -156,15 +175,19 @@ public class DatabaseAdapter {
     public List<HistoryDataTransfer> dameActividadesFecha(String fecha){
         //SELECT * FROM historial WHERE date(fechaIni)=date('2017-05-14')
         List<HistoryDataTransfer> retList = new ArrayList<>();
-        String query = "SELECT * FROM " + TABLA_HISTORIAL + " WHERE date(" + KEY_FECHAINI + ")=date(?)";
+        String query = "SELECT * FROM " + TABLA_HISTORIAL  + " JOIN " + TABLA_ACTIVIDADES + " ON " + TABLA_HISTORIAL  + "." + KEY_ACTIVIDAD_FK + "=" + TABLA_ACTIVIDADES + "." + KEY_ID + " WHERE date(" + KEY_FECHAINI + ")=date(?)";
         Cursor c = db.rawQuery(query, new String[]{fecha});
 
         while(c.moveToNext()){
             int id = c.getInt(c.getColumnIndex(KEY_ID));
-            int actividad = c.getInt(c.getColumnIndex(KEY_ACTIVIDAD));
+            int actividad = c.getInt(c.getColumnIndex(KEY_ACTIVIDAD_FK));
+            String actividadString = c.getString(c.getColumnIndex(KEY_ACTIVIDAD));
             Date fIni = getDateFromSqlite(c.getString(c.getColumnIndex(KEY_FECHAINI)));
             Date fFin = getDateFromSqlite(c.getString(c.getColumnIndex(KEY_FECHAFIN)));
-            HistoryDataTransfer historyDataTransfer = new HistoryDataTransfer(id, actividad, fIni, fFin);
+
+            HistoryDataTransfer historyDataTransfer = new HistoryDataTransfer(id, actividad, fIni, fFin, actividadString);
+
+
             retList.add(historyDataTransfer);
         }
 

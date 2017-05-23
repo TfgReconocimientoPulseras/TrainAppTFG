@@ -84,14 +84,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-/*
+
         DatabaseAdapter db = new DatabaseAdapter(this);
         db.open();
-        long id = db.insertActivity("caminar");
-        long id2 = db.insertActivity("correr");
-        long id3 = db.insertActivity("aplaudir");
-        long id4 = db.insertActivity("aplaudirTT");
+        long id2 = db.insertActivity("Caminar");
+        long id3 = db.insertActivity("Aplaudir");
+        long id4 = db.insertActivity("Quieto");
+        long id5 = db.insertActivity("Barrer");
+        long id = db.insertActivity("Ni idea");
 
+        /*
         Calendar cal = Calendar.getInstance();
         cal.set(2017, 4, 14, 8, 50 ,50);
         long idHistory = db.insertarNuevoRegistroAlHistorial(id, cal.getTimeInMillis(), cal.getTimeInMillis() + 60000);
@@ -104,8 +106,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         db.deleteActivty(id4);
+        */
         db.close();
-*/
+
 
     }
 
