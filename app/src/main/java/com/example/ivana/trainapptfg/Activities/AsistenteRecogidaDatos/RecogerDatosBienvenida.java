@@ -24,10 +24,7 @@ public class RecogerDatosBienvenida extends Activity {
         setContentView(R.layout.activity_recoger_datos_bienvenida);
         this.botonNext = (Button)findViewById(R.id.buttonNextBienvenida);
 
-        Intent intent = new Intent(this, BluetoothLeService.class);
-        bindService(intent, mConnetion, Context.BIND_AUTO_CREATE);
 
-        mService.mensaje_encenderSensorCC2650();
     }
 
     protected void onResume() {
@@ -36,8 +33,19 @@ public class RecogerDatosBienvenida extends Activity {
     }
 
     public void onClickButtonNext(View view) {
-        Intent formulario = new Intent (RecogerDatosBienvenida.this, RecogerDatosFormulario.class);
-        startActivity(formulario);
+
+        if(!mBound) {
+            Intent intent = new Intent(this, BluetoothLeService.class);
+            bindService(intent, mConnetion, Context.BIND_AUTO_CREATE);
+        }
+        else{
+            mService.mensaje_apagarSensorCC2650();
+        }
+
+        //mService.mensaje_encenderSensorCC2650();
+
+        //Intent formulario = new Intent (RecogerDatosBienvenida.this, RecogerDatosFormulario.class);
+        //startActivity(formulario);
 
     }
 

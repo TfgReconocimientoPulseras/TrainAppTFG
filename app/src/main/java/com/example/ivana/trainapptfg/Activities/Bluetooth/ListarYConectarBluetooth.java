@@ -107,6 +107,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         //TODO salta excepcion cuando se sale de la ventana. arreglar
         if(!mBound) {
             Intent intent = new Intent(this, BluetoothLeService.class);
+            startService(intent);
             bindService(intent, mConnetion, Context.BIND_AUTO_CREATE);
         }
     }
@@ -136,6 +137,8 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
     @Override
     public void onDestroy(){
+
+        //mService.unbindService(this.mConnetion);
         super.onDestroy();
     }
 
@@ -195,6 +198,8 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                 if(!mService.mensaje_conectarDispositivo(itemValue)){
                     Toast.makeText(getApplicationContext(), "No ha sido posible conectarse a " + itemValue, Toast.LENGTH_LONG).show();
                 }
+
+                mService.mensaje_encenderSensorCC2650();
             }
 
         });

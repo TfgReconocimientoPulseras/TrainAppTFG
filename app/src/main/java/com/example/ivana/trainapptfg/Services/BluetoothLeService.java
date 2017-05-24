@@ -84,11 +84,11 @@ public class BluetoothLeService extends Service {
     private boolean bluetoothConfigurado = false;
 
     //CARACTERISTICAS/SERVICE/CONFIG DISPOSITIVO BLUETOOTH
-    BluetoothGattService acelerometroService;
-    BluetoothGattCharacteristic movementCharacteristic;
-    BluetoothGattCharacteristic movementConf;
-    BluetoothGattCharacteristic movementPeriod;
-    BluetoothGattDescriptor config;
+    private BluetoothGattService acelerometroService;
+    private BluetoothGattCharacteristic movementCharacteristic;
+    private BluetoothGattCharacteristic movementConf;
+    private BluetoothGattCharacteristic movementPeriod;
+    private BluetoothGattDescriptor config;
 
     //CLASES BLUETOOTH
     private BluetoothAdapter mBluetoothAdapter;
