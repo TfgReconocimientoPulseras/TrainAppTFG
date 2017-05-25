@@ -67,6 +67,11 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                 list.add(resultData.getString("address"));
                 adapter.notifyDataSetChanged();
             }
+            else if(resultCode == 200){
+                Intent i = new Intent(ListarYConectarBluetooth.this, MainActivity.class);
+                i.putExtra("sensor", "PULSERA");
+                startActivity(i);
+            }
         }
     }
 
@@ -190,16 +195,17 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                 String itemValue = (String) listView.getItemAtPosition(position);
 
                 // Show Alert
-                Toast.makeText(getApplicationContext(),
+                /*Toast.makeText(getApplicationContext(),
                         "Position :" + itemPosition + "  ListItem : " + itemValue, Toast.LENGTH_LONG)
-                        .show();
+                        .show();*/
 
                 //conectarseDispositivo(itemValue);
                 if(!mService.mensaje_conectarDispositivo(itemValue)){
                     Toast.makeText(getApplicationContext(), "No ha sido posible conectarse a " + itemValue, Toast.LENGTH_LONG).show();
                 }
-
-                mService.mensaje_encenderSensorCC2650();
+                else {
+                    Toast.makeText(getApplicationContext(), "Configurando dispositivo  " + itemValue, Toast.LENGTH_LONG).show();
+                }
             }
 
         });

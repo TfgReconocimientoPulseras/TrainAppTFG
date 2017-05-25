@@ -158,7 +158,9 @@ public class BluetoothLeService extends Service {
 
             if(status == BluetoothGatt.GATT_SUCCESS){
                 Log.d("BLUETOOTH", "Servicios descubiertos :)");
-                obtenerCaracteristicasDescriptoresAccelGyroCC2650(mBluetoothGatt);
+                if(obtenerCaracteristicasDescriptoresAccelGyroCC2650(mBluetoothGatt)) {
+                    resultReceiver.send(200, null);
+                }
             }
         }
 
@@ -212,6 +214,7 @@ public class BluetoothLeService extends Service {
 
             }
         }
+
     };
 
 
@@ -364,7 +367,9 @@ public class BluetoothLeService extends Service {
         return v;
     }
 
-    private void obtenerCaracteristicasDescriptoresAccelGyroCC2650(BluetoothGatt gatt){
+    private boolean obtenerCaracteristicasDescriptoresAccelGyroCC2650(BluetoothGatt gatt){
+        boolean todoCorrecto = false;
+
         BluetoothGattService acelerometroService = gatt.getService(UUID_MOVEMENT_SERVICE);
         if(acelerometroService != null){
             this.movementCharacteristic = acelerometroService.getCharacteristic(UUID_MOVEMENT_DATA);
@@ -373,8 +378,11 @@ public class BluetoothLeService extends Service {
 
             if(movementCharacteristic != null && movementConf != null){
                 this.config = movementCharacteristic.getDescriptor(UUID_CCC);
+                todoCorrecto = true;
             }
         }
+
+        return todoCorrecto;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////

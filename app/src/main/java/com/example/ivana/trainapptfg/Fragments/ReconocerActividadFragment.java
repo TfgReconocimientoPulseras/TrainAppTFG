@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.ivana.trainapptfg.MainActivity;
 import com.example.ivana.trainapptfg.R;
 import com.example.ivana.trainapptfg.Services.BluetoothLeService;
 import com.example.ivana.trainapptfg.Services.RecogidaDeDatosService;
@@ -135,8 +136,11 @@ public class ReconocerActividadFragment extends Fragment {
                     reconocedorEncendido = 1;
                     nombreActividad.setText("Comenzando a reconocer...");
                     button.setText("Parar el reconocimiento");
-                    intent = new Intent(getContext(), RecogidaDeDatosService.class);
-                    getActivity().startService(intent);
+                    /*intent = new Intent(getContext(), RecogidaDeDatosService.class);
+                    getActivity().startService(intent);*/
+                    if(mBound){
+                        mService.mensaje_encenderSensorCC2650();
+                    }
                 }
                 else if(reconocedorEncendido == 1){
                     getActivity().stopService(intent);
@@ -174,6 +178,14 @@ public class ReconocerActividadFragment extends Fragment {
         LocalBroadcastManager.getInstance(getContext()).registerReceiver((receiver),
                 new IntentFilter("estado_actualizado")
         );
+
+
+        if(((MainActivity)getActivity()).getModo().equals("PULSERA")) {
+            if (!mBound) {
+                Intent intent = new Intent(getContext(), BluetoothLeService.class);
+                getActivity().bindService(intent, mConnetion, Context.BIND_AUTO_CREATE);
+            }
+        }
     }
 
     @Override
@@ -181,4 +193,30 @@ public class ReconocerActividadFragment extends Fragment {
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(receiver);
         super.onStop();
     }
+
+    private BluetoothLeService mService;
+    private boolean mBound = false;
+    private ServiceConnection mConnetion = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            BluetoothLeService.LocalBinder binder = (BluetoothLeService.LocalBinder) service;
+            mService = binder.getService();
+            Log.d("BIND", "mBound(true)");
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d("BIND", "mBound(false)");
+            mBound = false;
+        }
+    };
+
+    public void desconexionService(){
+        if(mBound){
+            getActivity().unbindService(mConnetion);
+            mBound = false;
+        }
+    }
+
 }

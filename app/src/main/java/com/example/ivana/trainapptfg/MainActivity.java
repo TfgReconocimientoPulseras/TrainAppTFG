@@ -1,10 +1,13 @@
 package com.example.ivana.trainapptfg;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.PorterDuff;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -16,8 +19,10 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.ivana.trainapptfg.Activities.AsistenteRecogidaDatos.RecogerDatosBienvenida;
 import com.example.ivana.trainapptfg.Activities.Bluetooth.ListarYConectarBluetooth;
@@ -25,6 +30,7 @@ import com.example.ivana.trainapptfg.Activities.ListarActividades;
 import com.example.ivana.trainapptfg.DataBase.DatabaseAdapter;
 import com.example.ivana.trainapptfg.Fragments.HistorialFragment;
 import com.example.ivana.trainapptfg.Fragments.ReconocerActividadFragment;
+import com.example.ivana.trainapptfg.Services.BluetoothLeService;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -34,6 +40,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private TabLayout tabLayout;
     private ViewPager viewPager;
+
+    private String modo;
 
     private int[] icons = {
             R.drawable.ic_directions_run_black_24dp,
@@ -48,6 +56,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //TODO crear constantes para "sensor" o modo "PULSERA" o "MOVIL"
+        //MODO PULSERA -> CC2650
+        //MODO MOVIL   -> sensor del telefono
+        Intent i = getIntent();
+        this.modo = i.getStringExtra("sensor");
+        if(this.modo == null){
+            this.modo = "MOVIL";
+        }
+
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         initViewPager(viewPager);
@@ -56,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tabLayout.setupWithViewPager(viewPager);
         tabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.colorWhite));
         initTabsWithIcons();
-        
+
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -108,8 +125,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         db.deleteActivty(id4);
         */
         db.close();
-
-
     }
 
     @Override
@@ -231,4 +246,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    public String getModo(){
+        return this.modo;
+    }
 }
