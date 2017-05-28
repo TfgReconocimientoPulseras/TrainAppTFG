@@ -1,6 +1,6 @@
 package com.example.ivana.trainapptfg.Sensor;
 
-import android.app.Activity;
+import android.app.Service;
 import android.hardware.SensorManager;
 
 import com.example.ivana.trainapptfg.Utilidades.DataTAD;
@@ -14,10 +14,10 @@ public class SensorMovil implements Sensor{
     private android.hardware.Sensor mAccelerometer;
     private android.hardware.Sensor mGyroscope;
 
-    private Activity a;
+    private Service service;
 
-    public SensorMovil(Activity act){
-        this.a = act;
+    public SensorMovil(Service ser){
+        this.service = ser;
     }
 
     @Override
@@ -35,7 +35,7 @@ public class SensorMovil implements Sensor{
     }
 
     private void configurarSensor() {
-        this.mSensorManager = (SensorManager) a.getSystemService(a.SENSOR_SERVICE);
+        this.mSensorManager = (SensorManager) service.getSystemService(service.SENSOR_SERVICE);
 
         this.mAccelerometer = mSensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER);
         this.mGyroscope = mSensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_GYROSCOPE);

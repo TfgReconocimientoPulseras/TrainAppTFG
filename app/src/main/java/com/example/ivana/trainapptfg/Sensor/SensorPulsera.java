@@ -1,7 +1,9 @@
 package com.example.ivana.trainapptfg.Sensor;
 
-import android.app.Activity;
-import android.app.Service;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.ResultReceiver;
+import android.os.SystemClock;
 
 import com.example.ivana.trainapptfg.Services.BluetoothLeService;
 import com.example.ivana.trainapptfg.Utilidades.DataTAD;
@@ -9,9 +11,32 @@ import com.example.ivana.trainapptfg.Utilidades.DataTAD;
 public class SensorPulsera implements Sensor{
 
     private BluetoothLeService mService;
+    private double[] datosAcelGyro = null;
+    private long timestamp;
+
+    private SensorPulsera.MyResultReceiverBluetooth datosRecibidos;
+
+    public class MyResultReceiverBluetooth extends ResultReceiver {
+        public MyResultReceiverBluetooth(Handler handler){
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData){
+            //100 -> datos recibidos de la pulsera
+
+            if(resultCode == 100) {
+                datosAcelGyro = resultData.getDoubleArray("datos");
+                //TODO revisar este timestamp
+                timestamp = System.currentTimeMillis() - SystemClock.elapsedRealtime();
+            }
+        }
+    }
 
     public SensorPulsera(BluetoothLeService ser){
         this.mService = ser;
+        this.datosRecibidos = new MyResultReceiverBluetooth(null);
+        this.mService.inicializarResultReceiverEnvioDatos(this.datosRecibidos);
     }
 
     @Override
@@ -26,12 +51,34 @@ public class SensorPulsera implements Sensor{
 
     @Override
     public DataTAD obtenerDatosAcel() {
-        return null;
+        float[] aux = new float[3];
+        DataTAD dAcel = null;
+
+        if(this.datosAcelGyro != null){
+            aux[0] = (float)this.datosAcelGyro[0];
+            aux[1] = (float)this.datosAcelGyro[1];
+            aux[2] = (float)this.datosAcelGyro[2];
+
+            dAcel = new DataTAD(this.timestamp, aux);
+        }
+
+        return dAcel;
     }
 
     @Override
     public DataTAD obtenerDatosGyro() {
-        return null;
+        float[] aux = new float[3];
+        DataTAD dAcel = null;
+
+        if(this.datosAcelGyro != null){
+            aux[0] = (float)this.datosAcelGyro[3];
+            aux[1] = (float)this.datosAcelGyro[4];
+            aux[2] = (float)this.datosAcelGyro[5];
+
+            dAcel = new DataTAD(this.timestamp, aux);
+        }
+
+        return dAcel;
     }
 
 }

@@ -20,6 +20,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.ivana.trainapptfg.Activities.Bluetooth.ListarYConectarBluetooth;
+import com.example.ivana.trainapptfg.Sensor.SensorPulsera;
 
 import java.util.HashMap;
 import java.util.Queue;
@@ -31,7 +32,8 @@ public class BluetoothLeService extends Service {
 
     //Colas para transmision de informacion desde el service
     private BlockingQueue<String> queueDispositivosEncontrados;
-    private ListarYConectarBluetooth.MyResultReceiverBluetooth resultReceiver;
+    private ListarYConectarBluetooth.MyResultReceiverBluetooth resultReceiverListarYConectar;
+    private SensorPulsera.MyResultReceiverBluetooth resultReceiverEnvioDatos;
 
     // Accelerometer ranges
     private static final int ACC_RANGE_2G = 0;
@@ -121,7 +123,7 @@ public class BluetoothLeService extends Service {
                 Bundle bundle = new Bundle();
                 bundle.putString("address", device.getAddress());
                 //TODO crear constantes para los codigos de envio
-                resultReceiver.send(100, bundle);
+                resultReceiverListarYConectar.send(100, bundle);
                 /*runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -159,7 +161,7 @@ public class BluetoothLeService extends Service {
             if(status == BluetoothGatt.GATT_SUCCESS){
                 Log.d("BLUETOOTH", "Servicios descubiertos :)");
                 if(obtenerCaracteristicasDescriptoresAccelGyroCC2650(mBluetoothGatt)) {
-                    resultReceiver.send(200, null);
+                    resultReceiverListarYConectar.send(200, null);
                 }
             }
         }
@@ -212,6 +214,15 @@ public class BluetoothLeService extends Service {
 
                 Log.d("GIROSCOPIO  ", "Value: " + gyro_scaledX + " : " + gyro_scaledY + " : " + gyro_scaledZ);
 
+                double[] datosAcelGyro = {acc_scaledX, acc_scaledY, acc_scaledZ, gyro_scaledX, gyro_scaledY, gyro_scaledZ};
+
+                Bundle bundle = new Bundle();
+                bundle.putDoubleArray("datos", datosAcelGyro);
+                //TODO crear constantes para los codigos de envio
+                resultReceiverEnvioDatos.send(100, bundle);
+
+
+
             }
         }
 
@@ -240,7 +251,11 @@ public class BluetoothLeService extends Service {
     }
 
     public void inicializarResultReceiver(ListarYConectarBluetooth.MyResultReceiverBluetooth rr){
-        this.resultReceiver = rr;
+        this.resultReceiverListarYConectar = rr;
+    }
+
+    public void inicializarResultReceiverEnvioDatos(SensorPulsera.MyResultReceiverBluetooth rr){
+        this.resultReceiverEnvioDatos = rr;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////

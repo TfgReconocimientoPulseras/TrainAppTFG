@@ -1,7 +1,10 @@
 package com.example.ivana.trainapptfg.Services;
 
 import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.IBinder;
@@ -9,6 +12,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.example.ivana.trainapptfg.Sensor.SensorMovil;
+import com.example.ivana.trainapptfg.Sensor.SensorPulsera;
 import com.example.ivana.trainapptfg.Utilidades.DataTAD;
 import com.example.ivana.trainapptfg.Threads.AnalizarClasificacionThread;
 import com.example.ivana.trainapptfg.Threads.ClasificacionDeDatosThread;
@@ -75,6 +80,11 @@ public class RecogidaDeDatosService extends Service{
     private static final int TAM_COLA_CLASIFICACION = 5;
     private static final int TAM_COLA_RESULTADOS = 30;
 
+    //SENSOR//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private com.example.ivana.trainapptfg.Sensor.Sensor mSensor;
+
+    private String modo;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -89,11 +99,11 @@ public class RecogidaDeDatosService extends Service{
 
         df = new DataFrame(colsNames);
         this.timer = new Timer();
-        this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        /*this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         this.miSensorEventListenerAcelerometro = new MiSensorEventListener(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
-        this.miSensorEventListenerGiroscopio = new MiSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+        this.miSensorEventListenerGiroscopio = new MiSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);*/
         this.timeAcumulated = 0;
 
         this.broadcaster = LocalBroadcastManager.getInstance(this);
@@ -120,87 +130,135 @@ public class RecogidaDeDatosService extends Service{
             public void run() {
                 //timeAcumulated += FREQUENCY_DEF;
 
-                DataTAD dataAccel = miSensorEventListenerAcelerometro.obtenerDatosSensor();
-                DataTAD dataGyro = miSensorEventListenerGiroscopio.obtenerDatosSensor();
+                /*DataTAD dataAccel = miSensorEventListenerAcelerometro.obtenerDatosSensor();
+                DataTAD dataGyro = miSensorEventListenerGiroscopio.obtenerDatosSensor();*/
 
-                //unificamos los valores del acelerómetro y del giroscopio...
-                float[] floatUnificada = DataTAD.concatenateValues(dataGyro.getValues(), dataAccel.getValues());
-                DataTAD dataUnificada = new DataTAD(System.currentTimeMillis(), floatUnificada);
+                DataTAD dataAccel = mSensor.obtenerDatosAcel();
+                DataTAD dataGyro = mSensor.obtenerDatosGyro();
 
-                df.append(dataUnificada.getDataTADasArrayList());
 
-                int actividadPredicha = -1;
-                int filaActual = df.length();
+                if(dataAccel != null && dataGyro != null){
+                    //unificamos los valores del acelerómetro y del giroscopio...
+                    float[] floatUnificada = DataTAD.concatenateValues(dataGyro.getValues(), dataAccel.getValues());
+                    DataTAD dataUnificada = new DataTAD(System.currentTimeMillis(), floatUnificada);
 
-                //lo añadimos al dataframe
-                if(timestampIni == 0){
-                    timestampIni = (Long) df.get(0, 0);
-                    filaActual = 0;
-                }
-                else{
-                    filaActual = df.length() - 1;
-                }
+                    df.append(dataUnificada.getDataTADasArrayList());
 
-                //TODO CUANDO SE HA COMPLETADO LA PRIMERA VENTANA EL TIMESTAMP ACTUAL ES EL DE LA PRIMERA,NO EL DE LA ULTIMA
-                long timestampActual = (Long) df.get(filaActual, 0);
+                    int actividadPredicha = -1;
+                    int filaActual = df.length();
 
-                if( (timestampActual - timestampIni) >= COLLECTION_TIME + 10 || (timestampActual - timestampIni) >= COLLECTION_TIME - 10){
-                    Log.d("Servicio - Recogida", "Ya han pasado " + COLLECTION_TIME + " segundos\n");
-                    try {
-                        Log.d("Servicio - Recogida", "Produzco dataframe LONGITUD: " + df.length() + "\n");
-                        bqRec_Segment.put(df);
-                        df = (DataFrame) bqSegment_Recog.take();
-                        df = df.resetIndex();
-                        Log.d("Servicio - Recogida", "Consumo dataframe del servicio de procesado\n");
-
-                        timestampIni = 0;
-
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    //lo añadimos al dataframe
+                    if(timestampIni == 0){
+                        timestampIni = (Long) df.get(0, 0);
+                        filaActual = 0;
                     }
-                }
-
-/**
-                if (timeAcumulated >= COLLECTION_TIME) { // tras 5 segundos para pruebas
-                    Log.d("Servicio - Recogida", "Ya han pasado 5 segundos\n");
-
-                    try {
-                        Log.d("Servicio - Recogida", "Produzco dataframe\n");
-                        bqRec_Segment.put(df);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    else{
+                        filaActual = df.length() - 1;
                     }
 
-                    df = new DataFrame(colsNames);
-                    timeAcumulated = 0;
+                    //TODO CUANDO SE HA COMPLETADO LA PRIMERA VENTANA EL TIMESTAMP ACTUAL ES EL DE LA PRIMERA,NO EL DE LA ULTIMA
+                    long timestampActual = (Long) df.get(filaActual, 0);
 
-                }
-                else{
-                    if(comenzando){
-                        Log.d("Servicio - Recogida", "Iniciando...\n");
-                        if(timeAcumulated >= 250){
-                            Intent intent = new Intent("estado_actualizado");
-                            intent.putExtra("estado", -40);
-                            broadcaster.sendBroadcast(intent);
-                            comenzando = false;
+                    if( (timestampActual - timestampIni) >= COLLECTION_TIME + 10 || (timestampActual - timestampIni) >= COLLECTION_TIME - 10){
+                        Log.d("Servicio - Recogida", "Ya han pasado " + COLLECTION_TIME + " segundos\n");
+                        try {
+                            Log.d("Servicio - Recogida", "Produzco dataframe LONGITUD: " + df.length() + "\n");
+                            bqRec_Segment.put(df);
+                            df = (DataFrame) bqSegment_Recog.take();
+                            df = df.resetIndex();
+                            Log.d("Servicio - Recogida", "Consumo dataframe del servicio de procesado\n");
+
+                            timestampIni = 0;
+
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
                     }
+
+                    /**
+                     if (timeAcumulated >= COLLECTION_TIME) { // tras 5 segundos para pruebas
+                     Log.d("Servicio - Recogida", "Ya han pasado 5 segundos\n");
+
+                     try {
+                     Log.d("Servicio - Recogida", "Produzco dataframe\n");
+                     bqRec_Segment.put(df);
+                     } catch (InterruptedException e) {
+                     e.printStackTrace();
+                     }
+
+                     df = new DataFrame(colsNames);
+                     timeAcumulated = 0;
+
+                     }
+                     else{
+                        if(comenzando){
+                             Log.d("Servicio - Recogida", "Iniciando...\n");
+                             if(timeAcumulated >= 250){
+                             Intent intent = new Intent("estado_actualizado");
+                             intent.putExtra("estado", -40);
+                             broadcaster.sendBroadcast(intent);
+                             comenzando = false;
+                        }
+                     }
+                     }
+                     */
                 }
- */
             }
 
 
         };
     }
 
+
+    private BluetoothLeService mService;
+    private boolean mBound = false;
+    private ServiceConnection mConnetion = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            BluetoothLeService.LocalBinder binder = (BluetoothLeService.LocalBinder) service;
+            mService = binder.getService();
+            Log.d("BIND", "mBound(true)");
+            mBound = true;
+
+            if(modo.equals("PULSERA")){
+                mSensor = new SensorPulsera(mService);
+            }
+            else if(modo.equals("MOVIL")){
+                mSensor = new SensorMovil(RecogidaDeDatosService.this);
+            }
+
+
+             activarSensores();
+            timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
+            segmentacionDeDatosThread.start();
+            clasificacionDeDatosThread.start();
+            anlisisClasificacionDeDatosThread.start();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d("BIND", "mBound(false)");
+            mBound = false;
+        }
+    };
+
+    public void desconexionService(){
+        if(mBound){
+            unbindService(mConnetion);
+            mBound = false;
+        }
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags,
                               int startId) {
-        activarSensores();
-        timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
-        segmentacionDeDatosThread.start();
-        clasificacionDeDatosThread.start();
-        anlisisClasificacionDeDatosThread.start();
+
+        if (!mBound) {
+            Intent inte = new Intent(getBaseContext(), BluetoothLeService.class);
+            bindService(inte, mConnetion, Context.BIND_AUTO_CREATE);
+        }
+        this.modo = intent.getStringExtra("modo");
+
         return Service.START_STICKY;
     }
 
@@ -220,13 +278,15 @@ public class RecogidaDeDatosService extends Service{
     }
 
     private void activarSensores() {
-        this.miSensorEventListenerAcelerometro.activarSensor();
-        this.miSensorEventListenerGiroscopio.activarSensor();
+        /*this.miSensorEventListenerAcelerometro.activarSensor();
+        this.miSensorEventListenerGiroscopio.activarSensor();*/
+        this.mSensor.encenderSensor();
     }
 
     private void desactivarSensores() {
-        this.miSensorEventListenerAcelerometro.desactivarSensor();
-        this.miSensorEventListenerGiroscopio.desactivarSensor();
+        /*this.miSensorEventListenerAcelerometro.desactivarSensor();
+        this.miSensorEventListenerGiroscopio.desactivarSensor();*/
+        this.mSensor.apagarSensor();
     }
 
 

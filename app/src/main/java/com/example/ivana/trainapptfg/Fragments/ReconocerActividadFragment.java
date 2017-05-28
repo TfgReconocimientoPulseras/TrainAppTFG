@@ -13,7 +13,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.graphics.drawable.DrawableWrapper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -136,11 +135,14 @@ public class ReconocerActividadFragment extends Fragment {
                     reconocedorEncendido = 1;
                     nombreActividad.setText("Comenzando a reconocer...");
                     button.setText("Parar el reconocimiento");
-                    /*intent = new Intent(getContext(), RecogidaDeDatosService.class);
-                    getActivity().startService(intent);*/
+
                     if(mBound){
                         mService.mensaje_encenderSensorCC2650();
                     }
+
+                    intent = new Intent(getContext(), RecogidaDeDatosService.class);
+                    intent.putExtra("modo", ((MainActivity)getActivity()).getModo());
+                    getActivity().startService(intent);
                 }
                 else if(reconocedorEncendido == 1){
                     getActivity().stopService(intent);
