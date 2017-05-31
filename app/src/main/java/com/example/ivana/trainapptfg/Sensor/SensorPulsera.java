@@ -28,7 +28,7 @@ public class SensorPulsera implements Sensor{
             if(resultCode == 100) {
                 datosAcelGyro = resultData.getDoubleArray("datos");
                 //TODO revisar este timestamp
-                timestamp = System.currentTimeMillis() - SystemClock.elapsedRealtime();
+                timestamp = System.currentTimeMillis();
             }
         }
     }

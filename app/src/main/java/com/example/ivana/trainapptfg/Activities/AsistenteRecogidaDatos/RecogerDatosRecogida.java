@@ -56,6 +56,7 @@ public class RecogerDatosRecogida extends Activity {
     //PARAMETROS DE CONFIGURACION ACTIVIDADES////////////////////////////////////////////////////////////////////////
     private String nameUser;
     private String nameActivity;
+    private int numActivity;
 
     //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
     private SensorManager mSensorManager;
@@ -77,7 +78,6 @@ public class RecogerDatosRecogida extends Activity {
     //CONSTANTES/////////////////////////////////////////////////////////////////////////////////////////////////////
     private static final int NUM_ATRIB_ACCEL = 3;
     private static final int NUM_ATRIB_GYRO = 3;
-    private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 123;
     private static final String PATH_DATA_DIR =  Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles";
     private static final int FREQUENCY_DEF = 100;
     private static final String TAG = "RecogerDatos";
@@ -181,7 +181,6 @@ public class RecogerDatosRecogida extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recoger_datos_recogida);
 
-        askForStoragePermission();
         this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -195,6 +194,7 @@ public class RecogerDatosRecogida extends Activity {
         Bundle bundle = getIntent().getExtras();
         this.nameUser = bundle.getString("nombreUsu");
         this.nameActivity = bundle.getString("nombreAct");
+        this.numActivity = bundle.getInt("numActividad");
 
         this.numArchivosCreados = (TextView) findViewById(R.id.numArchivosCreadosRecogida);
         this.temporizador = (TextView) findViewById(R.id.temporizadorRecogida);
@@ -297,7 +297,7 @@ public class RecogerDatosRecogida extends Activity {
 
     private void formatDataToCsvInternalStorage(ArrayList<DataTAD> list, int type) {
         //TODO ADD TIMESTAMP TO NOT OVERRIDE OLDER FILES.
-        String fileName = this.nameUser + "_" + this.nameActivity + "_" + numFileCreated + ".csv";
+        String fileName = this.nameUser + "_" + this.numActivity + "_" + numFileCreated + ".csv";
 
         OutputStreamWriter out = null;
         try {
@@ -326,9 +326,9 @@ public class RecogerDatosRecogida extends Activity {
 
     private void formatDataToCsvExternalStorage(ArrayList<DataTAD> list) {
         //TODO ADD TIMESTAMP TO NOT OVERRIDE OLDER FILES.
-        String fileName = this.nameUser + "_" + this.nameActivity + "_" + numFileCreated + ".csv";
+        String fileName = this.nameUser + "_" + this.numActivity + "_" + numFileCreated + ".csv";
 
-        File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles");
+        File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/" + this.nameActivity);
         directory.mkdirs();
         File file = new File(directory, fileName);
 
@@ -387,27 +387,5 @@ public class RecogerDatosRecogida extends Activity {
                 //showMessageToast("hola");
             }
         });
-    }
-
-    private void askForStoragePermission(){
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE);
-        }
-
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
-        if(grantResults.length > 0){
-            switch (requestCode){
-                case REQUEST_WRITE_EXTERNAL_STORAGE:
-                    if(!Utils.checkPermissionsResult(this, permissions, grantResults)){
-                        System.exit(0);
-                    };
-                    break;
-                default:
-                    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-            }
-        }
     }
 }

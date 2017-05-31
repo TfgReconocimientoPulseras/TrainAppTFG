@@ -34,43 +34,8 @@ public class RecogerDatosBienvenida extends Activity {
 
     public void onClickButtonNext(View view) {
 
-        if(!mBound) {
-            Intent intent = new Intent(this, BluetoothLeService.class);
-            bindService(intent, mConnetion, Context.BIND_AUTO_CREATE);
-        }
-        else{
-            mService.mensaje_apagarSensorCC2650();
-        }
+        Intent formulario = new Intent (RecogerDatosBienvenida.this, RecogerDatosFormulario.class);
+        startActivity(formulario);
 
-        //mService.mensaje_encenderSensorCC2650();
-
-        //Intent formulario = new Intent (RecogerDatosBienvenida.this, RecogerDatosFormulario.class);
-        //startActivity(formulario);
-
-    }
-
-    private BluetoothLeService mService;
-    private boolean mBound = false;
-    private ServiceConnection mConnetion = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            BluetoothLeService.LocalBinder binder = (BluetoothLeService.LocalBinder) service;
-            mService = binder.getService();
-            Log.d("BIND", "mBound(true)");
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.d("BIND", "mBound(false)");
-            mBound = false;
-        }
-    };
-
-    public void desconexionService(){
-        if(mBound){
-            unbindService(mConnetion);
-            mBound = false;
-        }
     }
 }
