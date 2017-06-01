@@ -61,7 +61,8 @@ public class RecogerDatosBienvenida extends Activity {
         asyncHttpClient.post(url, requestParams, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                Log.d("REQUEST AL SERVIDOR", "PETICION EXITOSA");
+
+                Log.d("REQUEST AL SERVIDOR", "PETICION EXITOSA: " + new String(responseBody));
             }
 
             @Override
