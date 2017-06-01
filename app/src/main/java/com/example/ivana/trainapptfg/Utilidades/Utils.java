@@ -4,6 +4,10 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.widget.Toast;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Iván on 19/04/2017.
  */
@@ -27,5 +31,32 @@ public class Utils {
             Toast.makeText(context, "Permission denied", Toast.LENGTH_SHORT).show();
             return false;
         }
+    }
+
+    public static List<File> obtenerArchivosDatosRecursivo(File directorioRaiz){
+        File[] files = directorioRaiz.listFiles();
+        ArrayList<File> retFiles = new ArrayList<File>();
+
+        for(File file : files){
+            if (file.isDirectory()) {
+                retFiles.addAll(obtenerArchivosDatosRecursivo(file));
+            } else {
+                if(file.getName().endsWith(".csv")){
+                    retFiles.add(file);
+                }
+            }
+        }
+
+        return retFiles;
+    }
+
+    public static File[] convertListToArray(List<File> filesList){
+        File[] fileArray = new File[filesList.size()];
+
+        for (int i = 0; i < filesList.size(); i++){
+            fileArray[i] = filesList.get(i);
+        }
+
+        return fileArray;
     }
 }
