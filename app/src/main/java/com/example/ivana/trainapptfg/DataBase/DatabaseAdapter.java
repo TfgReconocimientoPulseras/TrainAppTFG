@@ -13,10 +13,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by Ivan on 14/05/2017.
- */
-
 public class DatabaseAdapter {
 
     //TODO QUIZÁS SERÍA ÓPTIMO DIVIDIR ESTA CLASE EN TRANSFER Y DAO
