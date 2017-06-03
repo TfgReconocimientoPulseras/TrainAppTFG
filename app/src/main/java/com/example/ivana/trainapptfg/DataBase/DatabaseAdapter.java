@@ -21,7 +21,7 @@ public class DatabaseAdapter {
     private static final String TAG = "DataBaseAdapter";
 
     //VERSION BD
-    private static final int DATABASE_VERSION = 26;
+    private static final int DATABASE_VERSION = 30;
 
     //Nombre de la BD
     private static final String DB_NAME = "AppDB";
@@ -29,6 +29,7 @@ public class DatabaseAdapter {
     //Nombres de tablas
     private static final String TABLA_ACTIVIDADES = "actividades";
     private static final String TABLA_HISTORIAL = "historial";
+    private static final String TABLA_ARBOLES = "arboles";
 
     //Columnas comunes
     private static final String KEY_ID = "id";
@@ -43,6 +44,9 @@ public class DatabaseAdapter {
     private static final String KEY_FECHAINI = "fechaIni";
     private static final String KEY_FECHAFIN = "fechaFin";
     private static final String KEY_DURACION = "duracion";
+
+    //Columnas TABLA _ARBOLES
+    private static final String KEY_TREE_TEXT = "arbol";
 
 
     private static final String CREAR_TABLA_ACTIVIDADES = "CREATE TABLE "
@@ -61,6 +65,13 @@ public class DatabaseAdapter {
             + ")";
 
     private static final String BORRAR_TABLA_HISTORIAL = "DROP TABLE IF EXISTS " + TABLA_HISTORIAL;
+
+    private static final String CREAR_TABLA_ARBOLES = "CREATE TABLE " + TABLA_ARBOLES
+            + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + KEY_TREE_TEXT + " TEXT NOT NULL"
+            + ")";
+
+    private static final String BORRAR_TABLA_ARBOLES = "DROP TABLE IF EXISTS " + TABLA_ARBOLES;
 
     private final Context context;
     private DataBaseHelper dbHelper;
@@ -81,6 +92,7 @@ public class DatabaseAdapter {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(CREAR_TABLA_ACTIVIDADES);
             db.execSQL(CREAR_TABLA_HISTORIAL);
+            db.execSQL(CREAR_TABLA_ARBOLES);
         }
 
         @Override
@@ -88,6 +100,7 @@ public class DatabaseAdapter {
             Log.w(TAG, "Actualizando BD de la version " + oldVersion + " a " + newVersion + " lo cual destruirá todos los datos");
             db.execSQL(BORRAR_TABLA_ACTIVIDADES);
             db.execSQL(BORRAR_TABLA_HISTORIAL);
+            db.execSQL(BORRAR_TABLA_ARBOLES);
             onCreate(db);
         }
 
@@ -158,7 +171,20 @@ public class DatabaseAdapter {
 
 
         long id = db.insert(TABLA_HISTORIAL, null, values);
+        //TODO CONTROLAR QUE NO HA HABIDO ERROR (ID>0)
         historyDataTransfer.setId(id);
+
+        return id;
+    }
+
+    public long insertarNuevoArbol(TreeDataTransfer treeDataTransfer){
+        ContentValues values = new ContentValues();
+        values.put(KEY_TREE_TEXT, treeDataTransfer.getTree());
+
+        long id = db.insert(TABLA_ARBOLES, null, values);
+        if(id > 0){
+            treeDataTransfer.setId(id);
+        }
 
         return id;
     }
@@ -212,6 +238,21 @@ public class DatabaseAdapter {
     private static String getDateTimeToSqlite(long timeInMillis){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return dateFormat.format(new java.util.Date(timeInMillis));
+    }
+
+    public TreeDataTransfer getLastTree(){
+        TreeDataTransfer treeDataTransfer = null;
+        //TODO COMPROBAR QUE FUNCIONE
+        String query = "SELECT * FROM " + TABLA_ARBOLES  + " WHERE " + KEY_ID + " = (SELECT MAX(" + KEY_ID + ") FROM " + TABLA_ARBOLES + ")";
+        Cursor c = db.rawQuery(query, null);
+
+        while(c.getCount() == 1 && c.moveToNext()){
+            long id = c.getLong(c.getColumnIndex(KEY_ID));
+            String tree_text = c.getString(c.getColumnIndex(KEY_TREE_TEXT));
+            treeDataTransfer = new TreeDataTransfer(id, tree_text);
+        }
+
+        return treeDataTransfer;
     }
 
     private static Date getDateFromSqlite(String date){

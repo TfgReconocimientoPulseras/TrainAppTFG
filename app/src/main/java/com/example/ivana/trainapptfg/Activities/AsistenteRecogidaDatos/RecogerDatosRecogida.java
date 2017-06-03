@@ -1,6 +1,5 @@
 package com.example.ivana.trainapptfg.Activities.AsistenteRecogidaDatos;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -8,7 +7,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -19,9 +17,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -29,11 +25,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.ivana.trainapptfg.DataBase.DatabaseAdapter;
+import com.example.ivana.trainapptfg.DataBase.TreeDataTransfer;
 import com.example.ivana.trainapptfg.MainActivity;
 import com.example.ivana.trainapptfg.R;
 import com.example.ivana.trainapptfg.Utilidades.DataTAD;
 import com.example.ivana.trainapptfg.Utilidades.MiSensorEventListener;
 import com.example.ivana.trainapptfg.Utilidades.Utils;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -43,6 +44,8 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import cz.msebera.android.httpclient.Header;
 
 //TODO SE PUEDE MODIFICAR LAS LISTAS A DATAFRAMES (JOINERY)
 public class RecogerDatosRecogida extends Activity {
@@ -100,6 +103,8 @@ public class RecogerDatosRecogida extends Activity {
                 createSimpleDialog("¡Explendido! Ya casi estamos acabando. Vamos a repetir la prueba por última vez.");
             else if((Integer)msg.obj == NUM_ARCHIVOS_CREAR) {
                 numFileCreated = 0;
+                do_post();
+                //TODO CONTROLAR TIEMPO DE ESPERA
                 notificarDialogFinal();
 
             }
@@ -376,6 +381,41 @@ public class RecogerDatosRecogida extends Activity {
             dataListSensores.add(new DataTAD(timeInMillis, aux));
         }
 
+    }
+
+
+    public void do_post(){
+        String url = "http://192.168.1.33:8081/subeDatos";
+        AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+        RequestParams requestParams = new RequestParams();
+        File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/");
+
+        try {
+            requestParams.put("upload", Utils.convertListToArray(Utils.obtenerArchivosDatosRecursivo(directory)));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        asyncHttpClient.post(url, requestParams, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                DatabaseAdapter db = new DatabaseAdapter(getBaseContext());
+                TreeDataTransfer treeDataTransfer = new TreeDataTransfer(new String(responseBody));
+                db.open();
+                long id = db.insertarNuevoArbol(treeDataTransfer);
+                if( id < 0 ){
+                    Log.d("REQUEST AL SERVIDOR", "PETICION EXITOSA - ERROR AL INSERTAR ARBOL");
+                }
+                db.close();
+
+                Log.d("REQUEST AL SERVIDOR", "PETICION EXITOSA");
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Log.d("REQUEST AL SERVIDOR", "PETICION DESASTRE");
+            }
+        });
     }
 
 

@@ -14,10 +14,10 @@ import android.util.Log;
 
 import com.example.ivana.trainapptfg.Sensor.SensorMovil;
 import com.example.ivana.trainapptfg.Sensor.SensorPulsera;
-import com.example.ivana.trainapptfg.Utilidades.DataTAD;
 import com.example.ivana.trainapptfg.Threads.AnalizarClasificacionThread;
 import com.example.ivana.trainapptfg.Threads.ClasificacionDeDatosThread;
 import com.example.ivana.trainapptfg.Threads.SegmentacionDeDatosThread;
+import com.example.ivana.trainapptfg.Utilidades.DataTAD;
 import com.example.ivana.trainapptfg.Utilidades.MiSensorEventListener;
 
 import java.util.ArrayList;
@@ -26,7 +26,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Semaphore;
 
 import joinery.DataFrame;
 
@@ -121,7 +120,7 @@ public class RecogidaDeDatosService extends Service{
 
 
         this.segmentacionDeDatosThread = new Thread(new SegmentacionDeDatosThread(bqRec_Segment, bqSegment_Clasif, bqSegment_Recog));
-        this.clasificacionDeDatosThread = new Thread(new ClasificacionDeDatosThread(bqSegment_Clasif, bqResultados));
+        this.clasificacionDeDatosThread = new Thread(new ClasificacionDeDatosThread(bqSegment_Clasif, bqResultados, getApplicationContext()));
         this.anlisisClasificacionDeDatosThread = new Thread(new AnalizarClasificacionThread(bqResultados, broadcaster, getApplicationContext()));
 
         this.timerTask = new TimerTask() {
