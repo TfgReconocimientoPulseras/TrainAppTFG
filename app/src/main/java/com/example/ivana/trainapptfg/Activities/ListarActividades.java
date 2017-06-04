@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.view.View;
@@ -75,11 +74,12 @@ public class ListarActividades extends AppCompatActivity {
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                       String activity = input.getText().toString();
+                        String activity = input.getText().toString();
                         DatabaseAdapter db = new DatabaseAdapter(getActivity());
-                        //TODO COMPROBAR SI LA ACTIVIDAD YA EXISTÍA CAMPO UNIQUE
                         db.open();
-                        long id = db.insertActivity(activity);
+                        //TODO añadir URL Prohibido darle al mas
+                        ActivityDataTransfer act = new ActivityDataTransfer(activity, "");
+                        long id = db.insertActivity(act);
                         if( id != -1){
                             list.add(db.getActivityDataTransfer(id));
                             adapter.notifyDataSetChanged();

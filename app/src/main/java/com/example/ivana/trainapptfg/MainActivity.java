@@ -1,13 +1,11 @@
 package com.example.ivana.trainapptfg;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.PorterDuff;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.Environment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -19,21 +17,18 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.example.ivana.trainapptfg.Activities.AsistenteRecogidaDatos.RecogerDatosBienvenida;
 import com.example.ivana.trainapptfg.Activities.Bluetooth.ListarYConectarBluetooth;
 import com.example.ivana.trainapptfg.Activities.ListarActividades;
+import com.example.ivana.trainapptfg.DataBase.ActivityDataTransfer;
 import com.example.ivana.trainapptfg.DataBase.DatabaseAdapter;
 import com.example.ivana.trainapptfg.Fragments.HistorialFragment;
 import com.example.ivana.trainapptfg.Fragments.ReconocerActividadFragment;
-import com.example.ivana.trainapptfg.Services.BluetoothLeService;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 
@@ -101,14 +96,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        /*else if(idActividad == 1){
+            texto = "Estas caminando.";
+            iconoActividad.setBackgroundResource(R.drawable.ico_act_1);
+        }
+        else if(idActividad == 2){
+            texto = "Estás aplaudiendo.";
+            iconoActividad.setBackgroundResource(R.drawable.ico_act_8);
+        }
+        else if(idActividad == 3){
+            texto = "Estás quieto.";
+            iconoActividad.setBackgroundResource(R.drawable.ico_act_3);
+        }
+        else if(idActividad == 4){
+            texto = "Estás barriendo.";
+            iconoActividad.setBackgroundResource(R.drawable.ico_act_2);*/
+
 
         DatabaseAdapter db = new DatabaseAdapter(this);
         db.open();
-        long id2 = db.insertActivity("Caminar");
-        long id3 = db.insertActivity("Aplaudir");
-        long id4 = db.insertActivity("Quieto");
-        long id5 = db.insertActivity("Barrer");
-        long id = db.insertActivity("Ni idea");
+
+        ActivityDataTransfer caminar = new ActivityDataTransfer("Caminar", Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_act_1.png");
+        ActivityDataTransfer aplaudir = new ActivityDataTransfer("Aplaudir", Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_act_8.png");
+        ActivityDataTransfer quieto = new ActivityDataTransfer("Quieto", Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_act_3.png");
+        ActivityDataTransfer barrer = new ActivityDataTransfer("Barrer", Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_act_2.png");
+        //ActivityDataTransfer niidea = new ActivityDataTransfer("Ni idea", Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_act_0.png");
+
+
+        long id2 = db.insertActivity(caminar);
+        long id3 = db.insertActivity(aplaudir);
+        long id4 = db.insertActivity(quieto);
+        long id5 = db.insertActivity(barrer);
+        //long id = db.insertActivity(niidea);
+
+        //TODO HACER INSERT  DEL ÁRBOL POR DEFECTO EN LA BASE DE DATOS
 
         /*
         Calendar cal = Calendar.getInstance();

@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -21,6 +23,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.ivana.trainapptfg.DataBase.ActivityDataTransfer;
+import com.example.ivana.trainapptfg.DataBase.DatabaseAdapter;
 import com.example.ivana.trainapptfg.MainActivity;
 import com.example.ivana.trainapptfg.R;
 import com.example.ivana.trainapptfg.Services.BluetoothLeService;
@@ -31,49 +35,64 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 import joinery.DataFrame;
 
 public class ReconocerActividadFragment extends Fragment {
 
     private BluetoothLeService mServiceBluetooth;
+    private HashMap<Integer, HashMap<String, Object>> actividadesSistema;
+    private static final String KEY_NOMBRE_ACTIVIDAD = "text";
+    private static final String KEY_IMAGEN = "imagen";
 
 
     private Handler modificadorActividad = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            int f = (Integer)msg.obj;
-            String texto = "";
-
-            if(f == 0){
+            /*if(idActividad == 0){
                 texto = "No tengo muy claro lo que estás haciendo.";
                 iconoActividad.setBackgroundResource(R.drawable.ico_act_0);
             }
-            else if(f == 1){
+            else if(idActividad == 1){
                 texto = "Estas caminando.";
                 iconoActividad.setBackgroundResource(R.drawable.ico_act_1);
             }
-            else if(f == 2){
+            else if(idActividad == 2){
                 texto = "Estás aplaudiendo.";
                 iconoActividad.setBackgroundResource(R.drawable.ico_act_8);
             }
-            else if(f == 3){
+            else if(idActividad == 3){
                 texto = "Estás quieto.";
                 iconoActividad.setBackgroundResource(R.drawable.ico_act_3);
             }
-            else if(f == 4){
+            else if(idActividad == 4){
                 texto = "Estás barriendo.";
                 iconoActividad.setBackgroundResource(R.drawable.ico_act_2);
             }
-            else if(f == -20){
+            else if(idActividad == -20){
                 texto = "Empiezo a notar algo....";
                 iconoActividad.setBackgroundResource(R.drawable.ico_pensando);
             }
-            else if(f == -40){
+            else if(idActividad == -40){
                 texto = "Debes estar haciendo algo como...";
                 iconoActividad.setBackgroundResource(R.drawable.ico_idea);
             }
-            nombreActividad.setText(texto);
+            nombreActividad.setText(texto);*/
+
+            int idActividad = (Integer)msg.obj;
+
+            Log.d("MECCCCCCCCc ¬¬", String.valueOf(idActividad));
+            if(idActividad != 0){
+                nombreActividad.setText((String)((actividadesSistema.get(idActividad)).get(KEY_NOMBRE_ACTIVIDAD)));
+                iconoActividad.setImageBitmap((Bitmap)((actividadesSistema.get(idActividad)).get(KEY_IMAGEN)));
+            }
+            else if(idActividad == 0){
+                iconoActividad.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_act_0.png"));
+                nombreActividad.setText("No tengo muy claro lo que estás haciendo.");
+            }
+
         }
     };
 
@@ -103,7 +122,7 @@ public class ReconocerActividadFragment extends Fragment {
 
         super.onCreate(savedInstanceState);
 
-
+        this.actividadesSistema = new HashMap<Integer, HashMap<String, Object>>();
     }
 
     @Override
@@ -114,7 +133,8 @@ public class ReconocerActividadFragment extends Fragment {
 
         nombreActividad = (TextView) view.findViewById(R.id.nombre_actividad);
         iconoActividad = (ImageView) view.findViewById(R.id.icono_actividad);
-        iconoActividad.setBackgroundResource(R.drawable.ico_pausa);
+        //iconoActividad.setBackgroundResource(R.drawable.ico_pausa);
+        iconoActividad.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_pausa.png"));
 
         receiver = new BroadcastReceiver(){
             @Override
@@ -136,6 +156,23 @@ public class ReconocerActividadFragment extends Fragment {
                     nombreActividad.setText("Comenzando a reconocer...");
                     button.setText("Parar el reconocimiento");
 
+                    DatabaseAdapter db = new DatabaseAdapter(getContext());
+                    ActivityDataTransfer activityDataTransfer = null;
+                    db.open();
+                    List<ActivityDataTransfer> listaAct = db.listarActividadesSistema();
+                    db.close();
+
+                    for(final ActivityDataTransfer act: listaAct){
+                        //actividadesSistema.put((int)act.getId(), new ArrayList(){{add(0, act.getName()); add(1,act.getUrlImage());}});
+                        Log.d("ACTIVIDADES", String.valueOf((int)act.getId()) + " " + act.getName() + " " + act.getUrlImage());
+                        HashMap<String, Object> aux = new HashMap<String, Object>();
+                        aux.put(KEY_NOMBRE_ACTIVIDAD, act.getName());
+                        aux.put(KEY_IMAGEN, BitmapFactory.decodeFile(act.getUrlImage()));
+
+                        actividadesSistema.put((int)act.getId(), aux);
+
+                    }
+
                     if(mBound){
                         mService.mensaje_encenderSensorCC2650();
                     }
@@ -149,7 +186,9 @@ public class ReconocerActividadFragment extends Fragment {
                     nombreActividad.setText("Para volver a reconocer pulse el botón de abajo.");
                     button.setText("Comenzar a reconocer");
                     reconocedorEncendido = 0;
-                    iconoActividad.setBackgroundResource(R.drawable.ico_pausa);
+                    //iconoActividad.setBackgroundResource(R.drawable.ico_pausa);
+                    iconoActividad.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_pausa.png"));
+                    actividadesSistema.clear();
                 }
             }
         });

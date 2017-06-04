@@ -108,9 +108,10 @@ public class RecogidaDeDatosService extends Service{
         this.broadcaster = LocalBroadcastManager.getInstance(this);
 
 
-        Intent intent = new Intent("estado_actualizado");
+        //TODO ADAPTAR A LA NUEVA FORMA QUE TIENE EL HANDLER QUE MANEJA NOMBRE Y FOTO
+        /*Intent intent = new Intent("estado_actualizado");
         intent.putExtra("estado", -20);
-        broadcaster.sendBroadcast(intent);
+        broadcaster.sendBroadcast(intent);*/
 
         //TODO FAIR POLICY????
         this.bqRec_Segment = new ArrayBlockingQueue(TAM_COLA_RECOGIDA, true);
@@ -218,7 +219,7 @@ public class RecogidaDeDatosService extends Service{
             mService = binder.getService();
             Log.d("BIND", "mBound(true)");
             mBound = true;
-
+            //TODO CONTROLAR CUANDO ESTEMOS CONECTADOS CON PULSERA O CON MÓVIL
             if(modo.equals("PULSERA")){
                 mSensor = new SensorPulsera(mService);
             }
@@ -252,11 +253,22 @@ public class RecogidaDeDatosService extends Service{
     public int onStartCommand(Intent intent, int flags,
                               int startId) {
 
-        if (!mBound) {
+        this.modo = intent.getStringExtra("modo");
+
+        //TODO CAMBIAR A CONSTANTE
+        if (this.modo.equals("PULSERA") && !mBound) {
             Intent inte = new Intent(getBaseContext(), BluetoothLeService.class);
             bindService(inte, mConnetion, Context.BIND_AUTO_CREATE);
         }
-        this.modo = intent.getStringExtra("modo");
+        else if(modo.equals("MOVIL")){
+            //TODO ARREGLAR ESTO
+            mSensor = new SensorMovil(RecogidaDeDatosService.this);
+            activarSensores();
+            timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
+            segmentacionDeDatosThread.start();
+            clasificacionDeDatosThread.start();
+            anlisisClasificacionDeDatosThread.start();
+        }
 
         return Service.START_STICKY;
     }

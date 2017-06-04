@@ -21,7 +21,7 @@ public class DatabaseAdapter {
     private static final String TAG = "DataBaseAdapter";
 
     //VERSION BD
-    private static final int DATABASE_VERSION = 30;
+    private static final int DATABASE_VERSION = 37;
 
     //Nombre de la BD
     private static final String DB_NAME = "AppDB";
@@ -37,6 +37,7 @@ public class DatabaseAdapter {
     //Columnas TABLA_ACTIVIDADES
     private static final String KEY_FECHACREACION = "fechaCreacion";
     private static final String KEY_ACTIVIDAD = "actividad";
+    private static final String KEY_URL_IMAGE = "urlImage";
 
 
     //Columnas TABLA_HISTORIAL
@@ -52,7 +53,8 @@ public class DatabaseAdapter {
     private static final String CREAR_TABLA_ACTIVIDADES = "CREATE TABLE "
             + TABLA_ACTIVIDADES + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + KEY_ACTIVIDAD + " TEXT NOT NULL UNIQUE,"
-            + KEY_FECHACREACION + " DATETIME DEFAULT (datetime('now', 'localtime')))";
+            + KEY_FECHACREACION + " DATETIME DEFAULT (datetime('now', 'localtime')),"
+            + KEY_URL_IMAGE + " TEXT NOT NULL " + ")";
 
     private static final String BORRAR_TABLA_ACTIVIDADES = "DROP TABLE IF EXISTS " + TABLA_ACTIVIDADES;
 
@@ -120,12 +122,14 @@ public class DatabaseAdapter {
         this.dbHelper.close();
     }
 
-    //TODO CREAR CLASE ACTIVIDAD PARA REPRESENTAR EL MODELO (IGUAL NO ES NECESARIO)
-    public long insertActivity(String activity){
+    public long insertActivity(ActivityDataTransfer act){
         ContentValues values = new ContentValues();
-        values.put(KEY_ACTIVIDAD, activity);
+        values.put(KEY_ACTIVIDAD, act.getName());
+        values.put(KEY_URL_IMAGE, act.getUrlImage());
 
         long id = db.insert(TABLA_ACTIVIDADES, null, values);
+
+        act.setId(id);
 
         return id;
     }
@@ -137,8 +141,10 @@ public class DatabaseAdapter {
 
         while(c.getCount() == 1 && c.moveToNext()){
             String actividad = c.getString(c.getColumnIndex(KEY_ACTIVIDAD));
+            String url = c.getString(c.getColumnIndex(KEY_URL_IMAGE));
             Date fCreacion = getDateFromSqlite(c.getString(c.getColumnIndex(KEY_FECHACREACION)));
-            activityDataTransfer = new ActivityDataTransfer(id, actividad, fCreacion);
+
+            activityDataTransfer = new ActivityDataTransfer(id, actividad, fCreacion, url);
         }
 
         return activityDataTransfer;
@@ -227,8 +233,9 @@ public class DatabaseAdapter {
             int id = c.getInt(c.getColumnIndex(KEY_ID));
             String actividad = c.getString(c.getColumnIndex(KEY_ACTIVIDAD));
             Date fCreacion = getDateFromSqlite(c.getString(c.getColumnIndex(KEY_FECHACREACION)));
+            String url = c.getString(c.getColumnIndex(KEY_URL_IMAGE));
 
-            ActivityDataTransfer activityDataTransfer = new ActivityDataTransfer(id, actividad, fCreacion);
+            ActivityDataTransfer activityDataTransfer = new ActivityDataTransfer(id, actividad, fCreacion, url);
             retList.add(activityDataTransfer);
         }
 
@@ -242,7 +249,6 @@ public class DatabaseAdapter {
 
     public TreeDataTransfer getLastTree(){
         TreeDataTransfer treeDataTransfer = null;
-        //TODO COMPROBAR QUE FUNCIONE
         String query = "SELECT * FROM " + TABLA_ARBOLES  + " WHERE " + KEY_ID + " = (SELECT MAX(" + KEY_ID + ") FROM " + TABLA_ARBOLES + ")";
         Cursor c = db.rawQuery(query, null);
 

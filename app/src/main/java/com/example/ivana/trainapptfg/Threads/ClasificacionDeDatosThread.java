@@ -33,6 +33,12 @@ public class ClasificacionDeDatosThread implements Runnable {
         treeDataTransfer = db.getLastTree();
         db.close();
         this.mArbol = treeDataTransfer.getTree();
+        try {
+            interpreter.eval(this.mArbol);
+        } catch (EvalError evalError) {
+            evalError.printStackTrace();
+        }
+
     }
     @Override
     public void run() {
@@ -70,7 +76,8 @@ public class ClasificacionDeDatosThread implements Runnable {
         try {
             HashMap hashMap = dataframeToHashMap(df);
             interpreter.set("hashMap", hashMap);
-            prediccion = (Integer) interpreter.eval(this.mArbol);
+            prediccion = (Integer)interpreter.eval("miMetodo(hashMap)");
+
         } catch (EvalError evalError) {
             evalError.printStackTrace();
         }

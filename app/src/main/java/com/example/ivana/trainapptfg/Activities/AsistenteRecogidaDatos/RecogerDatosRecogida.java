@@ -47,7 +47,6 @@ import java.util.TimerTask;
 
 import cz.msebera.android.httpclient.Header;
 
-//TODO SE PUEDE MODIFICAR LAS LISTAS A DATAFRAMES (JOINERY)
 public class RecogerDatosRecogida extends Activity {
 
     //ELEMENTOS GRÁFICOS/////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,7 +85,7 @@ public class RecogerDatosRecogida extends Activity {
     private static final String TAG = "RecogerDatos";
     private static final String FILES_HEAD = "timestamp,gyro-alpha,gyro-beta,gyro-gamma,accel-x,accel-y,accel-z\n";
     private static final int NUM_ARCHIVOS_CREAR = 3;
-    private static final int TIEMPO_POR_ARCHIVO = 30000;
+    private static final int TIEMPO_POR_ARCHIVO = 30000; //antes 30000
 
     private Handler modificadorFinalizador = new Handler() {
         @Override

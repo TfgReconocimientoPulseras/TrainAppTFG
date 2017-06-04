@@ -72,9 +72,11 @@ public class RecogerDatosFormulario extends Activity {
 
             //2º Registrar la actividad en la base de datos
             DatabaseAdapter db = new DatabaseAdapter(this);
-            //TODO COMPROBAR SI LA ACTIVIDAD YA EXISTÍA CAMPO UNIQUE
             db.open();
-            long id = db.insertActivity(this.nameActivity);
+
+            ActivityDataTransfer nuevaActividad = new ActivityDataTransfer(this.nameActivity, Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_act_new.jpg");
+
+            long id = db.insertActivity(nuevaActividad);
             if( id != -1){
                 aux = db.getActivityDataTransfer(id);
                 aplicacionNoexiste = true;

@@ -3,19 +3,29 @@ package com.example.ivana.trainapptfg.DataBase;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/**
- * Created by Ivan on 15/05/2017.
- */
-
 public class ActivityDataTransfer {
     private long id;
     private String name;
     private Date fechaCreacion;
 
-    public ActivityDataTransfer(long id, String name, Date fechaCreacion) {
+    private String urlImage;
+
+    public ActivityDataTransfer(long id, String name, Date fechaCreacion, String url) {
         this.id = id;
         this.name = name;
         this.fechaCreacion = fechaCreacion;
+        this.urlImage = url;
+    }
+
+    public  ActivityDataTransfer(String name, Date fechaCreacion, String url){
+        this.name = name;
+        this.fechaCreacion = fechaCreacion;
+        this.urlImage = url;
+    }
+
+    public  ActivityDataTransfer(String name, String url){
+        this.name = name;
+        this.urlImage = url;
     }
 
     public long getId() {
@@ -40,6 +50,14 @@ public class ActivityDataTransfer {
 
     public void setFechaCreacion(Date fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
+    }
+
+    public String getUrlImage() {
+        return urlImage;
+    }
+
+    public void setUrlImage(String urlImage) {
+        this.urlImage = urlImage;
     }
 
     @Override

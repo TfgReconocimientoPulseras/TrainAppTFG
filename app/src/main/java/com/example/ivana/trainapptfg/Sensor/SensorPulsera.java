@@ -3,7 +3,6 @@ package com.example.ivana.trainapptfg.Sensor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
-import android.os.SystemClock;
 
 import com.example.ivana.trainapptfg.Services.BluetoothLeService;
 import com.example.ivana.trainapptfg.Utilidades.DataTAD;
@@ -27,7 +26,6 @@ public class SensorPulsera implements Sensor{
 
             if(resultCode == 100) {
                 datosAcelGyro = resultData.getDoubleArray("datos");
-                //TODO revisar este timestamp
                 timestamp = System.currentTimeMillis();
             }
         }

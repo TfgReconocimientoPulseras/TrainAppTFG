@@ -1,11 +1,8 @@
 package com.example.ivana.trainapptfg.EstadosFSM;
 
-import android.content.Context;
-
 import com.example.ivana.trainapptfg.DataBase.DatabaseAdapter;
 
 import java.util.Date;
-import java.util.List;
 
 public class EstadoDudoso extends Estado {
     private int contGlobal;
@@ -45,7 +42,6 @@ public class EstadoDudoso extends Estado {
         else if(contGlobal >= Estado.MAX_SIZE){
             DatabaseAdapter db = new DatabaseAdapter(getContext());
             db.open();
-            //TODO ME HE EQUIVOCADO, PONER FECHA FIN! EN HISTORY DATATRANSFER
             historyDataTransfer.setfFin(new Date());
             long id = db.insertarNuevoRegistroAlHistorial(historyDataTransfer);
             db.close();
@@ -61,7 +57,6 @@ public class EstadoDudoso extends Estado {
             DatabaseAdapter db = new DatabaseAdapter(getContext());
 
             db.open();
-            //TODO ME HE EQUIVOCADO, PONER FECHA FIN! EN HISTORY DATATRANSFER
             historyDataTransfer.setfFin(new Date());
             long id = db.insertarNuevoRegistroAlHistorial(historyDataTransfer);
             db.close();

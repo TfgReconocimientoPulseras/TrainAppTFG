@@ -5,12 +5,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.example.ivana.trainapptfg.DataBase.DatabaseAdapter;
 import com.example.ivana.trainapptfg.R;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +31,6 @@ public class HistorialDiaConcreto extends Activity {
 
         Intent i = getIntent();
         String dateToShow = i.getStringExtra("dayToShow");
-        //TODO EJECUTAR CONSULTA PARA OBTENER LAS ACTIVIDADES REALIZADAS HOY
         DatabaseAdapter db = new DatabaseAdapter(this);
 
         db.open();
