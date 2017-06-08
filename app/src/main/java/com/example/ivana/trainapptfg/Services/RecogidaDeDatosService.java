@@ -224,11 +224,11 @@ public class RecogidaDeDatosService extends Service{
                 mSensor = new SensorPulsera(mService);
             }
             else if(modo.equals("MOVIL")){
-                mSensor = new SensorMovil(RecogidaDeDatosService.this);
+                mSensor = new SensorMovil(getApplicationContext());
             }
 
 
-             activarSensores();
+            activarSensores();
             timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
             segmentacionDeDatosThread.start();
             clasificacionDeDatosThread.start();
@@ -262,7 +262,7 @@ public class RecogidaDeDatosService extends Service{
         }
         else if(modo.equals("MOVIL")){
             //TODO ARREGLAR ESTO
-            mSensor = new SensorMovil(RecogidaDeDatosService.this);
+            mSensor = new SensorMovil(getApplicationContext());
             activarSensores();
             timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
             segmentacionDeDatosThread.start();

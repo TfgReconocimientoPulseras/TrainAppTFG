@@ -5,8 +5,12 @@ import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -16,6 +20,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -29,6 +34,10 @@ import com.example.ivana.trainapptfg.DataBase.DatabaseAdapter;
 import com.example.ivana.trainapptfg.DataBase.TreeDataTransfer;
 import com.example.ivana.trainapptfg.MainActivity;
 import com.example.ivana.trainapptfg.R;
+import com.example.ivana.trainapptfg.Sensor.ModoSensor;
+import com.example.ivana.trainapptfg.Sensor.SensorMovil;
+import com.example.ivana.trainapptfg.Sensor.SensorPulsera;
+import com.example.ivana.trainapptfg.Services.BluetoothLeService;
 import com.example.ivana.trainapptfg.Utilidades.DataTAD;
 import com.example.ivana.trainapptfg.Utilidades.MiSensorEventListener;
 import com.example.ivana.trainapptfg.Utilidades.Utils;
@@ -61,11 +70,12 @@ public class RecogerDatosRecogida extends Activity {
     private int numActivity;
 
     //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
-    private SensorManager mSensorManager;
+    /*private SensorManager mSensorManager;
     private MiSensorEventListener miSensorEventListenerAcelerometro;
     private MiSensorEventListener miSensorEventListenerGiroscopio;
     private Sensor mAccelerometer;
-    private Sensor mGyroscope;
+    private Sensor mGyroscope;*/
+    private com.example.ivana.trainapptfg.Sensor.Sensor mSensor;
 
     //ALMACENAMIENTO DATOS DE SENSORES///////////////////////////////////////////////////////////////////////////////
     private ArrayList<DataTAD> dataListAccel;
@@ -185,11 +195,24 @@ public class RecogerDatosRecogida extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recoger_datos_recogida);
 
-        this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        ModoSensor modo = (ModoSensor) getApplication();
+
+        if(modo.getModo() == ModoSensor.MODO_MOVIL){
+            this.mSensor = new SensorMovil(getApplicationContext());
+        }
+        else if(modo.getModo() == ModoSensor.MODO_PULSERA){
+            this.mSensor = null;
+            if (!mBound) {
+                Intent inte = new Intent(getBaseContext(), BluetoothLeService.class);
+                bindService(inte, mConnetion, Context.BIND_AUTO_CREATE);
+            }
+        }
+
+        /*this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         this.miSensorEventListenerAcelerometro = new MiSensorEventListener(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
-        this.miSensorEventListenerGiroscopio = new MiSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
+        this.miSensorEventListenerGiroscopio = new MiSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);*/
 
         this.dataListAccel = new ArrayList<DataTAD>();
         this.dataListGyro = new ArrayList<DataTAD>();
@@ -219,60 +242,66 @@ public class RecogerDatosRecogida extends Activity {
     }
 
     public void onClickButtonPlay(View view) {
-        this.timeAcumulated = 0;
+        ModoSensor modo = (ModoSensor) getApplication();
 
-        this.timer = new Timer();
+        //if de comprobacion para asegurarnos de que, en modo pulsera, el servicio de bluetooth ha sido encontrado antes de dar al boton
+        if((mBound && modo.getModo() == ModoSensor.MODO_PULSERA) || modo.getModo() == ModoSensor.MODO_MOVIL){
+            this.timeAcumulated = 0;
 
-        this.buttonRecord.setEnabled(false);
-        buttonRecord.setBackgroundColor(Color.rgb(223, 229, 229));
-        this.buttonRecord.setText("En proceso...");
+            this.timer = new Timer();
 
-        this.progressBar.setProgress(0);
+            this.buttonRecord.setEnabled(false);
+            buttonRecord.setBackgroundColor(Color.rgb(223, 229, 229));
+            this.buttonRecord.setText("En proceso...");
 
-        this.activarSensores();
+            this.progressBar.setProgress(0);
 
-        this.progressBar.setMax((TIEMPO_POR_ARCHIVO));
+            this.activarSensores();
 
-        temporizador.setText(Integer.toString(TIEMPO_POR_ARCHIVO/1000));
+            this.progressBar.setMax((TIEMPO_POR_ARCHIVO));
 
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                incrementProgressBar(FREQUENCY_DEF);
-                timeAcumulated += FREQUENCY_DEF;
+            temporizador.setText(Integer.toString(TIEMPO_POR_ARCHIVO/1000));
 
-                rellenaListasDeDatos();
+            TimerTask timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    incrementProgressBar(FREQUENCY_DEF);
+                    timeAcumulated += FREQUENCY_DEF;
 
-                if((timeAcumulated % 1000) == 0){
-                    modificadorTemporizador.sendEmptyMessage(0);
+                    rellenaListasDeDatos();
+
+                    if((timeAcumulated % 1000) == 0){
+                        modificadorTemporizador.sendEmptyMessage(0);
+                    }
+
+                    if (timeAcumulated >= (TIEMPO_POR_ARCHIVO)) {
+                        comprobacionTimestamp();
+
+                    /*miSensorEventListenerAcelerometro.desactivarSensor();
+                    miSensorEventListenerGiroscopio.desactivarSensor();*/
+                        desactivarSensores();
+
+                        timer.cancel();
+                        numFileCreated++;
+                        formatDataToCsvExternalStorage(dataListSensores); //Sensor.TYPE_ALL
+
+                        dataListSensores.clear();
+                        dataListAccel.clear();
+                        dataListGyro.clear();
+                        Message msg = new Message();
+                        msg.obj = numFileCreated;
+                        modificadorFinalizador.sendMessage(msg);
+
+                        notificationAviso(numFileCreated);
+                    }
                 }
-
-                if (timeAcumulated >= (TIEMPO_POR_ARCHIVO)) {
-                    comprobacionTimestamp();
-
-                    miSensorEventListenerAcelerometro.desactivarSensor();
-                    miSensorEventListenerGiroscopio.desactivarSensor();
-
-                    timer.cancel();
-                    numFileCreated++;
-                    formatDataToCsvExternalStorage(dataListSensores); //Sensor.TYPE_ALL
-
-                    dataListSensores.clear();
-                    dataListAccel.clear();
-                    dataListGyro.clear();
-                    Message msg = new Message();
-                    msg.obj = numFileCreated;
-                    modificadorFinalizador.sendMessage(msg);
-
-                    notificationAviso(numFileCreated);
-                }
-            }
-        };
+            };
 
         /*
          * Pasado 1s comienza a ejecutarse la tarea "timerTask" cada 100 ms
          */
-        this.timer.scheduleAtFixedRate(timerTask, 1000, this.FREQUENCY_DEF);
+            this.timer.scheduleAtFixedRate(timerTask, 1000, this.FREQUENCY_DEF);
+        }
     }
 
     public void createSimpleDialog(String texto) {
@@ -286,13 +315,15 @@ public class RecogerDatosRecogida extends Activity {
     }
 
     private void desactivarSensores() {
-        this.miSensorEventListenerAcelerometro.desactivarSensor();
-        this.miSensorEventListenerGiroscopio.desactivarSensor();
+        /*this.miSensorEventListenerAcelerometro.desactivarSensor();
+        this.miSensorEventListenerGiroscopio.desactivarSensor();*/
+        this.mSensor.apagarSensor();
     }
 
     private void activarSensores() {
-        this.miSensorEventListenerAcelerometro.activarSensor();
-        this.miSensorEventListenerGiroscopio.activarSensor();
+        /*this.miSensorEventListenerAcelerometro.activarSensor();
+        this.miSensorEventListenerGiroscopio.activarSensor();*/
+        this.mSensor.encenderSensor();
     }
 
     private void incrementProgressBar(int increment) {
@@ -365,8 +396,11 @@ public class RecogerDatosRecogida extends Activity {
     }
 
     private void rellenaListasDeDatos() {
-        DataTAD dAccel = miSensorEventListenerAcelerometro.obtenerDatosSensor();
-        DataTAD dGyro = miSensorEventListenerGiroscopio.obtenerDatosSensor();
+        /*DataTAD dAccel = miSensorEventListenerAcelerometro.obtenerDatosSensor();
+        DataTAD dGyro = miSensorEventListenerGiroscopio.obtenerDatosSensor();*/
+        DataTAD dAccel = mSensor.obtenerDatosAcel();
+        DataTAD dGyro = mSensor.obtenerDatosGyro();
+
         long timeInMillis = System.currentTimeMillis();
 
         if (dAccel.getValues() != null && dGyro.getValues() != null) {
@@ -426,5 +460,32 @@ public class RecogerDatosRecogida extends Activity {
                 //showMessageToast("hola");
             }
         });
+    }
+
+    private BluetoothLeService mService;
+    private boolean mBound = false;
+    private ServiceConnection mConnetion = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            BluetoothLeService.LocalBinder binder = (BluetoothLeService.LocalBinder) service;
+            mService = binder.getService();
+            Log.d("BIND", "mBound(true)");
+            mBound = true;
+
+            mSensor = new SensorPulsera(mService);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d("BIND", "mBound(false)");
+            mBound = false;
+        }
+    };
+
+    public void desconexionService(){
+        if(mBound){
+            unbindService(mConnetion);
+            mBound = false;
+        }
     }
 }

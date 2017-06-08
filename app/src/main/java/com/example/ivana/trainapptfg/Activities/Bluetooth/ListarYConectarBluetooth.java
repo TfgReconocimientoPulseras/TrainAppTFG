@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.example.ivana.trainapptfg.MainActivity;
 import com.example.ivana.trainapptfg.R;
+import com.example.ivana.trainapptfg.Sensor.ModoSensor;
 import com.example.ivana.trainapptfg.Services.BluetoothLeService;
 import com.example.ivana.trainapptfg.Utilidades.Utils;
 
@@ -68,6 +69,8 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
             }
             else if(resultCode == 200){
+                ModoSensor modo = (ModoSensor) getApplication();
+                modo.setModo(ModoSensor.MODO_PULSERA);
                 Intent i = new Intent(ListarYConectarBluetooth.this, MainActivity.class);
                 i.putExtra("sensor", "PULSERA");
                 startActivity(i);

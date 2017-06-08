@@ -26,6 +26,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:name= ".Sensor.ModoSensor"
         android:theme="@style/AppTheme">
         <uses-feature
             android:name="android.hardware.sensor.accelerometer"
