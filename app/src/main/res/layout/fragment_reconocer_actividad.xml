@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -14,31 +13,28 @@
         app:layout_heightPercent="40%"
         app:layout_widthPercent="70%"
         android:gravity="center_horizontal"
-        android:background="@drawable/borde"
-
-
+        android:background="@drawable/border"
         android:layout_marginLeft="40dp"
         android:layout_marginRight="40dp"
         android:layout_marginTop="7dp"
+        android:layout_marginBottom="5dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
     <TextView
         android:id="@+id/nombre_actividad"
         android:layout_width="match_parent"
-
-        android:gravity="center"
-        android:text="Para comenzar a reconocer la actividad pulse el botón de abajo."
-        android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
+        android:background="@drawable/border"
+        android:layout_below="@+id/icono_actividad"
+        android:layout_centerHorizontal="true"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
+        android:gravity="center"
+
+        android:text="Para comenzar a reconocer la actividad pulse el botón de abajo."
+        android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
         android:textColor="@color/colorPrimaryDark"
-
-        android:background="@drawable/borde"
-
-        app:layout_heightPercent="40%"
-        android:layout_below="@+id/icono_actividad"
-        android:layout_centerHorizontal="true" />
+        app:layout_heightPercent="40%" />
 
     <FrameLayout
         android:id="@+id/panel_end"

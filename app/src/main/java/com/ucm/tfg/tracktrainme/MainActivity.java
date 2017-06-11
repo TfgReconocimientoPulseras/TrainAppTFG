@@ -72,12 +72,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                tab.getIcon().setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.SRC_IN);
+                tab.getIcon().setColorFilter(getResources().getColor(R.color.colorWhite), PorterDuff.Mode.SRC_IN);
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                tab.getIcon().setColorFilter(getResources().getColor(R.color.colorWhite), PorterDuff.Mode.SRC_IN);
+                tab.getIcon().setColorFilter(getResources().getColor(R.color.colorWhiteDark), PorterDuff.Mode.SRC_IN);
             }
 
             @Override
@@ -95,24 +95,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        /*else if(idActividad == 1){
-            texto = "Estas caminando.";
-            iconoActividad.setBackgroundResource(R.drawable.ico_act_1);
-        }
-        else if(idActividad == 2){
-            texto = "Estás aplaudiendo.";
-            iconoActividad.setBackgroundResource(R.drawable.ico_act_8);
-        }
-        else if(idActividad == 3){
-            texto = "Estás quieto.";
-            iconoActividad.setBackgroundResource(R.drawable.ico_act_3);
-        }
-        else if(idActividad == 4){
-            texto = "Estás barriendo.";
-            iconoActividad.setBackgroundResource(R.drawable.ico_act_2);*/
-
-
 
         DatabaseAdapter db = new DatabaseAdapter(this);
         db.open();
@@ -132,20 +114,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //TODO HACER INSERT  DEL ÁRBOL POR DEFECTO EN LA BASE DE DATOS
 
-        /*
-        Calendar cal = Calendar.getInstance();
-        cal.set(2017, 4, 14, 8, 50 ,50);
-        long idHistory = db.insertarNuevoRegistroAlHistorial(id, cal.getTimeInMillis(), cal.getTimeInMillis() + 60000);
-
-        cal.set(2017, 4, 14, 10, 50 ,50);
-        long idHistory2 = db.insertarNuevoRegistroAlHistorial(id2, cal.getTimeInMillis(), cal.getTimeInMillis() + 60000);
-
-        cal.set(2017, 4, 15, 8, 50 ,50);
-        long idHistory3 = db.insertarNuevoRegistroAlHistorial(id3, cal.getTimeInMillis(), cal.getTimeInMillis() + 60000);
-
-
-        db.deleteActivty(id4);
-        */
         db.close();
     }
 
@@ -201,11 +169,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(this, ListarActividades.class);
             startActivity(intent);
         }
-        /*else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }*/
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -224,6 +187,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tabLayout.getTabAt(0).getIcon().setColorFilter(getResources().getColor(R.color.colorWhite), PorterDuff.Mode.SRC_IN);
 
         tabLayout.getTabAt(1).setIcon(icons[1]);
+        tabLayout.getTabAt(1).getIcon().setColorFilter(getResources().getColor(R.color.colorWhiteDark), PorterDuff.Mode.SRC_IN);
+
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {

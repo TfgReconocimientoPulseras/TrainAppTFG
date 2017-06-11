@@ -23,12 +23,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.ucm.tfg.tracktrainme.DataBase.ActivityDataTransfer;
-import com.ucm.tfg.tracktrainme.DataBase.DatabaseAdapter;
 import com.ucm.tfg.tracktrainme.MainActivity;
 import com.ucm.tfg.tracktrainme.R;
 import com.ucm.tfg.tracktrainme.Services.BluetoothLeService;
-import com.ucm.tfg.tracktrainme.Services.RecogidaDeDatosService;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,7 +33,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 import joinery.DataFrame;
 
@@ -47,40 +43,9 @@ public class ReconocerActividadFragment extends Fragment {
     private static final String KEY_NOMBRE_ACTIVIDAD = "text";
     private static final String KEY_IMAGEN = "imagen";
 
-
     private Handler modificadorActividad = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            /*if(idActividad == 0){
-                texto = "No tengo muy claro lo que estás haciendo.";
-                iconoActividad.setBackgroundResource(R.drawable.ico_act_0);
-            }
-            else if(idActividad == 1){
-                texto = "Estas caminando.";
-                iconoActividad.setBackgroundResource(R.drawable.ico_act_1);
-            }
-            else if(idActividad == 2){
-                texto = "Estás aplaudiendo.";
-                iconoActividad.setBackgroundResource(R.drawable.ico_act_8);
-            }
-            else if(idActividad == 3){
-                texto = "Estás quieto.";
-                iconoActividad.setBackgroundResource(R.drawable.ico_act_3);
-            }
-            else if(idActividad == 4){
-                texto = "Estás barriendo.";
-                iconoActividad.setBackgroundResource(R.drawable.ico_act_2);
-            }
-            else if(idActividad == -20){
-                texto = "Empiezo a notar algo....";
-                iconoActividad.setBackgroundResource(R.drawable.ico_pensando);
-            }
-            else if(idActividad == -40){
-                texto = "Debes estar haciendo algo como...";
-                iconoActividad.setBackgroundResource(R.drawable.ico_idea);
-            }
-            nombreActividad.setText(texto);*/
-
             int idActividad = (Integer)msg.obj;
 
             Log.d("MECCCCCCCCc ¬¬", String.valueOf(idActividad));
@@ -122,20 +87,8 @@ public class ReconocerActividadFragment extends Fragment {
 
         super.onCreate(savedInstanceState);
 
+        /**
         this.actividadesSistema = new HashMap<Integer, HashMap<String, Object>>();
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_reconocer_actividad, container, false);
-
-        nombreActividad = (TextView) view.findViewById(R.id.nombre_actividad);
-        iconoActividad = (ImageView) view.findViewById(R.id.icono_actividad);
-        //iconoActividad.setBackgroundResource(R.drawable.ico_pausa);
-        iconoActividad.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_pausa.png"));
-
         receiver = new BroadcastReceiver(){
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -145,6 +98,24 @@ public class ReconocerActividadFragment extends Fragment {
                 modificadorActividad.sendMessage(msg);
             }
         };
+         **/
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_reconocer_actividad, container, false);
+        /*
+        nombreActividad = (TextView) view.findViewById(R.id.nombre_actividad);
+        iconoActividad = (ImageView) view.findViewById(R.id.icono_actividad);
+        //iconoActividad.setBackgroundResource(R.drawable.ico_pausa);
+        iconoActividad.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_pausa.png"));
+
+
+
         button = (Button) view.findViewById(R.id.boton_reconocer);
         button.setOnClickListener(new View.OnClickListener() {
             private Intent intent;
@@ -192,8 +163,9 @@ public class ReconocerActividadFragment extends Fragment {
                 }
             }
         });
-
+*/
         return view;
+
     }
 
     private void formatDataToCsvExternalStorage(String fName, DataFrame df) {
@@ -211,6 +183,7 @@ public class ReconocerActividadFragment extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     @Override
