@@ -23,9 +23,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.ucm.tfg.tracktrainme.DataBase.ActivityDataTransfer;
+import com.ucm.tfg.tracktrainme.DataBase.DatabaseAdapter;
 import com.ucm.tfg.tracktrainme.MainActivity;
 import com.ucm.tfg.tracktrainme.R;
 import com.ucm.tfg.tracktrainme.Services.BluetoothLeService;
+import com.ucm.tfg.tracktrainme.Services.RecogidaDeDatosService;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,6 +36,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import joinery.DataFrame;
 
@@ -87,7 +91,7 @@ public class ReconocerActividadFragment extends Fragment {
 
         super.onCreate(savedInstanceState);
 
-        /**
+
         this.actividadesSistema = new HashMap<Integer, HashMap<String, Object>>();
         receiver = new BroadcastReceiver(){
             @Override
@@ -98,7 +102,7 @@ public class ReconocerActividadFragment extends Fragment {
                 modificadorActividad.sendMessage(msg);
             }
         };
-         **/
+
 
     }
 
@@ -108,7 +112,7 @@ public class ReconocerActividadFragment extends Fragment {
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_reconocer_actividad, container, false);
-        /*
+
         nombreActividad = (TextView) view.findViewById(R.id.nombre_actividad);
         iconoActividad = (ImageView) view.findViewById(R.id.icono_actividad);
         //iconoActividad.setBackgroundResource(R.drawable.ico_pausa);
@@ -163,9 +167,8 @@ public class ReconocerActividadFragment extends Fragment {
                 }
             }
         });
-*/
-        return view;
 
+        return view;
     }
 
     private void formatDataToCsvExternalStorage(String fName, DataFrame df) {
