@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_heightPercent="25%"
+        app:layout_widthPercent="35%"
+        android:id="@+id/relativeLayout3">
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@color/colorPrimaryDark"
+            android:text="TextView"
+            android:textAlignment="center"
+            android:textColor="@color/colorWhite"
+            android:textSize="60dp"
+            tools:text="CA" />
+
+    </RelativeLayout>
+
+    <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        app:layout_heightPercent="25%"
+        app:layout_widthPercent="65%"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true">
+
+
+        <TextView
+            android:id="@+id/textView14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            app:layout_heightPercent="40%"
+            app:layout_widthPercent="100%"
+            android:textSize="30dp"
+            android:padding="10dp"
+            android:layout_alignParentTop="true"
+            android:text="Caminar" />
+
+        <TextView
+            android:id="@+id/textView15"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_heightPercent="30%"
+            app:layout_widthPercent="50%"
+            android:textAlignment="center"
+            android:textSize="20dp"
+            android:layout_below="@+id/textView14"
+            android:text="Desde las" />
+
+        <TextView
+            android:id="@+id/textView16"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_heightPercent="30%"
+            app:layout_widthPercent="50%"
+            android:textAlignment="center"
+            android:textSize="20dp"
+            android:layout_alignEnd="@+id/textView15"
+            android:layout_below="@+id/textView15"
+            android:text="Hasta las" />
+
+        <TextView
+            android:id="@+id/textView17"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textView14"
+            app:layout_heightPercent="30%"
+            app:layout_widthPercent="50%"
+            android:textAlignment="center"
+            android:textSize="20dp"
+            android:layout_toEndOf="@+id/textView15"
+            android:text="12:25" />
+
+        <TextView
+            android:id="@+id/textView18"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_heightPercent="30%"
+            app:layout_widthPercent="50%"
+            android:textAlignment="center"
+            android:textSize="20dp"
+            android:layout_alignBottom="@+id/textView16"
+            android:layout_toEndOf="@+id/textView15"
+            android:text="13:01" />
+
+    </android.support.percent.PercentRelativeLayout>
+
+
+</android.support.percent.PercentRelativeLayout>
