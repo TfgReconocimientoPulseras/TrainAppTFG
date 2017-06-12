@@ -5,114 +5,137 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
-    android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        app:layout_heightPercent="35%"
-        android:orientation="horizontal"
-        android:id="@+id/linearLayout"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true">
-
-        <TextView
-            android:id="@+id/textView8"
-            android:layout_width="match_parent"
-            app:layout_heightPercent="100%"
-            app:layout_widthPercent="100%"
-            android:gravity="center"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Antes de comenzar, necesitamos saber unas cositas..."
-            android:textColor="#FFFFFF"
-            android:textSize="25dp" />
-    </android.support.percent.PercentRelativeLayout>
-
-    <GridLayout
+    <TextView
+        android:id="@+id/textView8"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_heightPercent="45%"
-        android:columnCount="2"
-        android:rowCount="6"
-        android:id="@+id/gridLayout"
-        android:layout_below="@+id/linearLayout"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_weight="1"
+        android:background="@color/colorPrimaryDark"
+        android:gravity="center"
+        android:text="Antes de comenzar, necesitamos saber unas cositas..."
+        android:textColor="@color/colorWhite"
+        android:textSize="25dp"
+        app:layout_heightPercent="15%"
+        app:layout_widthPercent="100%" />
 
-        <TextView
+    <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_heightPercent="15%"
+        app:layout_widthPercent="100%"
+        android:layout_below="@+id/textView8"
+        android:layout_alignParentStart="true"
+        android:id="@+id/percentRelativeLayout">
+
+        <ImageView
             android:id="@+id/textView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="30dp"
-            android:layout_marginTop="20dp"
-            android:layout_row="0"
-            android:layout_rowSpan="2"
-            android:background="@drawable/ico_usu" />
-
-        <TextView
-            android:id="@+id/textView7"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_marginBottom="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="30dp"
-            android:layout_marginTop="20dp"
-            android:layout_row="2"
-            android:layout_rowSpan="2"
-            android:background="@drawable/ico_activ" />
+            android:background="@drawable/ico_usu"
+            app:layout_widthPercent="25%"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"/>
 
         <EditText
             android:id="@+id/nombreUsuFormulario"
+            android:layout_height="wrap_content"
+            app:layout_widthPercent="75%"
+            android:hint="Nombre"
+            android:inputType="textPersonName"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true" />
+    </android.support.percent.PercentRelativeLayout>
+
+    <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/percentRelativeLayout4"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/percentRelativeLayout"
+        app:layout_heightPercent="15%"
+        app:layout_widthPercent="100%">
+
+        <ImageView
+            android:id="@+id/textView7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_column="1"
-            android:layout_marginBottom="20dp"
-            android:layout_marginTop="49dp"
-            android:layout_marginRight="200dp"
-            android:layout_row="0"
-            android:ems="10"
-            android:inputType="textPersonName"
-            android:hint="Tu nombre"/>
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/ico_activ"
+            app:layout_widthPercent="25%" />
 
         <EditText
             android:id="@+id/nombreActFormulario"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_column="1"
-            android:layout_marginBottom="40dp"
-            android:layout_marginTop="40dp"
-            android:layout_marginRight="200dp"
-            android:layout_row="2"
-            android:ems="10"
+            android:hint="La actividad"
             android:inputType="textPersonName"
-            android:hint="La actividad" />
+            app:layout_widthPercent="75%"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true" />
+    </android.support.percent.PercentRelativeLayout>
 
-    </GridLayout>
-
-    <LinearLayout
+    <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/percentRelativeLayout2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_heightPercent="20%"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
+        app:layout_heightPercent="40%"
+        app:layout_widthPercent="100%"
+        android:layout_below="@+id/percentRelativeLayout4"
         android:layout_alignParentStart="true">
+
+        <ImageView
+            android:id="@+id/imagen_actividad"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/border"
+            android:gravity="center_horizontal"
+            android:scaleType="fitCenter"
+            app:layout_heightPercent="85%"
+            app:layout_widthPercent="70%" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/floatingActionButton2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:onClick="onClickButtonImage"
+            app:backgroundTint="@color/colorPrimary"
+            app:srcCompat="@drawable/ic_menu_gallery"
+            android:layout_alignBottom="@+id/imagen_actividad"
+            android:layout_alignEnd="@+id/imagen_actividad" />
+
+
+    </android.support.percent.PercentRelativeLayout>
+
+    <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/percentRelativeLayout3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/percentRelativeLayout2"
+        app:layout_widthPercent="100%">
 
         <Button
             android:id="@+id/buttonNextForumulario"
             android:layout_width="wrap_content"
+            app:layout_widthPercent="80%"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="25dp"
-            android:layout_marginLeft="100dp"
-            android:layout_marginRight="100dp"
-            android:layout_marginTop="25dp"
-            android:layout_weight="0.27"
-            android:background="#86BF9F"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@color/colorPrimaryDark"
             android:onClick="onClickButtonNext"
             android:text="Siguiente"
-            android:textColor="#FFFFFF" />
-    </LinearLayout>
+            android:textColor="@color/colorWhite" />
+
+    </android.support.percent.PercentRelativeLayout>
+
 
 </android.support.percent.PercentRelativeLayout>
