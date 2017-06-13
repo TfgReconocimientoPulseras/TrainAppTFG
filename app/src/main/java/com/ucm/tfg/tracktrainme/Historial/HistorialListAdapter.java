@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.ucm.tfg.tracktrainme.R;
@@ -13,22 +14,37 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class HistorialListAdapter extends ArrayAdapter {
+public class HistorialListAdapter extends BaseAdapter {
 
-    private final Activity context;
-    private final List<String> nombreActividad;
-    private final List<Date> horaInicio;
-    private final List<Date> horaFin;
+    private Activity context;
+    private List<String> nombreActividad;
+    private List<Date> horaInicio;
+    private List<Date> horaFin;
 
     public HistorialListAdapter(Activity context, List<String> nombreActividad, List<Date> horaInicio, List<Date> horaFin){
 
 
-        super(context, R.layout.lista_historial, nombreActividad);
+        //super(context, R.layout.lista_historial, nombreActividad);
 
         this.context = context;
         this.nombreActividad = nombreActividad;
         this.horaInicio = horaInicio;
         this.horaFin = horaFin;
+    }
+
+    @Override
+    public int getCount() {
+        return nombreActividad.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return nombreActividad.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
     //@Override
