@@ -4,6 +4,9 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -11,6 +14,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.ucm.tfg.tracktrainme.DataBase.ActivityDataTransfer;
@@ -19,6 +23,9 @@ import com.ucm.tfg.tracktrainme.R;
 import com.ucm.tfg.tracktrainme.Utilidades.Utils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.stream.Stream;
 
 
 public class RecogerDatosFormulario extends Activity {
@@ -27,13 +34,17 @@ public class RecogerDatosFormulario extends Activity {
     private Button botonNext;
     private EditText textNombre;
     private EditText textActividad;
+    private ImageView image;
 
     //DATOS FORMULARIO////////////////////////////////////////////////////////////////////////////////////////////////
     private String nameUser;
     private String nameActivity;
+    private Bitmap bitmap;
 
     //CONSTANTES//////////////////////////////////////////////////////////////////////////////////////////////////////
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 123;
+    private static final int PICK_CODE = 321;
+
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -44,6 +55,7 @@ public class RecogerDatosFormulario extends Activity {
         this.botonNext = (Button)findViewById(R.id.buttonNextForumulario);
         this.textNombre = (EditText)findViewById(R.id.nombreUsuFormulario);
         this.textActividad = (EditText)findViewById(R.id.nombreActFormulario);
+        this.image = (ImageView) findViewById(R.id.imagen_actividad);
 
         askForStoragePermission();
 
@@ -52,6 +64,19 @@ public class RecogerDatosFormulario extends Activity {
     protected void onResume() {
 
         super.onResume();
+    }
+
+    public void onClickButtonImage(View view){
+        Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        getIntent.setType("image/*");
+
+        Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        pickIntent.setType("image/*");
+
+        Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
+
+        startActivityForResult(chooserIntent, PICK_CODE);
     }
 
     public void onClickButtonNext(View view) {
@@ -63,7 +88,7 @@ public class RecogerDatosFormulario extends Activity {
         this.nameActivity = this.textActividad.getText().toString();
 
         if(this.nameUser.equals("") || this.nameActivity.equals("")){
-            Toast.makeText(this, "¡Rellene todos los campos!", Toast.LENGTH_LONG);
+            Toast.makeText(this, "¡Rellene todos los campos!", Toast.LENGTH_LONG).show();
         }
         else{
             //1º Crear carpeta donde se alojarán los datos
@@ -82,8 +107,7 @@ public class RecogerDatosFormulario extends Activity {
                 aplicacionNoexiste = true;
             }
             else{
-                Toast toast = Toast.makeText(this,"La actividad ya se encuentra registrada", Toast.LENGTH_LONG);
-                toast.show();
+                Toast.makeText(this,"La actividad ya se encuentra registrada", Toast.LENGTH_LONG).show();
             }
 
             db.close();
@@ -117,6 +141,26 @@ public class RecogerDatosFormulario extends Activity {
                     break;
                 default:
                     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            }
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PICK_CODE) {
+            if (resultCode == RESULT_OK) {
+                InputStream stream = null;
+                //TODO INSERTAR IMAGEN EN CARPETA /TRACKTRAINME/IMAGES
+                //TODO AÑADIR URI A LA ACTIVIDAD EN LA BD
+                String s = data.getData().getPath();
+                try {
+                    stream = getContentResolver().openInputStream(data.getData());
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                bitmap = BitmapFactory.decodeStream(stream);
+                image.setImageBitmap(bitmap);
             }
         }
     }

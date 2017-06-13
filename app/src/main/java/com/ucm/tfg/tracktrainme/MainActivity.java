@@ -28,6 +28,7 @@ import com.ucm.tfg.tracktrainme.DataBase.DatabaseAdapter;
 import com.ucm.tfg.tracktrainme.Fragments.HistorialFragment;
 import com.ucm.tfg.tracktrainme.Fragments.ReconocerActividadFragment;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
