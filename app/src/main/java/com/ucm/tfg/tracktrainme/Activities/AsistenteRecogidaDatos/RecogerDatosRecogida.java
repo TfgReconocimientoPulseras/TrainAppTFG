@@ -414,7 +414,9 @@ public class RecogerDatosRecogida extends Activity {
 
 
     public void do_post(){
-        String url = "http://192.168.1.33:8081/subeDatos";
+        //String url = "http://192.168.1.33:8081/subeDatos";
+        String url = "http://192.168.1.116:8081/subeDatos";
+
         AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
         RequestParams requestParams = new RequestParams();
         File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/");

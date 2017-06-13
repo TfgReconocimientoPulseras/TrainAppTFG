@@ -2,9 +2,9 @@
 <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -14,7 +14,7 @@
         android:id="@+id/relativeLayout3">
 
         <TextView
-            android:id="@+id/textView3"
+            android:id="@+id/textSiglasAct"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -24,7 +24,7 @@
             android:textAlignment="center"
             android:textColor="@color/colorWhite"
             android:textSize="60dp"
-            tools:text="CA" />
+            tools:text="" />
 
     </RelativeLayout>
 
@@ -38,9 +38,8 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true">
 
-
         <TextView
-            android:id="@+id/textView14"
+            android:id="@+id/textNombreAct"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAlignment="center"
@@ -49,7 +48,7 @@
             android:textSize="30dp"
             android:padding="10dp"
             android:layout_alignParentTop="true"
-            android:text="Caminar" />
+            android:text="" />
 
         <TextView
             android:id="@+id/textView15"
@@ -59,7 +58,7 @@
             app:layout_widthPercent="50%"
             android:textAlignment="center"
             android:textSize="20dp"
-            android:layout_below="@+id/textView14"
+            android:layout_below="@+id/textNombreAct"
             android:text="Desde las" />
 
         <TextView
@@ -75,30 +74,29 @@
             android:text="Hasta las" />
 
         <TextView
-            android:id="@+id/textView17"
+            android:id="@+id/textHoraIni"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textView14"
+            android:layout_below="@+id/textNombreAct"
             app:layout_heightPercent="30%"
             app:layout_widthPercent="50%"
             android:textAlignment="center"
-            android:textSize="20dp"
+            android:textSize="23dp"
             android:layout_toEndOf="@+id/textView15"
-            android:text="12:25" />
+            android:text="" />
 
         <TextView
-            android:id="@+id/textView18"
+            android:id="@+id/textHoraFin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_heightPercent="30%"
             app:layout_widthPercent="50%"
             android:textAlignment="center"
-            android:textSize="20dp"
+            android:textSize="23dp"
             android:layout_alignBottom="@+id/textView16"
             android:layout_toEndOf="@+id/textView15"
-            android:text="13:01" />
+            android:text="" />
 
     </android.support.percent.PercentRelativeLayout>
-
 
 </android.support.percent.PercentRelativeLayout>

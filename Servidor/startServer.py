@@ -73,11 +73,16 @@ def creameClaseArbolString(ruta_timestamp, ruta_timestamp_tmp):
 		##Procesamos los datos con las metricas
 	llamadaAprocesar(ruta_timestamp, ruta_timestamp_tmp)
 	juntar(ruta_timestamp_tmp)
-	concatenar()
-	
+	concatenar(ruta_timestamp_tmp)
+
+	directorioActual = os.getcwd()
+	os.chdir(ruta_timestamp_tmp)
+
 	##creamos el arbol
 	X = genfromtxt("X_train_movil.csv", delimiter=',')
 	y = genfromtxt("y_train_movil.csv", delimiter='')
+
+	os.chdir(directorioActual)
 	
 	clf = DecisionTreeClassifier(criterion='entropy', max_depth=6, random_state=0, min_samples_split=2, min_samples_leaf=2)
 	clf = clf.fit(X, y)	
@@ -145,9 +150,11 @@ def juntar(ruta_timestamp_tmp):
 		dfOutX = pd.concat([dfOutX, dfX])
 		dfOutY = pd.concat([dfOutY, dfY])
 		dfOutI = pd.concat([dfOutI, dfI])
-	os.chdir(directorioActual)
+	#os.chdir(directorioActual)
+	os.chdir(ruta_timestamp_tmp)
 	dfOutX.to_csv("X_train_movil.csv",header=None, index=False)
 	dfOutY.to_csv("y_train_movil.csv",header=None, index=False)
+	os.chdir(directorioActual)
 
 def maximovalor(arr):
     maximo = 0
@@ -181,23 +188,33 @@ def tree_to_code(tree, feature_names, codigo):
     codigo = recurse(0, 1, codigo)
     return codigo
 
-def concatenar():
+def concatenar(ruta_timestamp_tmp):
 	infile = open('X_train_movil_aplaudirfinal.csv', 'r')
 	datosAnteriores=infile.read()
-	
-	outfileNuevo = open('X_train_movil.csv', 'a') 
+
+	directorioActual=os.getcwd()
+	os.chdir(ruta_timestamp_tmp)
+
+	outfileNuevo = open('X_train_movil.csv', 'a')
 	outfileNuevo.write(str(datosAnteriores))
 	outfileNuevo.close()
 	infile.close()
+
+	os.chdir(directorioActual)
 	
 	#concatenar y
 	
 	infile = open('y_train_movil_aplaudirfinal.csv', 'r')
 	datosAnteriores=infile.read()
 	infile.close()
+
+	os.chdir(ruta_timestamp_tmp)
+
 	outfileNuevo = open('y_train_movil.csv', 'a') 
 	outfileNuevo.write(str(datosAnteriores))
 	outfileNuevo.close()
+
+	os.chdir(directorioActual)
 
 os.unlink('ProcesarDatos.pyc')
 
