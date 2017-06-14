@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.media.RingtoneManager;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.ucm.tfg.tracktrainme.DataBase.ActivityDataTransfer;
 import com.ucm.tfg.tracktrainme.DataBase.DatabaseAdapter;
 import com.ucm.tfg.tracktrainme.DataBase.TreeDataTransfer;
 import com.ucm.tfg.tracktrainme.MainActivity;
@@ -41,14 +43,20 @@ import com.ucm.tfg.tracktrainme.Services.BluetoothLeService;
 import com.ucm.tfg.tracktrainme.Utilidades.DataTAD;
 import com.ucm.tfg.tracktrainme.Utilidades.Utils;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -64,6 +72,8 @@ public class RecogerDatosRecogida extends Activity {
     private String nameUser;
     private String nameActivity;
     private int numActivity;
+    private String imagePath;
+
 
     //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
     /*private SensorManager mSensorManager;
@@ -218,6 +228,7 @@ public class RecogerDatosRecogida extends Activity {
         this.nameUser = bundle.getString("nombreUsu");
         this.nameActivity = bundle.getString("nombreAct");
         this.numActivity = bundle.getInt("numActividad");
+        this.imagePath = bundle.getString("dirImage");
 
         this.numArchivosCreados = (TextView) findViewById(R.id.numArchivosCreadosRecogida);
         this.temporizador = (TextView) findViewById(R.id.temporizadorRecogida);
@@ -356,7 +367,6 @@ public class RecogerDatosRecogida extends Activity {
     }
 
     private void formatDataToCsvExternalStorage(ArrayList<DataTAD> list) {
-        //TODO ADD TIMESTAMP TO NOT OVERRIDE OLDER FILES.
         String fileName = this.nameUser + "_" + this.numActivity + "_" + numFileCreated + ".csv";
 
         File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/" + this.nameActivity);
@@ -414,8 +424,8 @@ public class RecogerDatosRecogida extends Activity {
 
 
     public void do_post(){
-        //String url = "http://192.168.1.33:8081/subeDatos";
-        String url = "http://192.168.1.116:8081/subeDatos";
+        String url = "http://192.168.1.33:8081/subeDatos";
+        //String url = "http://192.168.1.116:8081/subeDatos";
 
         AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
         RequestParams requestParams = new RequestParams();
@@ -431,10 +441,39 @@ public class RecogerDatosRecogida extends Activity {
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 DatabaseAdapter db = new DatabaseAdapter(getBaseContext());
                 TreeDataTransfer treeDataTransfer = new TreeDataTransfer(new String(responseBody));
+
+                InputStream stream = null;
+
+                try {
+                    stream = getContentResolver().openInputStream(Uri.parse(imagePath));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                String dataDir = getApplicationContext().getApplicationInfo().dataDir;
+                File directory = new File(dataDir + "/images/");
+                directory.mkdirs();
+
+                File f = new File(directory, UUID.randomUUID().toString() + ".png");
+
+                try {
+                    FileUtils.copyToFile(stream, f);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                //TODO
+                ActivityDataTransfer activityDataTransfer = new ActivityDataTransfer(nameActivity, new Date(), f.getAbsolutePath());
+
                 db.open();
                 long id = db.insertarNuevoArbol(treeDataTransfer);
                 if( id < 0 ){
                     Log.d("REQUEST AL SERVIDOR", "PETICION EXITOSA - ERROR AL INSERTAR ARBOL");
+                }
+                //TODO
+                id = db.insertActivity(activityDataTransfer);
+                if(id < 0){
+                    Log.d("REQUEST AL SERVIDOR", "PETICION EXITOSA - ERROR AL INSERTAR ACTIVIDAD");
                 }
                 db.close();
 

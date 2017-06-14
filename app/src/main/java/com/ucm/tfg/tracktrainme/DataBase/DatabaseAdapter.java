@@ -21,7 +21,7 @@ public class DatabaseAdapter {
     private static final String TAG = "DataBaseAdapter";
 
     //VERSION BD
-    private static final int DATABASE_VERSION = 37;
+    private static final int DATABASE_VERSION = 1;
 
     //Nombre de la BD
     private static final String DB_NAME = "AppDB";
@@ -242,6 +242,14 @@ public class DatabaseAdapter {
         return retList;
     }
 
+    public boolean existeActividad(String actividad){
+        String query = "SELECT * FROM " + TABLA_ACTIVIDADES + " WHERE " + KEY_ACTIVIDAD + "=" + "'" + actividad + "'";
+        Cursor c = db.rawQuery(query, null);
+
+        int i = c.getCount();
+        return (c.getCount() > 0);
+    }
+
     private static String getDateTimeToSqlite(long timeInMillis){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return dateFormat.format(new java.util.Date(timeInMillis));
@@ -259,6 +267,24 @@ public class DatabaseAdapter {
         }
 
         return treeDataTransfer;
+    }
+
+    public int getNextIndexValueActivityTable(){
+        int i = -1;
+
+        String query = "SELECT seq FROM sqlite_sequence WHERE name='" + TABLA_ACTIVIDADES + "'";
+        Cursor c = db.rawQuery(query, null);
+
+
+        while(c.moveToNext()){
+            i = c.getInt(0);
+        }
+
+        if(i != -1){
+            i = i + 1; //next
+        }
+
+        return i;
     }
 
     private static Date getDateFromSqlite(String date){

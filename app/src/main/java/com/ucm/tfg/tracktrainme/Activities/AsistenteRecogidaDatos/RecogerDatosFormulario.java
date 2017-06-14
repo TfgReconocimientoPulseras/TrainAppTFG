@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -22,10 +21,13 @@ import com.ucm.tfg.tracktrainme.DataBase.DatabaseAdapter;
 import com.ucm.tfg.tracktrainme.R;
 import com.ucm.tfg.tracktrainme.Utilidades.Utils;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.stream.Stream;
+import java.util.UUID;
 
 
 public class RecogerDatosFormulario extends Activity {
@@ -39,11 +41,13 @@ public class RecogerDatosFormulario extends Activity {
     //DATOS FORMULARIO////////////////////////////////////////////////////////////////////////////////////////////////
     private String nameUser;
     private String nameActivity;
+    private UUID uuidImage;
     private Bitmap bitmap;
 
     //CONSTANTES//////////////////////////////////////////////////////////////////////////////////////////////////////
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 123;
     private static final int PICK_CODE = 321;
+    private String dirImage;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,8 +85,8 @@ public class RecogerDatosFormulario extends Activity {
 
     public void onClickButtonNext(View view) {
 
-        boolean aplicacionNoexiste = false;
-        ActivityDataTransfer aux = null;
+        int id = -1;
+        boolean actividadNoexiste = false;
 
         this.nameUser = this.textNombre.getText().toString();
         this.nameActivity = this.textActividad.getText().toString();
@@ -92,19 +96,14 @@ public class RecogerDatosFormulario extends Activity {
         }
         else{
             //1º Crear carpeta donde se alojarán los datos
-            File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/" + this.nameActivity);
-            directory.mkdirs();
 
             //2º Registrar la actividad en la base de datos
             DatabaseAdapter db = new DatabaseAdapter(this);
             db.open();
 
-            ActivityDataTransfer nuevaActividad = new ActivityDataTransfer(this.nameActivity, Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_act_new.jpg");
-
-            long id = db.insertActivity(nuevaActividad);
-            if( id != -1){
-                aux = db.getActivityDataTransfer(id);
-                aplicacionNoexiste = true;
+            if(!db.existeActividad(this.nameActivity)){
+                actividadNoexiste = true;
+                id = db.getNextIndexValueActivityTable();
             }
             else{
                 Toast.makeText(this,"La actividad ya se encuentra registrada", Toast.LENGTH_LONG).show();
@@ -113,11 +112,12 @@ public class RecogerDatosFormulario extends Activity {
             db.close();
 
             //3º Arrancar la tercera parte del asistente de recogida de datos
-            if(aplicacionNoexiste){
+            if(actividadNoexiste){
                 Intent recogida = new Intent (RecogerDatosFormulario.this, RecogerDatosRecogida.class);
                 recogida.putExtra("nombreUsu", this.nameUser);
                 recogida.putExtra("nombreAct", this.nameActivity);
-                recogida.putExtra("numActividad", (int)aux.getId());
+                recogida.putExtra("dirImage", this.dirImage);
+                recogida.putExtra("numActividad", id);
                 startActivity(recogida);
             }
         }
@@ -153,14 +153,17 @@ public class RecogerDatosFormulario extends Activity {
                 InputStream stream = null;
                 //TODO INSERTAR IMAGEN EN CARPETA /TRACKTRAINME/IMAGES
                 //TODO AÑADIR URI A LA ACTIVIDAD EN LA BD
-                String s = data.getData().getPath();
+
                 try {
                     stream = getContentResolver().openInputStream(data.getData());
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
+
                 bitmap = BitmapFactory.decodeStream(stream);
                 image.setImageBitmap(bitmap);
+
+                this.dirImage = data.getDataString();
             }
         }
     }
