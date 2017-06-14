@@ -101,7 +101,7 @@ public class RecogerDatosRecogida extends Activity {
     private static final String TAG = "RecogerDatos";
     private static final String FILES_HEAD = "timestamp,gyro-alpha,gyro-beta,gyro-gamma,accel-x,accel-y,accel-z\n";
     private static final int NUM_ARCHIVOS_CREAR = 3;
-    private static final int TIEMPO_POR_ARCHIVO = 30000; //antes 30000
+    private static final int TIEMPO_POR_ARCHIVO = 5000; //antes 30000
 
     private Handler modificadorFinalizador = new Handler() {
         @Override
@@ -424,8 +424,8 @@ public class RecogerDatosRecogida extends Activity {
 
 
     public void do_post(){
-        //String url = "http://192.168.1.33:8081/subeDatos";
-        String url = "http://192.168.1.116:8081/subeDatos";
+        String url = "http://192.168.1.33:8081/subeDatos";
+        //String url = "http://192.168.1.116:8081/subeDatos";
 
         AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
         RequestParams requestParams = new RequestParams();
