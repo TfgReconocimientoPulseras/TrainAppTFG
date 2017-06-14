@@ -16,21 +16,28 @@ import android.widget.Toast;
 
 import com.ucm.tfg.tracktrainme.DataBase.ActivityDataTransfer;
 import com.ucm.tfg.tracktrainme.DataBase.DatabaseAdapter;
+import com.ucm.tfg.tracktrainme.DataBase.HistoryDataTransfer;
+import com.ucm.tfg.tracktrainme.Historial.HistorialListAdapter;
 import com.ucm.tfg.tracktrainme.R;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ListarActividades extends AppCompatActivity {
     private ListView listView;
     private FloatingActionButton floatingActionButton;
 
-    private ArrayAdapter<String> adapter;
-    private List list;
+    private ActividadesListAdapter adapter;
+    private List<ActivityDataTransfer> list;
 
 
     //TODO HACER LIMPIEZA DE ESTA CLASE
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        List<String> nombreActividad = new ArrayList<>();
+        List<Date> fechaCreacion = new ArrayList<>();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listar_actividades);
         this.listView = (ListView)findViewById(R.id.list);
@@ -58,58 +65,17 @@ public class ListarActividades extends AppCompatActivity {
             }
         });
 
-        this.floatingActionButton = (FloatingActionButton) findViewById(R.id.floatingActionButton);
-
-        this.floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                //TODO CREAR MÉTODO PARA ENCAPSULAR LA CREACION DEL DIALOGO
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle("Añadir nueva actividad");
-
-                final EditText input = new EditText(getActivity());
-                input.setInputType(InputType.TYPE_CLASS_TEXT);
-                builder.setView(input);
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String activity = input.getText().toString();
-                        DatabaseAdapter db = new DatabaseAdapter(getActivity());
-                        db.open();
-                        //TODO añadir URL Prohibido darle al mas
-                        ActivityDataTransfer act = new ActivityDataTransfer(activity, "");
-                        long id = db.insertActivity(act);
-                        if( id != -1){
-                            list.add(db.getActivityDataTransfer(id));
-                            adapter.notifyDataSetChanged();
-                        }
-                        else{
-                            Toast toast = Toast.makeText(getActivity(),"La actividad ya se encuentra registrada", Toast.LENGTH_LONG);
-                            toast.show();
-                        }
-                        
-                        db.close();
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-                builder.create().show();
-            }
-        });
-
-
         DatabaseAdapter db = new DatabaseAdapter(this);
         db.open();
         list = db.listarActividadesSistema();
         db.close();
 
-        this.adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, android.R.id.text1, list);
+        for(ActivityDataTransfer aux: list){
+            nombreActividad.add(aux.getName());
+            fechaCreacion.add(aux.getFechaCreacion());
+        }
+
+        this.adapter = new ActividadesListAdapter(this, nombreActividad, fechaCreacion);
 
         listView.setAdapter(adapter);
     }

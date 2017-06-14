@@ -46,6 +46,7 @@ public class HistorialFragment extends Fragment {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat dateFormat2 = new SimpleDateFormat("dd/MM/yyyy");
 
                 Calendar cal = Calendar.getInstance();
                 cal.set(Calendar.YEAR, year);
@@ -56,6 +57,7 @@ public class HistorialFragment extends Fragment {
                 String dateString = dateFormat.format(dateRepresentation);
                 Intent intent = new Intent(getContext(), HistorialDiaConcreto.class);
                 intent.putExtra("dayToShow", dateString);
+                intent.putExtra("dayToShow2", dateFormat2.format(dateRepresentation));
 
                 startActivity(intent);
             }

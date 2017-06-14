@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,6 +16,7 @@ import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -103,6 +105,9 @@ public class RecogerDatosRecogida extends Activity {
     private static final int NUM_ARCHIVOS_CREAR = 3;
     private static final int TIEMPO_POR_ARCHIVO = 30000; //antes 30000
 
+    //PROGRESS DIALOG/////////////////////////////////////////////////////////////////////////////////////////////////
+    ProgressDialog progressDialog;
+
     private Handler modificadorFinalizador = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -120,7 +125,7 @@ public class RecogerDatosRecogida extends Activity {
                 numFileCreated = 0;
                 do_post();
                 //TODO CONTROLAR TIEMPO DE ESPERA
-                notificarDialogFinal();
+
 
             }
             else
@@ -173,10 +178,10 @@ public class RecogerDatosRecogida extends Activity {
         nm.notify(1, noti);
     }
 
-    public void notificarDialogFinal(){
+    public void notificarDialogFinal(String texto){
         AlertDialog.Builder dialogoFinal = new AlertDialog.Builder(this);
         dialogoFinal.setTitle("Ey!");
-        dialogoFinal.setMessage("Hemos terminado. ¿Quieres repetir el asistente?");
+        dialogoFinal.setMessage(texto);
         dialogoFinal.setPositiveButton("Repetir", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -200,6 +205,7 @@ public class RecogerDatosRecogida extends Activity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recoger_datos_recogida);
+        this.progressDialog = new ProgressDialog(this);
 
         ModoSensor modo = (ModoSensor) getApplication();
 
@@ -424,19 +430,7 @@ public class RecogerDatosRecogida extends Activity {
 
 
     public void do_post(){
-        //String url = "http://192.168.1.33:8081/subeDatos";
-        String url = "http://192.168.1.116:8081/subeDatos";
-
-        AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
-        RequestParams requestParams = new RequestParams();
-        File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/");
-
-        try {
-            requestParams.put("upload", Utils.convertListToArray(Utils.obtenerArchivosDatosRecursivo(directory)));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        asyncHttpClient.post(url, requestParams, new AsyncHttpResponseHandler() {
+        AsyncHttpResponseHandler httphandler = new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 DatabaseAdapter db = new DatabaseAdapter(getBaseContext());
@@ -478,14 +472,36 @@ public class RecogerDatosRecogida extends Activity {
                 db.close();
 
                 Log.d("REQUEST AL SERVIDOR", "PETICION EXITOSA");
+                progressDialog.cancel();
+                notificarDialogFinal("Hemos terminado. ¿Quieres añadir alguna otra actividad?");
 
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 Log.d("REQUEST AL SERVIDOR", "PETICION DESASTRE");
+                progressDialog.cancel();
+                notificarDialogFinal("Parece que ha habido un error en el proceso y la actividad no se ha añadido correctamente. ¿Quieres intentar grabar la actividad de nuevo?");
             }
-        });
+        };
+
+        //String url = "http://192.168.1.33:8081/subeDatos";
+        String url = "http://192.168.1.116:8081/subeDatos";
+
+        AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+        RequestParams requestParams = new RequestParams();
+        File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/");
+
+        try {
+            requestParams.put("upload", Utils.convertListToArray(Utils.obtenerArchivosDatosRecursivo(directory)));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        asyncHttpClient.post(url, requestParams, httphandler);
+
+        this.progressDialog.setMessage("Construyendo su nuevo clasificador, por favor espere...");
+        this.progressDialog.setCanceledOnTouchOutside(false);
+        this.progressDialog.show();
     }
 
 

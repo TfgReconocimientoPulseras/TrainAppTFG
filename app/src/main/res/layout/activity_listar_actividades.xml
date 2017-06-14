@@ -32,15 +32,4 @@
             app:popupTheme="@style/AppTheme.PopupOverlay" />
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/floatingActionButton"
-        android:layout_width="81dp"
-        android:layout_height="77dp"
-        android:layout_gravity="top|left"
-        android:clickable="true"
-        app:fabSize="mini"
-        app:layout_anchor="@+id/linearLayout3"
-        app:layout_anchorGravity="bottom|right"
-        app:srcCompat="@drawable/ic_add_black_48dp" />
-
 </android.support.design.widget.CoordinatorLayout>

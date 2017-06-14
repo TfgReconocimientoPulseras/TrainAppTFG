@@ -19,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.ucm.tfg.tracktrainme.Activities.AsistenteRecogidaDatos.RecogerDatosBienvenida;
 import com.ucm.tfg.tracktrainme.Activities.Bluetooth.ListarYConectarBluetooth;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
 
         //TODO crear constantes para "sensor" o modo "PULSERA" o "MOVIL"
+        //TODO modificar esto. DESFASADO
         //MODO PULSERA -> CC2650
         //MODO MOVIL   -> sensor del telefono
         Intent i = getIntent();
@@ -60,6 +62,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(this.modo == null){
             this.modo = "MOVIL";
         }
+
+        //TODO adaptar esto, pues this.modo va a dejar de existir
+        if(i.getStringExtra("sensor") != null)
+            if(i.getStringExtra("sensor").equals("PULSERA")){
+                Toast.makeText(getApplicationContext(), "La conexión por Bluetooth ha finalizado correctamente. Conectado!", Toast.LENGTH_LONG).show();
+            }
 
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);

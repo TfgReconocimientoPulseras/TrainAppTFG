@@ -1,6 +1,7 @@
 package com.ucm.tfg.tracktrainme.Activities.Bluetooth;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
@@ -48,6 +49,9 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
     private ArrayList<String> list;
 
+    //ProgressDialog
+    ProgressDialog progressDialog;
+
 
     private IntentFilter filter;
 
@@ -68,7 +72,9 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
             else if(resultCode == 200){
                 ModoSensor modo = (ModoSensor) getApplication();
                 modo.setModo(ModoSensor.MODO_PULSERA);
+                progressDialog.cancel();
                 Intent i = new Intent(ListarYConectarBluetooth.this, MainActivity.class);
+                //TODO Eliminar este extra, pues ya no se usa
                 i.putExtra("sensor", "PULSERA");
                 startActivity(i);
             }
@@ -122,6 +128,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listar_yconectar_bluetooth);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Dispositivos a tú alcance");
         setSupportActionBar(toolbar);
 
         this.dispositivosEncontrados = new MyResultReceiverBluetooth(null);
@@ -137,6 +144,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
 
         //INICIALIZAR LISTA (MODELO Y GRAFICA)
         inicializarListaGraficaYModelo();
+        this.progressDialog = new ProgressDialog(this);
     }
 
 
@@ -200,11 +208,15 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
                         .show();*/
 
                 //conectarseDispositivo(itemValue);
+                progressDialog.setMessage("Conectándonos con el dispositivo, por favor espere...");
+                progressDialog.setCanceledOnTouchOutside(false);
+                progressDialog.show();
                 if(!mService.mensaje_conectarDispositivo(itemValue)){
+                    progressDialog.cancel();
                     Toast.makeText(getApplicationContext(), "No ha sido posible conectarse a " + itemValue, Toast.LENGTH_LONG).show();
                 }
                 else {
-                    Toast.makeText(getApplicationContext(), "Configurando dispositivo  " + itemValue, Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(), "Configurando dispositivo  " + itemValue, Toast.LENGTH_LONG).show();
                 }
             }
 

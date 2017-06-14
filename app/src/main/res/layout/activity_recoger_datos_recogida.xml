@@ -19,7 +19,7 @@
             android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ahora vamos a tomar datos mientras realizas los movimientos de la actividad. Repetiremos esta acción unas veces. Cuando estés preparado pulsa el botón del play."
+            android:text="Ahora vamos a tomar datos mientras realizas los movimientos de la actividad. Repetiremos esta acción unas veces. Cuando estés preparado pulsa el botón de comenzar."
             android:textColor="@android:color/background_light"
             android:textSize="24dp" />
 

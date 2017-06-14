@@ -3,6 +3,9 @@ package com.ucm.tfg.tracktrainme.Historial;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -17,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class HistorialDiaConcreto extends Activity {
+public class HistorialDiaConcreto extends AppCompatActivity {
 
     private ListView listView;
     //private ArrayAdapter<String> adapter;
@@ -31,22 +34,16 @@ public class HistorialDiaConcreto extends Activity {
         List<Date> horaFin = new ArrayList<>();
         Intent i;
         String dateToShow;
+        String dateToShow2;
         DatabaseAdapter db;
-
-
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_historial_dia_concreto);
         this.listView = (ListView)findViewById(R.id.list);
 
-        //INICIALIZAMOS MODELO LISTA//////////////////////////////////////////////////////////////////////
-        //this.list = new ArrayList<String>();
-
-        //INICIALIZAMOS ADAPTADOR/////////////////////////////////////////////////////////////////////////
-
-
         i = getIntent();
         dateToShow = i.getStringExtra("dayToShow");
+        dateToShow2 = i.getStringExtra("dayToShow2");
         db = new DatabaseAdapter(this);
 
         db.open();
@@ -59,14 +56,20 @@ public class HistorialDiaConcreto extends Activity {
             horaFin.add(aux.getfFin());
         }
 
-        /*this.adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, android.R.id.text1, list);*/
-
-
         this.adapter = new HistorialListAdapter(this, nombreActividad, horaInicio, horaFin);
 
         listView.setAdapter(adapter);
-        //this.textoPruebas.setText("Aquí aparecerá una lista con las actividades que has realizado en el día " + Integer.toString(i.getIntExtra("dayOfMonth", 1)) + " del " + Integer.toString(i.getIntExtra("month", 1) + 1) + " del " + Integer.toString(i.getIntExtra("year", 1970)) + " ;)");
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarHistorial);
+        toolbar.setTitle("Historial del " + dateToShow2);
+        setSupportActionBar(toolbar);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_historial, menu);
+        return true;
     }
 
     protected void onResume() {
