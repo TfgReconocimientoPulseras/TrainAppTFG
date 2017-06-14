@@ -15,13 +15,39 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.tree import _tree
 
 CONST_DIR_TMP = "./tmp/"
-#CONST_DIR_DATOSPROCESADOS = CONST_DIR_TMP + "tmp/"
 
 @route('/')
 def home():
-	return template('formUploadFile')
+	procesaDatos()
+	##return template('formUploadFile')
 
+#PARA PRUEBAS DESDE LOCAL
+def procesaDatos():
+	ruta_timestamp = CONST_DIR_TMP + "2017_06_15(___)00_43_32_631000" + "/"
+	ruta_timestamp_tmp = ruta_timestamp + "tmp/"
+	#llamadaAprocesar(ruta_timestamp, ruta_timestamp_tmp)
+	#juntar(ruta_timestamp_tmp)
+	#concatenar(ruta_timestamp_tmp)
 
+	feature_names=[ 'gyro_alpha_avg','gyro_beta_avg','gyro_gamma_avg','accel_x_avg','accel_y_avg','accel_z_avg','gyro_alpha_min','gyro_beta_min','gyro_gamma_min','accel_x_min','accel_y_min','accel_z_min','gyro_alpha_max','gyro_beta_max','gyro_gamma_max','accel_x_max','accel_y_max','accel_z_max','gyro_alpha_std','gyro_beta_std','gyro_gamma_std','accel_x_std','accel_y_std','accel_z_std','xy_cor','xz_cor','yz_cor','x_fft','y_fft','z_fft','gyro_alpha_med','gyro_beta_med','gyro_gamma_med','accel_x_med','accel_y_med','accel_z_med']
+
+	directorioActual = os.getcwd()
+
+	os.chdir(ruta_timestamp_tmp)
+	X = np.loadtxt("X_train_movil.csv", delimiter=",")
+	y = np.loadtxt("y_train_movil.csv", delimiter="\n")
+	os.chdir(directorioActual)
+
+	clf = DecisionTreeClassifier(criterion='entropy', max_depth=6, random_state=0, min_samples_split=2, min_samples_leaf=2)
+	clf = clf.fit(X, y)
+
+	codigo = "public int miMetodo(HashMap hashMap){\n"
+	codigo = tree_to_code(clf, feature_names, codigo)
+	codigo = codigo + "\n}"
+
+	#print codigo
+
+#PARA ANDROID
 @post('/subeDatos')
 def subeDatos():
 	peticion_time = ('{:%Y_%m_%d(___)%H_%M_%S_%f}'.format(datetime.datetime.now()))
@@ -61,16 +87,7 @@ def subeDatos():
 
 
 def creameClaseArbolString(ruta_timestamp, ruta_timestamp_tmp):
-	###string = """if(hashMap.get("timestamp") >= 0.24858457457){
-	###   return 5;
-	###}	
-	###return 3;"""
-	###
-	###return string
-
-
-
-		##Procesamos los datos con las metricas
+	##Procesamos los datos con las metricas
 	llamadaAprocesar(ruta_timestamp, ruta_timestamp_tmp)
 	juntar(ruta_timestamp_tmp)
 	concatenar(ruta_timestamp_tmp)
@@ -79,8 +96,8 @@ def creameClaseArbolString(ruta_timestamp, ruta_timestamp_tmp):
 	os.chdir(ruta_timestamp_tmp)
 
 	##creamos el arbol
-	X = genfromtxt("X_train_movil.csv", delimiter=',')
-	y = genfromtxt("y_train_movil.csv", delimiter='')
+	X = np.loadtxt("X_train_movil.csv", delimiter=",")
+	y = np.loadtxt("y_train_movil.csv", delimiter="\n")
 
 	os.chdir(directorioActual)
 	
@@ -97,63 +114,52 @@ def creameClaseArbolString(ruta_timestamp, ruta_timestamp_tmp):
 
 def llamadaAprocesar(ruta_timestamp, ruta_timestamp_tmp):
 	j = 0;
-	for (path, ficheros, archivos) in walk(ruta_timestamp):
-		for i in  archivos:
-			print(i)
+
+	for item in os.listdir(ruta_timestamp):
+	    if os.path.isfile(os.path.join(ruta_timestamp, item)):
 			if (j % 3 == 0):
-				nombre = i.split('_')
+				print(item)
+				nombre = item.split('_')
 				persona = nombre[0]
 				actividad = nombre[1]
 				ProcesarDatos.getStatisticsValues(('%s_%s' %(persona, actividad)), 3, ruta_timestamp, ruta_timestamp_tmp)
+
 			j = j + 1;
 
 def juntar(ruta_timestamp_tmp):
 	dfOutX = pd.DataFrame()
 	dfOutY = pd.DataFrame()
-	dfOutI = pd.DataFrame()
 
 	directorioActual=os.getcwd()
 
 	for (path, ficheros, archivos) in walk(ruta_timestamp_tmp):
 		for i in  archivos:
-			print(i)
+			#print(i)
 			actividada=i.split('_')
-		   # actividad2=actividada.spilt('-');
 			actividad=actividada[1]
-			
+		
 			os.chdir(ruta_timestamp_tmp)
 			dfX=pd.DataFrame()
-			dfX = pd.read_csv(i, sep=';', index_col=0, error_bad_lines=False)
-		   
+			dfX = pd.read_csv(i, sep=';', index_col=0)
+
 			os.chdir(directorioActual)
-			numero=actividad
-		   
-			numeroFilas=len(dfX)
-			
 			dfY=pd.DataFrame()
+
 			lista=list()
-			
-			dfI=pd.DataFrame()
-			listaInformacion=list()
-			indices=dfX.index.tolist()  
-			
+
 			d=0
-			for d in range(numeroFilas):
-				lista.append(numero)
-				dfX.index.tolist()
-				listaInformacion.append(actividada[0])
-			
-			
-		dfY=pd.DataFrame(lista)
-		dfI=pd.DataFrame(listaInformacion)
+			for d in range(len(dfX)):
+				lista.append(actividad)
+						
+			dfY=pd.DataFrame(lista)
 	  
-		dfOutX = pd.concat([dfOutX, dfX])
-		dfOutY = pd.concat([dfOutY, dfY])
-		dfOutI = pd.concat([dfOutI, dfI])
+			dfOutX = dfOutX.append(dfX)
+			dfOutY = dfOutY.append(dfY)
+
 	#os.chdir(directorioActual)
 	os.chdir(ruta_timestamp_tmp)
-	dfOutX.to_csv("X_train_movil.csv",header=None, index=False)
-	dfOutY.to_csv("y_train_movil.csv",header=None, index=False)
+	dfOutX.to_csv("X_train_movil.csv", index=False, header=False)
+	dfOutY.to_csv("y_train_movil.csv", index=False, header=False)
 	os.chdir(directorioActual)
 
 def maximovalor(arr):
@@ -220,4 +226,4 @@ os.unlink('ProcesarDatos.pyc')
 
 
 if __name__ == '__main__':
-	run(host='192.168.1.33', port=8081, debug=True, reloader=True)
+	run(host='192.168.1.33', port=8081, debug=True)
