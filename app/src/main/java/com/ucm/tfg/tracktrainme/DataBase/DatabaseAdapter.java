@@ -260,11 +260,17 @@ public class DatabaseAdapter {
         String query = "SELECT * FROM " + TABLA_ARBOLES  + " WHERE " + KEY_ID + " = (SELECT MAX(" + KEY_ID + ") FROM " + TABLA_ARBOLES + ")";
         Cursor c = db.rawQuery(query, null);
 
+        if(c.getCount() == 0){
+            String arbolGeneral = getGeneralTree();
+            treeDataTransfer = new TreeDataTransfer(arbolGeneral);
+            insertarNuevoArbol(treeDataTransfer);
+        }
         while(c.getCount() == 1 && c.moveToNext()){
             long id = c.getLong(c.getColumnIndex(KEY_ID));
             String tree_text = c.getString(c.getColumnIndex(KEY_TREE_TEXT));
             treeDataTransfer = new TreeDataTransfer(id, tree_text);
         }
+
 
         return treeDataTransfer;
     }
@@ -299,6 +305,129 @@ public class DatabaseAdapter {
         return d;
     }
 
+    private String getGeneralTree(){
+        return "public int miMetodo(HashMap hashMap){\n" +
+                "if(hashMap.get(\"gyro_gamma_max\") <= 0.209456175566)\n" +
+                "if(hashMap.get(\"accel_y_std\") <= 0.242084830999)\n" +
+                "if(hashMap.get(\"gyro_alpha_min\") <= -0.308585643768)\n" +
+                "if(hashMap.get(\"accel_x_max\") <= 9.31309700012)\n" +
+                "if(hashMap.get(\"gyro_beta_std\") <= 0.167273283005)\n" +
+                "return 3;\n" +
+                "else //if(gyro_beta_std > 0.167273283005)\n" +
+                "if(hashMap.get(\"gyro_alpha_min\") <= -0.643096804619)\n" +
+                "return 3;\n" +
+                "else //if(gyro_alpha_min > -0.643096804619)\n" +
+                "return 1;\n" +
+                "else //if(accel_x_max > 9.31309700012)\n" +
+                "if(hashMap.get(\"gyro_gamma_med\") <= -0.250750094652)\n" +
+                "return 4;\n" +
+                "else //if(gyro_gamma_med > -0.250750094652)\n" +
+                "return 2;\n" +
+                "else //if(gyro_alpha_min > -0.308585643768)\n" +
+                "if(hashMap.get(\"gyro_beta_min\") <= -1.05088806152)\n" +
+                "return 1;\n" +
+                "else //if(gyro_beta_min > -1.05088806152)\n" +
+                "return 3;\n" +
+                "else //if(accel_y_std > 0.242084830999)\n" +
+                "if(hashMap.get(\"accel_y_max\") <= 2.62441110611)\n" +
+                "if(hashMap.get(\"accel_x_med\") <= 2.50304412842)\n" +
+                "if(hashMap.get(\"gyro_gamma_min\") <= -0.18482208252)\n" +
+                "return 1;\n" +
+                "else //if(gyro_gamma_min > -0.18482208252)\n" +
+                "if(hashMap.get(\"accel_y_med\") <= -3.60224342346)\n" +
+                "return 4;\n" +
+                "else //if(accel_y_med > -3.60224342346)\n" +
+                "return 1;\n" +
+                "else //if(accel_x_med > 2.50304412842)\n" +
+                "if(hashMap.get(\"accel_y_std\") <= 0.506831645966)\n" +
+                "if(hashMap.get(\"gyro_gamma_med\") <= -0.263118743896)\n" +
+                "return 1;\n" +
+                "else //if(gyro_gamma_med > -0.263118743896)\n" +
+                "return 3;\n" +
+                "else //if(accel_y_std > 0.506831645966)\n" +
+                "if(hashMap.get(\"gyro_beta_max\") <= 1.56587266922)\n" +
+                "return 4;\n" +
+                "else //if(gyro_beta_max > 1.56587266922)\n" +
+                "return 1;\n" +
+                "else //if(accel_y_max > 2.62441110611)\n" +
+                "return 2;\n" +
+                "else //if(gyro_gamma_max > 0.209456175566)\n" +
+                "if(hashMap.get(\"accel_y_avg\") <= -8.48324775696)\n" +
+                "if(hashMap.get(\"accel_x_max\") <= 8.04502105713)\n" +
+                "if(hashMap.get(\"accel_y_min\") <= -10.8130435944)\n" +
+                "if(hashMap.get(\"accel_x_med\") <= 4.60125732422)\n" +
+                "if(hashMap.get(\"gyro_gamma_min\") <= -0.466049194336)\n" +
+                "return 1;\n" +
+                "else //if(gyro_gamma_min > -0.466049194336)\n" +
+                "return 1;\n" +
+                "else //if(accel_x_med > 4.60125732422)\n" +
+                "if(hashMap.get(\"gyro_beta_min\") <= -1.39317393303)\n" +
+                "return 1;\n" +
+                "else //if(gyro_beta_min > -1.39317393303)\n" +
+                "return 4;\n" +
+                "else //if(accel_y_min > -10.8130435944)\n" +
+                "if(hashMap.get(\"gyro_gamma_min\") <= -0.682512402534)\n" +
+                "if(hashMap.get(\"accel_z_avg\") <= 3.95836639404)\n" +
+                "return 1;\n" +
+                "else //if(accel_z_avg > 3.95836639404)\n" +
+                "return 4;\n" +
+                "else //if(gyro_gamma_min > -0.682512402534)\n" +
+                "if(hashMap.get(\"accel_x_max\") <= 3.54990386963)\n" +
+                "return 3;\n" +
+                "else //if(accel_x_max > 3.54990386963)\n" +
+                "return 1;\n" +
+                "else //if(accel_x_max > 8.04502105713)\n" +
+                "if(hashMap.get(\"accel_x_med\") <= 4.50099945068)\n" +
+                "if(hashMap.get(\"yz_cor\") <= 0.531381249428)\n" +
+                "if(hashMap.get(\"accel_x_min\") <= 0.725691199303)\n" +
+                "return 4;\n" +
+                "else //if(accel_x_min > 0.725691199303)\n" +
+                "return 1;\n" +
+                "else //if(yz_cor > 0.531381249428)\n" +
+                "return 4;\n" +
+                "else //if(accel_x_med > 4.50099945068)\n" +
+                "if(hashMap.get(\"accel_x_max\") <= 8.52625274658)\n" +
+                "if(hashMap.get(\"xz_cor\") <= -0.193183273077)\n" +
+                "return 4;\n" +
+                "else //if(xz_cor > -0.193183273077)\n" +
+                "return 1;\n" +
+                "else //if(accel_x_max > 8.52625274658)\n" +
+                "return 4;\n" +
+                "else //if(accel_y_avg > -8.48324775696)\n" +
+                "if(hashMap.get(\"accel_y_max\") <= 4.24551773071)\n" +
+                "if(hashMap.get(\"accel_x_max\") <= 8.47423171997)\n" +
+                "if(hashMap.get(\"gyro_gamma_min\") <= -1.3512878418)\n" +
+                "if(hashMap.get(\"gyro_beta_max\") <= 2.33505249023)\n" +
+                "return 4;\n" +
+                "else //if(gyro_beta_max > 2.33505249023)\n" +
+                "return 1;\n" +
+                "else //if(gyro_gamma_min > -1.3512878418)\n" +
+                "if(hashMap.get(\"accel_x_med\") <= 5.54896402359)\n" +
+                "return 1;\n" +
+                "else //if(accel_x_med > 5.54896402359)\n" +
+                "return 4;\n" +
+                "else //if(accel_x_max > 8.47423171997)\n" +
+                "if(hashMap.get(\"accel_y_med\") <= 0.981155395508)\n" +
+                "if(hashMap.get(\"gyro_gamma_max\") <= 1.2589943409)\n" +
+                "return 4;\n" +
+                "else //if(gyro_gamma_max > 1.2589943409)\n" +
+                "return 4;\n" +
+                "else //if(accel_y_med > 0.981155395508)\n" +
+                "if(hashMap.get(\"z_fft\") <= 161.493133545)\n" +
+                "return 3;\n" +
+                "else //if(z_fft > 161.493133545)\n" +
+                "return 1;\n" +
+                "else //if(accel_y_max > 4.24551773071)\n" +
+                "if(hashMap.get(\"accel_y_med\") <= 0.325078427792)\n" +
+                "if(hashMap.get(\"xy_cor\") <= -0.523706614971)\n" +
+                "return 4;\n" +
+                "else //if(xy_cor > -0.523706614971)\n" +
+                "return 2;\n" +
+                "else //if(accel_y_med > 0.325078427792)\n" +
+                "return 2;\n" +
+                "\n" +
+                "}";
+    }
 
     //C:\Users\Ivan\AppData\Local\Android\sdk\platform-tools
     //adb shell

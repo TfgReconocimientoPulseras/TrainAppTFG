@@ -33,10 +33,10 @@ def procesaDatos():
 
 	directorioActual = os.getcwd()
 
-	os.chdir(ruta_timestamp_tmp)
-	X = np.loadtxt("X_train_movil.csv", delimiter=",")
-	y = np.loadtxt("y_train_movil.csv", delimiter="\n")
-	os.chdir(directorioActual)
+	#os.chdir(ruta_timestamp_tmp)
+	X = np.loadtxt("X_train_movil_aplaudirfinal.csv", delimiter=",")
+	y = np.loadtxt("y_train_movil_aplaudirfinal.csv", delimiter="\n")
+	#os.chdir(directorioActual)
 
 	clf = DecisionTreeClassifier(criterion='entropy', max_depth=6, random_state=0, min_samples_split=2, min_samples_leaf=2)
 	clf = clf.fit(X, y)
@@ -45,7 +45,8 @@ def procesaDatos():
 	codigo = tree_to_code(clf, feature_names, codigo)
 	codigo = codigo + "\n}"
 
-	#print codigo
+	
+	print codigo
 
 #PARA ANDROID
 @post('/subeDatos')
@@ -134,7 +135,7 @@ def juntar(ruta_timestamp_tmp):
 
 	for (path, ficheros, archivos) in walk(ruta_timestamp_tmp):
 		for i in  archivos:
-			#print(i)
+			print(i)
 			actividada=i.split('_')
 			actividad=actividada[1]
 		

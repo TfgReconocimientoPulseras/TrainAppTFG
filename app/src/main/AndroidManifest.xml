@@ -37,7 +37,8 @@
 
         <service android:name="com.ucm.tfg.tracktrainme.Services.RecogidaDeDatosService" />
 
-        <activity android:name="com.ucm.tfg.tracktrainme.MainActivity">
+        <activity android:name="com.ucm.tfg.tracktrainme.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -46,24 +47,31 @@
         </activity>
         <activity
             android:name="com.ucm.tfg.tracktrainme.Activities.AsistenteRecogidaDatos.RecogerDatosBienvenida"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.ucm.tfg.tracktrainme.Activities.AsistenteRecogidaDatos.RecogerDatosFormulario"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.ucm.tfg.tracktrainme.Activities.AsistenteRecogidaDatos.RecogerDatosRecogida"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.ucm.tfg.tracktrainme.Historial.HistorialDiaConcreto"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.ucm.tfg.tracktrainme.NoSensores"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.ucm.tfg.tracktrainme.Activities.Bluetooth.ListarYConectarBluetooth"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_listar_yconectar_bluetooth"
             android:theme="@style/AppTheme" />
-        <activity android:name="com.ucm.tfg.tracktrainme.Activities.ListarActividades"></activity>
+        <activity android:name="com.ucm.tfg.tracktrainme.Activities.ListarActividades"
+            android:screenOrientation="portrait"></activity>
 
         <service android:name="com.ucm.tfg.tracktrainme.Services.BluetoothLeService"></service>
     </application>
