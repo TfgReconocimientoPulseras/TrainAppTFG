@@ -29,17 +29,17 @@ peticiones y devuelve clasificadores personalizados. Los ficheros de esta última
 carpeta están implementados en Python.
 
 Dentro de la carpeta app hemos organizado los paquetes de la siguiente manera:
-	+ Las clases Activity se encuentran en el paquete Activities.
-	+ Las clases encargadas del uso de la base de datos se encuentran en el
-	paquete DataBase
-	+ Las clases que se encargan de llevar a cabo la política de clasificación
-	se encuentran en el paquete EstadosFSM.
-	+ Las clases encargadas de las vistas de la ventana principal se encuentran 
-	en el paquete Fragments.
-	+ Las clases que se encargan del manejo del historial de actividades se
-	encuentra en el paquete Historial.
-	+ Los distintos Services de la aplicación se encuentran en el paquete
-	Service.
++ Las clases Activity se encuentran en el paquete Activities.
++ Las clases encargadas del uso de la base de datos se encuentran en el
+paquete DataBase
++ Las clases que se encargan de llevar a cabo la política de clasificación
+se encuentran en el paquete EstadosFSM.
++ Las clases encargadas de las vistas de la ventana principal se encuentran 
+en el paquete Fragments.
++ Las clases que se encargan del manejo del historial de actividades se
+encuentra en el paquete Historial.
++ Los distintos Services de la aplicación se encuentran en el paquete
+Service.
 	+ Las clases que se encargan de la implementación de los diferentes Threads
 	se encuentran en el paquete Threads.
 	+ En el paquete Utilidades podemos encontrar métodos genéricos que no tienen
