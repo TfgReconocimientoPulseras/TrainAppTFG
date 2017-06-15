@@ -34,7 +34,7 @@ public class RecogerDatosFormulario extends Activity {
 
     //ELEMENTOS GRÁFICOS//////////////////////////////////////////////////////////////////////////////////////////////
     private Button botonNext;
-    private EditText textNombre;
+    //private EditText textNombre;
     private EditText textActividad;
     private ImageView image;
 
@@ -57,7 +57,7 @@ public class RecogerDatosFormulario extends Activity {
         setContentView(R.layout.activity_recoger_datos_formulario);
 
         this.botonNext = (Button)findViewById(R.id.buttonNextForumulario);
-        this.textNombre = (EditText)findViewById(R.id.nombreUsuFormulario);
+        //this.textNombre = (EditText)findViewById(R.id.nombreUsuFormulario);
         this.textActividad = (EditText)findViewById(R.id.nombreActFormulario);
         this.image = (ImageView) findViewById(R.id.imagen_actividad);
 
@@ -88,7 +88,8 @@ public class RecogerDatosFormulario extends Activity {
         int id = -1;
         boolean actividadNoexiste = false;
 
-        this.nameUser = this.textNombre.getText().toString();
+        //this.nameUser = this.textNombre.getText().toString();
+        this.nameUser = "Pepe";
         this.nameActivity = this.textActividad.getText().toString();
 
         if(this.nameUser.equals("") || this.nameActivity.equals("")){

@@ -17,37 +17,10 @@
         android:text="Antes de comenzar, necesitamos saber unas cositas..."
         android:textColor="@color/colorWhite"
         android:textSize="25dp"
-        app:layout_heightPercent="15%"
+        app:layout_heightPercent="30%"
         app:layout_widthPercent="100%" />
 
-    <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_heightPercent="15%"
-        app:layout_widthPercent="100%"
-        android:layout_below="@+id/textView8"
-        android:layout_alignParentStart="true"
-        android:id="@+id/percentRelativeLayout">
 
-        <ImageView
-            android:id="@+id/textView6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ico_usu"
-            app:layout_widthPercent="25%"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true"/>
-
-        <EditText
-            android:id="@+id/nombreUsuFormulario"
-            android:layout_height="wrap_content"
-            app:layout_widthPercent="75%"
-            android:hint="Nombre"
-            android:inputType="textPersonName"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true" />
-    </android.support.percent.PercentRelativeLayout>
 
     <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -55,7 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/percentRelativeLayout"
+        android:layout_below="@+id/textView8"
         app:layout_heightPercent="15%"
         app:layout_widthPercent="100%">
 
@@ -65,6 +38,9 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
             android:background="@drawable/ico_activ"
             app:layout_widthPercent="25%" />
 
@@ -73,7 +49,8 @@
             android:layout_height="wrap_content"
             android:hint="La actividad"
             android:inputType="textPersonName"
-            app:layout_widthPercent="75%"
+            android:layout_marginRight="20dp"
+            app:layout_widthPercent="60%"
             android:layout_centerVertical="true"
             android:layout_alignParentEnd="true" />
     </android.support.percent.PercentRelativeLayout>
