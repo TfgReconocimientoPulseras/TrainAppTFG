@@ -40,7 +40,7 @@ en el paquete Fragments.
 encuentra en el paquete Historial.
 + Los distintos Services de la aplicación se encuentran en el paquete
 Service.
-	+ Las clases que se encargan de la implementación de los diferentes Threads
-	se encuentran en el paquete Threads.
-	+ En el paquete Utilidades podemos encontrar métodos genéricos que no tienen
-	una ubicación específica en el proyecto.
++ Las clases que se encargan de la implementación de los diferentes Threads
+se encuentran en el paquete Threads.
++ En el paquete Utilidades podemos encontrar métodos genéricos que no tienen
+una ubicación específica en el proyecto.
