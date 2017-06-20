@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.ucm.tfg.tracktrainme.Sensor.ModoSensor;
 import com.ucm.tfg.tracktrainme.Sensor.SensorMovil;
 import com.ucm.tfg.tracktrainme.Sensor.SensorPulsera;
 import com.ucm.tfg.tracktrainme.Threads.AnalizarClasificacionThread;
@@ -219,14 +220,7 @@ public class RecogidaDeDatosService extends Service{
             mService = binder.getService();
             Log.d("BIND", "mBound(true)");
             mBound = true;
-            //TODO CONTROLAR CUANDO ESTEMOS CONECTADOS CON PULSERA O CON MÓVIL
-            if(modo.equals("PULSERA")){
-                mSensor = new SensorPulsera(mService);
-            }
-            else if(modo.equals("MOVIL")){
-                mSensor = new SensorMovil(getApplicationContext());
-            }
-
+            mSensor = new SensorPulsera(mService);
 
             activarSensores();
             timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
@@ -253,7 +247,7 @@ public class RecogidaDeDatosService extends Service{
     public int onStartCommand(Intent intent, int flags,
                               int startId) {
 
-        this.modo = intent.getStringExtra("modo");
+        /*this.modo = intent.getStringExtra("modo");
 
         //TODO CAMBIAR A CONSTANTE
         if (this.modo.equals("PULSERA") && !mBound) {
@@ -268,6 +262,25 @@ public class RecogidaDeDatosService extends Service{
             segmentacionDeDatosThread.start();
             clasificacionDeDatosThread.start();
             anlisisClasificacionDeDatosThread.start();
+        }*/
+
+        ModoSensor modo = (ModoSensor) getApplication();
+
+        if(modo.getModo() == ModoSensor.MODO_MOVIL){
+            this.mSensor = new SensorMovil(getApplicationContext());
+            this.mSensor.encenderSensor();
+            timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
+            segmentacionDeDatosThread.start();
+            clasificacionDeDatosThread.start();
+            anlisisClasificacionDeDatosThread.start();
+
+        }
+        else if(modo.getModo() == ModoSensor.MODO_PULSERA){
+            this.mSensor = null;
+            if (!mBound) {
+                Intent inte = new Intent(getBaseContext(), BluetoothLeService.class);
+                bindService(inte, mConnetion, Context.BIND_AUTO_CREATE);
+            }
         }
 
         return Service.START_STICKY;

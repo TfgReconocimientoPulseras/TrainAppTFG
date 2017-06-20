@@ -128,7 +128,7 @@ public class ListarYConectarBluetooth extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listar_yconectar_bluetooth);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Dispositivos a tú alcance");
+        toolbar.setTitle("Dispositivos a tu alcance");
         setSupportActionBar(toolbar);
 
         this.dispositivosEncontrados = new MyResultReceiverBluetooth(null);

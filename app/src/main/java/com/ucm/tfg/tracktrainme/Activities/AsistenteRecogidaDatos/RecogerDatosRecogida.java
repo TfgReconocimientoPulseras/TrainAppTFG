@@ -485,8 +485,8 @@ public class RecogerDatosRecogida extends Activity {
             }
         };
 
-        String url = "http://192.168.1.33:8081/subeDatos";
-        //String url = "http://192.168.1.116:8081/subeDatos";
+        //String url = "http://192.168.1.33:8081/subeDatos";
+        String url = "http://192.168.1.116:8081/subeDatos";
 
         AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
         RequestParams requestParams = new RequestParams();
