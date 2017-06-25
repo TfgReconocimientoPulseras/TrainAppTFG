@@ -1,8 +1,10 @@
 package com.ucm.tfg.tracktrainme.Fragments;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -16,6 +18,7 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +49,9 @@ public class ReconocerActividadFragment extends Fragment {
     private HashMap<Integer, HashMap<String, Object>> actividadesSistema;
     private static final String KEY_NOMBRE_ACTIVIDAD = "text";
     private static final String KEY_IMAGEN = "imagen";
+
+    private Dialog consejo;
+    private boolean consejoAceptado;
 
     private Handler modificadorActividad = new Handler() {
         @Override
@@ -127,6 +133,9 @@ public class ReconocerActividadFragment extends Fragment {
             public void onClick(View v) {
 
                 if(reconocedorEncendido == 0) {
+                    //TODO arreglar que hasta que no se de al boton de ok no arranque el clasificador
+                    configurarConsejoDialog();
+
                     reconocedorEncendido = 1;
                     nombreActividad.setText("Comenzando a reconocer...");
                     button.setText("Parar el reconocimiento");
@@ -234,6 +243,91 @@ public class ReconocerActividadFragment extends Fragment {
             getActivity().unbindService(mConnetion);
             mBound = false;
         }
+    }
+
+    private Handler modificadorFoto = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            int re = (Integer)msg.obj;
+
+            ImageView imagen = (ImageView) consejo.findViewById(R.id.imageView_colocacion);
+
+            if(re == 0){
+                imagen.setBackgroundResource(R.drawable.colocacion);
+            }
+            else if(re == 1){
+                imagen.setBackgroundResource(R.drawable.colocacionmal);
+            }
+
+        }
+    };
+
+    private void configurarConsejoDialog(){
+        consejoAceptado = false;
+        this.consejo = new Dialog(getActivity());
+        consejo.setContentView(R.layout.colocacion_dispositivo);
+
+        Button ok_boton = (Button) consejo.findViewById(R.id.button_recordatorio);
+
+        class MiThread extends Thread {
+
+            @Override
+            public void run() {
+                while(true){
+                    Message msg = new Message();
+                    msg.obj = 0;
+                    modificadorFoto.sendMessage(msg);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    msg = new Message();
+                    msg.obj = 1;
+                    modificadorFoto.sendMessage(msg);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            public void parar(){
+                this.interrupt();
+            }
+        }
+
+        final MiThread fotos_thread = new MiThread();
+
+        ok_boton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                consejo.dismiss();
+                fotos_thread.parar();
+                consejoAceptado = true;
+            }
+        });
+
+        consejo.setCanceledOnTouchOutside(false);
+
+        consejo.setOnKeyListener(new Dialog.OnKeyListener() {
+
+            @Override
+            public boolean onKey(DialogInterface arg0, int keyCode,
+                                 KeyEvent event) {
+                // TODO Auto-generated method stub
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    fotos_thread.parar();
+                    consejo.dismiss();
+                }
+                return true;
+            }
+        });
+
+        consejo.show();
+        fotos_thread.start();
     }
 
 }

@@ -2,6 +2,7 @@ package com.ucm.tfg.tracktrainme.Activities.AsistenteRecogidaDatos;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -11,8 +12,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.media.MediaScannerConnection;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -24,8 +27,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -107,6 +112,8 @@ public class RecogerDatosRecogida extends Activity {
 
     //PROGRESS DIALOG/////////////////////////////////////////////////////////////////////////////////////////////////
     ProgressDialog progressDialog;
+
+    private Dialog consejo;
 
     private Handler modificadorFinalizador = new Handler() {
         @Override
@@ -247,6 +254,92 @@ public class RecogerDatosRecogida extends Activity {
         this.numFileCreated = 0;
 
         temporizador.setText(Integer.toString(TIEMPO_POR_ARCHIVO/1000));
+
+        configurarConsejoDialog();
+    }
+
+    private Handler modificadorFoto = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            int re = (Integer)msg.obj;
+
+            ImageView imagen = (ImageView) consejo.findViewById(R.id.imageView_colocacion);
+
+            if(re == 0){
+                imagen.setBackgroundResource(R.drawable.colocacion);
+            }
+            else if(re == 1){
+                imagen.setBackgroundResource(R.drawable.colocacionmal);
+            }
+
+        }
+    };
+
+    private void configurarConsejoDialog(){
+        this.consejo = new Dialog(this);
+        consejo.setContentView(R.layout.colocacion_dispositivo);
+
+        Button ok_boton = (Button) consejo.findViewById(R.id.button_recordatorio);
+
+        class MiThread extends Thread {
+
+            @Override
+            public void run() {
+                while(true){
+                    Message msg = new Message();
+                    msg.obj = 0;
+                    modificadorFoto.sendMessage(msg);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    msg = new Message();
+                    msg.obj = 1;
+                    modificadorFoto.sendMessage(msg);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            public void parar(){
+                this.interrupt();
+            }
+        }
+
+        final MiThread fotos_thread = new MiThread();
+
+        ok_boton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                consejo.dismiss();
+                fotos_thread.parar();
+                //TODO Close button action
+            }
+        });
+
+        consejo.setCanceledOnTouchOutside(false);
+
+        consejo.setOnKeyListener(new Dialog.OnKeyListener() {
+
+            @Override
+            public boolean onKey(DialogInterface arg0, int keyCode,
+                                 KeyEvent event) {
+                // TODO Auto-generated method stub
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    fotos_thread.parar();
+                    consejo.dismiss();
+                }
+                return true;
+            }
+        });
+
+        consejo.show();
+        fotos_thread.start();
     }
 
     protected void onResume() {
@@ -486,7 +579,8 @@ public class RecogerDatosRecogida extends Activity {
         };
 
         //String url = "http://192.168.1.33:8081/subeDatos";
-        String url = "http://192.168.1.116:8081/subeDatos";
+        //String url = "http://192.168.1.116:8081/subeDatos";
+        String url = "http://147.96.80.41/tfg/subeDatos";
 
         AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
         RequestParams requestParams = new RequestParams();
