@@ -530,6 +530,9 @@ public class RecogerDatosRecogida extends Activity {
                 TreeDataTransfer treeDataTransfer = new TreeDataTransfer(new String(responseBody));
 
                 InputStream stream = null;
+                if(imagePath == null){
+                    imagePath = "android.resource://com.ucm.tfg.tracktrainme/" + R.drawable.ico_activ;
+                }
 
                 try {
                     stream = getContentResolver().openInputStream(Uri.parse(imagePath));
@@ -549,7 +552,6 @@ public class RecogerDatosRecogida extends Activity {
                     e.printStackTrace();
                 }
 
-                //TODO
                 ActivityDataTransfer activityDataTransfer = new ActivityDataTransfer(nameActivity, new Date(), f.getAbsolutePath());
 
                 db.open();
@@ -557,7 +559,7 @@ public class RecogerDatosRecogida extends Activity {
                 if( id < 0 ){
                     Log.d("REQUEST AL SERVIDOR", "PETICION EXITOSA - ERROR AL INSERTAR ARBOL");
                 }
-                //TODO
+
                 id = db.insertActivity(activityDataTransfer);
                 if(id < 0){
                     Log.d("REQUEST AL SERVIDOR", "PETICION EXITOSA - ERROR AL INSERTAR ACTIVIDAD");

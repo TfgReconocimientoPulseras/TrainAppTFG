@@ -1,6 +1,8 @@
 package com.ucm.tfg.tracktrainme;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -29,9 +31,16 @@ import com.ucm.tfg.tracktrainme.DataBase.DatabaseAdapter;
 import com.ucm.tfg.tracktrainme.Fragments.HistorialFragment;
 import com.ucm.tfg.tracktrainme.Fragments.ReconocerActividadFragment;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -105,25 +114,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        DatabaseAdapter db = new DatabaseAdapter(this);
-        db.open();
+        if(!comprobarSiExisteDirImagenes())
+            crearImagenesPorDefecto();
 
-        ActivityDataTransfer caminar = new ActivityDataTransfer("Caminar", Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_act_1.png");
-        ActivityDataTransfer aplaudir = new ActivityDataTransfer("Aplaudir", Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_act_8.png");
-        ActivityDataTransfer quieto = new ActivityDataTransfer("Quieto", Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_act_3.png");
-        ActivityDataTransfer barrer = new ActivityDataTransfer("Barrer", Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_act_2.png");
-        //ActivityDataTransfer niidea = new ActivityDataTransfer("Ni idea", Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_act_0.png");
-
-
-        long id2 = db.insertActivity(caminar);
-        long id3 = db.insertActivity(aplaudir);
-        long id4 = db.insertActivity(quieto);
-        long id5 = db.insertActivity(barrer);
-        //long id = db.insertActivity(niidea);
-
-        //TODO HACER INSERT  DEL ÁRBOL POR DEFECTO EN LA BASE DE DATOS
-
-        db.close();
     }
 
     @Override
@@ -240,6 +233,65 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent salir = new Intent (MainActivity.this, NoSensores.class);
             startActivity(salir);
         }
+    }
+
+    private void guardarImagenes(String nombre, Bitmap bitmap, boolean isActivity){
+        String dataDir = getApplicationContext().getApplicationInfo().dataDir;
+        File f = null;
+        File directory = new File(dataDir + "/images/");
+        directory.mkdirs();
+
+        if(isActivity)
+            f = new File(directory, UUID.randomUUID().toString() + ".png");
+        else
+            f = new File(directory, nombre + ".png");
+
+        OutputStream os;
+
+        try {
+            os = new FileOutputStream(f);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
+            os.flush();
+            os.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        if(isActivity){
+            ActivityDataTransfer activity = new ActivityDataTransfer(nombre, f.getAbsolutePath());
+            DatabaseAdapter db = new DatabaseAdapter(this);
+            db.open();
+
+            long id = db.insertActivity(activity);
+
+            db.close();
+        }
+
+    }
+
+    private void crearImagenesPorDefecto(){
+        Bitmap bitMap = BitmapFactory.decodeResource(getResources(), R.drawable.ico_act_1);
+        guardarImagenes("Caminar", bitMap, true);
+
+        bitMap = BitmapFactory.decodeResource(getResources(), R.drawable.ico_act_8);
+        guardarImagenes("Aplaudir", bitMap, true);
+
+        bitMap = BitmapFactory.decodeResource(getResources(), R.drawable.ico_act_3);
+        guardarImagenes("Quieto", bitMap, true);
+
+        bitMap = BitmapFactory.decodeResource(getResources(), R.drawable.ico_act_2);
+        guardarImagenes("Barrer", bitMap, true);
+
+    }
+
+    private boolean comprobarSiExisteDirImagenes(){
+        String dataDir = getApplicationContext().getApplicationInfo().dataDir;
+        File directory = new File(dataDir + "/images/");
+
+        return directory.exists();
     }
 
     public String getModo(){

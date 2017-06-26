@@ -8,14 +8,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -123,10 +126,7 @@ public class ReconocerActividadFragment extends Fragment {
 
         nombreActividad = (TextView) view.findViewById(R.id.nombre_actividad);
         iconoActividad = (ImageView) view.findViewById(R.id.icono_actividad);
-        //iconoActividad.setBackgroundResource(R.drawable.ico_pausa);
-        iconoActividad.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_pausa.png"));
-
-
+        iconoActividad.setImageDrawable(ContextCompat.getDrawable(getActivity().getApplicationContext(), R.drawable.ico_pausa));
 
         button = (Button) view.findViewById(R.id.boton_reconocer);
         button.setOnClickListener(new View.OnClickListener() {
@@ -135,7 +135,6 @@ public class ReconocerActividadFragment extends Fragment {
             public void onClick(View v) {
 
                 if(reconocedorEncendido == 0) {
-                    //TODO arreglar que hasta que no se de al boton de ok no arranque el clasificador
                     configurarConsejoDialog();
 
                     reconocedorEncendido = 1;

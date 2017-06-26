@@ -60,6 +60,7 @@ public class RecogerDatosFormulario extends Activity {
         //this.textNombre = (EditText)findViewById(R.id.nombreUsuFormulario);
         this.textActividad = (EditText)findViewById(R.id.nombreActFormulario);
         this.image = (ImageView) findViewById(R.id.imagen_actividad);
+        this.image.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ico_activ));
 
         askForStoragePermission();
 
