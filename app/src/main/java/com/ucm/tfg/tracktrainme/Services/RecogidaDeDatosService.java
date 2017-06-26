@@ -252,6 +252,4 @@ public class RecogidaDeDatosService extends Service{
     private void desactivarSensores() {
         this.mSensor.apagarSensor();
     }
-
-
 }
