@@ -8,6 +8,7 @@ import android.content.ServiceConnection;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -84,6 +85,8 @@ public class RecogidaDeDatosService extends Service{
     private com.ucm.tfg.tracktrainme.Sensor.Sensor mSensor;
 
     private String modo;
+    private PowerManager powerManager;
+    private PowerManager.WakeLock wakeLock;
 
     @Nullable
     @Override
@@ -99,22 +102,10 @@ public class RecogidaDeDatosService extends Service{
 
         df = new DataFrame(colsNames);
         this.timer = new Timer();
-        /*this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        this.mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        this.miSensorEventListenerAcelerometro = new MiSensorEventListener(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
-        this.miSensorEventListenerGiroscopio = new MiSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);*/
         this.timeAcumulated = 0;
 
         this.broadcaster = LocalBroadcastManager.getInstance(this);
 
-
-        //TODO ADAPTAR A LA NUEVA FORMA QUE TIENE EL HANDLER QUE MANEJA NOMBRE Y FOTO
-        /*Intent intent = new Intent("estado_actualizado");
-        intent.putExtra("estado", -20);
-        broadcaster.sendBroadcast(intent);*/
-
-        //TODO FAIR POLICY????
         this.bqRec_Segment = new ArrayBlockingQueue(TAM_COLA_RECOGIDA, true);
         this.bqSegment_Recog = new ArrayBlockingQueue(TAM_COLA_RECOGIDA, true);
         this.bqSegment_Clasif = new ArrayBlockingQueue(TAM_COLA_CLASIFICACION, true);
@@ -129,11 +120,6 @@ public class RecogidaDeDatosService extends Service{
 
             @Override
             public void run() {
-                //timeAcumulated += FREQUENCY_DEF;
-
-                /*DataTAD dataAccel = miSensorEventListenerAcelerometro.obtenerDatosSensor();
-                DataTAD dataGyro = miSensorEventListenerGiroscopio.obtenerDatosSensor();*/
-
                 DataTAD dataAccel = mSensor.obtenerDatosAcel();
                 DataTAD dataGyro = mSensor.obtenerDatosGyro();
 
@@ -157,7 +143,6 @@ public class RecogidaDeDatosService extends Service{
                         filaActual = df.length() - 1;
                     }
 
-                    //TODO CUANDO SE HA COMPLETADO LA PRIMERA VENTANA EL TIMESTAMP ACTUAL ES EL DE LA PRIMERA,NO EL DE LA ULTIMA
                     long timestampActual = (Long) df.get(filaActual, 0);
 
                     if( (timestampActual - timestampIni) >= COLLECTION_TIME + 10 || (timestampActual - timestampIni) >= COLLECTION_TIME - 10){
@@ -175,39 +160,15 @@ public class RecogidaDeDatosService extends Service{
                             e.printStackTrace();
                         }
                     }
-
-                    /**
-                     if (timeAcumulated >= COLLECTION_TIME) { // tras 5 segundos para pruebas
-                     Log.d("Servicio - Recogida", "Ya han pasado 5 segundos\n");
-
-                     try {
-                     Log.d("Servicio - Recogida", "Produzco dataframe\n");
-                     bqRec_Segment.put(df);
-                     } catch (InterruptedException e) {
-                     e.printStackTrace();
-                     }
-
-                     df = new DataFrame(colsNames);
-                     timeAcumulated = 0;
-
-                     }
-                     else{
-                        if(comenzando){
-                             Log.d("Servicio - Recogida", "Iniciando...\n");
-                             if(timeAcumulated >= 250){
-                             Intent intent = new Intent("estado_actualizado");
-                             intent.putExtra("estado", -40);
-                             broadcaster.sendBroadcast(intent);
-                             comenzando = false;
-                        }
-                     }
-                     }
-                     */
                 }
             }
 
 
         };
+
+        powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "wakeLockRecogidaDatos");
     }
 
 
@@ -246,24 +207,6 @@ public class RecogidaDeDatosService extends Service{
     @Override
     public int onStartCommand(Intent intent, int flags,
                               int startId) {
-
-        /*this.modo = intent.getStringExtra("modo");
-
-        //TODO CAMBIAR A CONSTANTE
-        if (this.modo.equals("PULSERA") && !mBound) {
-            Intent inte = new Intent(getBaseContext(), BluetoothLeService.class);
-            bindService(inte, mConnetion, Context.BIND_AUTO_CREATE);
-        }
-        else if(modo.equals("MOVIL")){
-            //TODO ARREGLAR ESTO
-            mSensor = new SensorMovil(getApplicationContext());
-            activarSensores();
-            timer.scheduleAtFixedRate(timerTask, DELAY_TIMER_TASK, FREQUENCY_DEF);
-            segmentacionDeDatosThread.start();
-            clasificacionDeDatosThread.start();
-            anlisisClasificacionDeDatosThread.start();
-        }*/
-
         ModoSensor modo = (ModoSensor) getApplication();
 
         if(modo.getModo() == ModoSensor.MODO_MOVIL){
@@ -283,6 +226,7 @@ public class RecogidaDeDatosService extends Service{
             }
         }
 
+        wakeLock.acquire();
         return Service.START_STICKY;
     }
 
@@ -297,19 +241,15 @@ public class RecogidaDeDatosService extends Service{
         segmentacionDeDatosThread.interrupt();
         clasificacionDeDatosThread.interrupt();
         anlisisClasificacionDeDatosThread.interrupt();
-
+        wakeLock.release();
         super.onDestroy();
     }
 
     private void activarSensores() {
-        /*this.miSensorEventListenerAcelerometro.activarSensor();
-        this.miSensorEventListenerGiroscopio.activarSensor();*/
         this.mSensor.encenderSensor();
     }
 
     private void desactivarSensores() {
-        /*this.miSensorEventListenerAcelerometro.desactivarSensor();
-        this.miSensorEventListenerGiroscopio.desactivarSensor();*/
         this.mSensor.apagarSensor();
     }
 
