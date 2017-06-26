@@ -53,6 +53,8 @@ public class ReconocerActividadFragment extends Fragment {
     private Dialog consejo;
     private boolean consejoAceptado;
 
+    private Intent intent;
+
     private Handler modificadorActividad = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -128,7 +130,7 @@ public class ReconocerActividadFragment extends Fragment {
 
         button = (Button) view.findViewById(R.id.boton_reconocer);
         button.setOnClickListener(new View.OnClickListener() {
-            private Intent intent;
+
             @Override
             public void onClick(View v) {
 
@@ -328,6 +330,16 @@ public class ReconocerActividadFragment extends Fragment {
 
         consejo.show();
         fotos_thread.start();
+    }
+
+    @Override
+    public void onDestroy(){
+        if(reconocedorEncendido == 1) {
+            getActivity().stopService(intent);
+        }
+
+        super.onDestroy();
+
     }
 
 }
