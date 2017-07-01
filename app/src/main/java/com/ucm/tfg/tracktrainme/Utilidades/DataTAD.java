@@ -30,7 +30,6 @@ public class DataTAD {
     }
 
     public void setValues(float[] values) {
-
         this.values = values;
     }
 

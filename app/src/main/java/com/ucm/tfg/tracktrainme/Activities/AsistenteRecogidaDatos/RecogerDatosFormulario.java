@@ -34,14 +34,12 @@ public class RecogerDatosFormulario extends Activity {
 
     //ELEMENTOS GRÁFICOS//////////////////////////////////////////////////////////////////////////////////////////////
     private Button botonNext;
-    //private EditText textNombre;
     private EditText textActividad;
     private ImageView image;
 
     //DATOS FORMULARIO////////////////////////////////////////////////////////////////////////////////////////////////
     private String nameUser;
     private String nameActivity;
-    private UUID uuidImage;
     private Bitmap bitmap;
 
     //CONSTANTES//////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,7 +55,6 @@ public class RecogerDatosFormulario extends Activity {
         setContentView(R.layout.activity_recoger_datos_formulario);
 
         this.botonNext = (Button)findViewById(R.id.buttonNextForumulario);
-        //this.textNombre = (EditText)findViewById(R.id.nombreUsuFormulario);
         this.textActividad = (EditText)findViewById(R.id.nombreActFormulario);
         this.image = (ImageView) findViewById(R.id.imagen_actividad);
         this.image.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ico_activ));
@@ -89,7 +86,6 @@ public class RecogerDatosFormulario extends Activity {
         int id = -1;
         boolean actividadNoexiste = false;
 
-        //this.nameUser = this.textNombre.getText().toString();
         this.nameUser = "Pepe";
         this.nameActivity = this.textActividad.getText().toString();
 
@@ -153,8 +149,6 @@ public class RecogerDatosFormulario extends Activity {
         if (requestCode == PICK_CODE) {
             if (resultCode == RESULT_OK) {
                 InputStream stream = null;
-                //TODO INSERTAR IMAGEN EN CARPETA /TRACKTRAINME/IMAGES
-                //TODO AÑADIR URI A LA ACTIVIDAD EN LA BD
 
                 try {
                     stream = getContentResolver().openInputStream(data.getData());

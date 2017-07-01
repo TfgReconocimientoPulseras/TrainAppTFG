@@ -63,7 +63,6 @@ public class ReconocerActividadFragment extends Fragment {
         public void handleMessage(Message msg) {
             int idActividad = (Integer)msg.obj;
 
-            Log.d("MECCCCCCCCc ¬¬", String.valueOf(idActividad));
             if(idActividad != 0){
                 nombreActividad.setText((String)((actividadesSistema.get(idActividad)).get(KEY_NOMBRE_ACTIVIDAD)));
                 iconoActividad.setImageBitmap((Bitmap)((actividadesSistema.get(idActividad)).get(KEY_IMAGEN)));
@@ -148,7 +147,6 @@ public class ReconocerActividadFragment extends Fragment {
                     db.close();
 
                     for(final ActivityDataTransfer act: listaAct){
-                        //actividadesSistema.put((int)act.getId(), new ArrayList(){{add(0, act.getName()); add(1,act.getUrlImage());}});
                         Log.d("ACTIVIDADES", String.valueOf((int)act.getId()) + " " + act.getName() + " " + act.getUrlImage());
                         HashMap<String, Object> aux = new HashMap<String, Object>();
                         aux.put(KEY_NOMBRE_ACTIVIDAD, act.getName());
@@ -171,7 +169,6 @@ public class ReconocerActividadFragment extends Fragment {
                     nombreActividad.setText("Para volver a reconocer pulse el botón de abajo.");
                     button.setText("Comenzar a reconocer");
                     reconocedorEncendido = 0;
-                    //iconoActividad.setBackgroundResource(R.drawable.ico_pausa);
                     iconoActividad.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles/Imagenes/" + "ico_pausa.png"));
                     actividadesSistema.clear();
                 }
@@ -179,24 +176,6 @@ public class ReconocerActividadFragment extends Fragment {
         });
 
         return view;
-    }
-
-    private void formatDataToCsvExternalStorage(String fName, DataFrame df) {
-        String fileName = new Date().getTime() + "_" + fName + ".csv";
-        File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyFiles");
-        directory.mkdirs();
-        File file = new File(directory, fileName);
-
-        try {
-            OutputStream oS = new FileOutputStream(file);
-            df.writeCsv(oS);
-            oS.flush();
-            oS.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     @Override

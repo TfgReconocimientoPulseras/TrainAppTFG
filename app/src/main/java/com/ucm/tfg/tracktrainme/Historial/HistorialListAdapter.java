@@ -21,10 +21,6 @@ public class HistorialListAdapter extends BaseAdapter {
     private List<Date> horaFin;
 
     public HistorialListAdapter(Activity context, List<String> nombreActividad, List<Date> horaInicio, List<Date> horaFin){
-
-
-        //super(context, R.layout.lista_historial, nombreActividad);
-
         this.context = context;
         this.nombreActividad = nombreActividad;
         this.horaInicio = horaInicio;
@@ -46,7 +42,6 @@ public class HistorialListAdapter extends BaseAdapter {
         return position;
     }
 
-    //@Override
     public View getView(int position, View view, ViewGroup parent){
         LayoutInflater inflater = context.getLayoutInflater();
         View rowView = inflater.inflate(R.layout.lista_historial, null);

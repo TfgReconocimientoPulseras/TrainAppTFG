@@ -8,10 +8,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Iván on 19/04/2017.
- */
-
 public class Utils {
     /**
      * Esta función devuelve si un número double es un entero

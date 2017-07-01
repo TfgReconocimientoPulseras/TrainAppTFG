@@ -83,11 +83,6 @@ public class RecogerDatosRecogida extends Activity {
 
 
     //GESTION DE SENSORES////////////////////////////////////////////////////////////////////////////////////////////
-    /*private SensorManager mSensorManager;
-    private MiSensorEventListener miSensorEventListenerAcelerometro;
-    private MiSensorEventListener miSensorEventListenerGiroscopio;
-    private Sensor mAccelerometer;
-    private Sensor mGyroscope;*/
     private com.ucm.tfg.tracktrainme.Sensor.Sensor mSensor;
 
     //ALMACENAMIENTO DATOS DE SENSORES///////////////////////////////////////////////////////////////////////////////
@@ -119,9 +114,6 @@ public class RecogerDatosRecogida extends Activity {
         @Override
         public void handleMessage(Message msg) {
             buttonRecord.setEnabled(true);
-            //buttonRecord.setBackgroundColor(Color.rgb(134, 191, 159));
-            //buttonRecord.setBackgroundResource(R.color.colorPrimary);
-            //buttonRecord.setBackgroundResource(R.drawable.ico_play);
             buttonRecord.setBackgroundColor(buttonRecord.getContext().getResources().getColor(R.color.colorPrimary));
             buttonRecord.setText("Comenzar");
 
@@ -226,12 +218,6 @@ public class RecogerDatosRecogida extends Activity {
                 bindService(inte, mConnetion, Context.BIND_AUTO_CREATE);
             }
         }
-
-        /*this.mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        this.mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        this.miSensorEventListenerAcelerometro = new MiSensorEventListener(this.mAccelerometer, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);
-        this.miSensorEventListenerGiroscopio = new MiSensorEventListener(this.mGyroscope, this.mSensorManager, SensorManager.SENSOR_DELAY_FASTEST);*/
 
         this.dataListAccel = new ArrayList<DataTAD>();
         this.dataListGyro = new ArrayList<DataTAD>();
@@ -383,8 +369,6 @@ public class RecogerDatosRecogida extends Activity {
                     if (timeAcumulated >= (TIEMPO_POR_ARCHIVO)) {
                         comprobacionTimestamp();
 
-                    /*miSensorEventListenerAcelerometro.desactivarSensor();
-                    miSensorEventListenerGiroscopio.desactivarSensor();*/
                         desactivarSensores();
 
                         timer.cancel();
@@ -421,14 +405,10 @@ public class RecogerDatosRecogida extends Activity {
     }
 
     private void desactivarSensores() {
-        /*this.miSensorEventListenerAcelerometro.desactivarSensor();
-        this.miSensorEventListenerGiroscopio.desactivarSensor();*/
         this.mSensor.apagarSensor();
     }
 
     private void activarSensores() {
-        /*this.miSensorEventListenerAcelerometro.activarSensor();
-        this.miSensorEventListenerGiroscopio.activarSensor();*/
         this.mSensor.encenderSensor();
     }
 
@@ -501,8 +481,6 @@ public class RecogerDatosRecogida extends Activity {
     }
 
     private void rellenaListasDeDatos() {
-        /*DataTAD dAccel = miSensorEventListenerAcelerometro.obtenerDatosSensor();
-        DataTAD dGyro = miSensorEventListenerGiroscopio.obtenerDatosSensor();*/
         DataTAD dAccel = mSensor.obtenerDatosAcel();
         DataTAD dGyro = mSensor.obtenerDatosGyro();
 
@@ -512,7 +490,6 @@ public class RecogerDatosRecogida extends Activity {
             dataListAccel.add(dAccel);
             dataListGyro.add(dGyro);
 
-            //TODO COMPROBAR QUE ESTO FUNCIONE CORRECTAMENTE
             float[] aux = new float[NUM_ATRIB_ACCEL + NUM_ATRIB_GYRO];
             System.arraycopy(dGyro.getValues(), 0, aux, 0, NUM_ATRIB_GYRO);
             System.arraycopy(dAccel.getValues(), 0, aux, NUM_ATRIB_GYRO, NUM_ATRIB_ACCEL);
@@ -598,17 +575,6 @@ public class RecogerDatosRecogida extends Activity {
         this.progressDialog.setMessage("Construyendo su nuevo clasificador, por favor espere...");
         this.progressDialog.setCanceledOnTouchOutside(false);
         this.progressDialog.show();
-    }
-
-
-    //MIRAR QUE SE ESTÉ REALIZANDO BIEN
-    private void actualizaMemoria(){
-        MediaScannerConnection.scanFile(this, new String[]{PATH_DATA_DIR}, null, new MediaScannerConnection.OnScanCompletedListener() {
-            @Override
-            public void onScanCompleted(String path, Uri uri) {
-                //showMessageToast("hola");
-            }
-        });
     }
 
     private BluetoothLeService mService;

@@ -23,9 +23,7 @@ import java.util.List;
 public class HistorialDiaConcreto extends AppCompatActivity {
 
     private ListView listView;
-    //private ArrayAdapter<String> adapter;
     private HistorialListAdapter adapter;
-    //private ArrayList<String> list;
 
     protected void onCreate(Bundle savedInstanceState){
         List<HistoryDataTransfer> list;

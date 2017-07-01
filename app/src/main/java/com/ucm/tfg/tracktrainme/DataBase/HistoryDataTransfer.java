@@ -3,15 +3,13 @@ package com.ucm.tfg.tracktrainme.DataBase;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/**
- * Created by Ivan on 15/05/2017.
- */
-
 public class HistoryDataTransfer {
     private long id;
     private int actividad;
     private Date fIni;
     private Date fFin;
+    private String nombreActividad;
+
 
     public String getNombreActividad() {
         return nombreActividad;
@@ -21,16 +19,6 @@ public class HistoryDataTransfer {
         this.nombreActividad = nombreActividad;
     }
 
-    private String nombreActividad;
-
-/*
-            long diffInMilliSec = fFin.getTime() - fIni.getTime();
-
-            long seconds = (diffInMilliSec / 1000) % 60;
-
-            long minutes = (diffInMilliSec / (1000 * 60)) % 60;
-
-            long hours = (diffInMilliSec / (1000 * 60 * 60)) % 24;*/
 
     public HistoryDataTransfer() {
 

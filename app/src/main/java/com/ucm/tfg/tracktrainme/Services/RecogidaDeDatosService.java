@@ -233,7 +233,6 @@ public class RecogidaDeDatosService extends Service{
     @Override
     public void onDestroy(){
         Log.d("Servicio - Recogida","Terminado");
-
         timer.cancel();
         desactivarSensores();
 
@@ -241,7 +240,9 @@ public class RecogidaDeDatosService extends Service{
         segmentacionDeDatosThread.interrupt();
         clasificacionDeDatosThread.interrupt();
         anlisisClasificacionDeDatosThread.interrupt();
+
         wakeLock.release();
+
         super.onDestroy();
     }
 

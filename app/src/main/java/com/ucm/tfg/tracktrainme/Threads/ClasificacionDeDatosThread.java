@@ -24,9 +24,7 @@ public class ClasificacionDeDatosThread implements Runnable {
         this.queueConsume = bqConsumeFrom;
         this.queueProduce = bqProduceTo;
         this.interpreter = new Interpreter();
-        //TODO ALMACENAR STRING DE ARBOL EN LA BASE DE DATOS PARA ACCEDER POSTERIORMENTE
-        //TODO REALIZAR FLUJO CON BASE DE DATOS DE ARBOLES
-        //TODO ACCEDER AL ULTIMO ARBOL CREADO EN LA BASE DE DATOS
+
         DatabaseAdapter db = new DatabaseAdapter(ctx);
         TreeDataTransfer treeDataTransfer = null;
         db.open();

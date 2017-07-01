@@ -7,7 +7,6 @@ import android.graphics.PorterDuff;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -30,8 +29,6 @@ import com.ucm.tfg.tracktrainme.DataBase.ActivityDataTransfer;
 import com.ucm.tfg.tracktrainme.DataBase.DatabaseAdapter;
 import com.ucm.tfg.tracktrainme.Fragments.HistorialFragment;
 import com.ucm.tfg.tracktrainme.Fragments.ReconocerActividadFragment;
-
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -218,7 +215,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         public CharSequence getPageTitle(int position) {
-            //return mFragmentTitleList.get(position);
             return null;
         }
     }

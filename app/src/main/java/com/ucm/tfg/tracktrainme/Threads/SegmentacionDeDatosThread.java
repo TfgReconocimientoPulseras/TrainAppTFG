@@ -175,7 +175,8 @@ public class SegmentacionDeDatosThread implements Runnable {
     }
 
 
-    //TODO YA LE PASAMOS LA VENTANA DE 1 SEGUNDO Y REALIZAMOS EL SOLAPAMIENTO -> YA NO HARIA FALTA HACER CON SOLAPAMIENTO, SOLAMENTE CON LA VENTANA BASTARÍA?
+    //TODO YA LE PASAMOS LA VENTANA DE 1 SEGUNDO Y REALIZAMOS EL SOLAPAMIENTO -> YA NO HARIA FALTA HACER CON SOLAPAMIENTO, SOLAMENTE CON LA VENTANA BASTARÍA
+    @Deprecated
     private DataFrame segmentameDatosConSolapamiento(DataFrame df, int porcentajeSolapamiento){
         DataFrame retDf = new DataFrame();
 
@@ -254,7 +255,7 @@ public class SegmentacionDeDatosThread implements Runnable {
 
 
     /**
-     * Por ahora esta funcion devuelve en una lista de valores, la correlación entre las variables accel-x accel - y | accel - x accel - z | accel - y accel - z
+     * esta funcion devuelve en una lista de valores, la correlación entre las variables accel-x accel - y | accel - x accel - z | accel - y accel - z
      * Es importante que en el dataframe este ordenado, ya que el acceso se realiza de manera manual
      * 2ºAccels (x, y, z)
      * 1ºGyros (a , b , g)
@@ -293,7 +294,7 @@ public class SegmentacionDeDatosThread implements Runnable {
 
         double[][] miMatrix = (double[][]) df.toArray(double[][].class);
         RealMatrix rm = new Array2DRowRealMatrix(miMatrix);
-        int n = df.length();
+
         double logaritmo;
         double[] x = rm.getColumn(3);// accel-x
         double[] y = rm.getColumn(4);// accel-y
@@ -317,15 +318,12 @@ public class SegmentacionDeDatosThread implements Runnable {
         double sumY = 0;
         double sumZ = 0;
 
-        //TODO PENDIENTE DE COMPROBACIÓN (MARLON)
-        //TODO FOR HASTA df.length o X.length?
         for (int i = 0; i < df.length(); i++) {
             sumX += Math.pow(X[i].abs(), 2);
             sumY += Math.pow(Y[i].abs(), 2);
             sumZ += Math.pow(Z[i].abs(), 2);
         }
 
-        //TODO PENDIENTE DE COMPROBACIÓN (MARLON)
         retList.add(sumX/df.length());
         retList.add(sumY/df.length());
         retList.add(sumZ/df.length());

@@ -31,8 +31,6 @@ public class ListarActividades extends AppCompatActivity {
     private ActividadesListAdapter adapter;
     private List<ActivityDataTransfer> list;
 
-
-    //TODO HACER LIMPIEZA DE ESTA CLASE
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         List<String> nombreActividad = new ArrayList<>();
@@ -46,7 +44,6 @@ public class ListarActividades extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 ActivityDataTransfer activityDataTransfer = (ActivityDataTransfer) list.get(position);
                 DatabaseAdapter db = new DatabaseAdapter(getActivity());
-                //TODO COMPROBAR SI LA ACTIVIDAD YA EXISTÍA CAMPO UNIQUE
                 db.open();
                 if(db.deleteActivty(activityDataTransfer.getId())){
                     list.remove(position);
